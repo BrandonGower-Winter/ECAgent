@@ -23,6 +23,9 @@ check: venv
 check-verbose: venv
 	. venv/bin/activate; pycodestyle --show-source --show-pep8 ./src/ECAgent/Core.py
 
+upload: package
+	. venv/bin/activate; twine upload --repository pypi dist/*
+
 clean:
 	rm -rf venv
 	rm -rf dist

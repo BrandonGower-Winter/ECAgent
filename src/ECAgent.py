@@ -109,7 +109,7 @@ class SystemManager:
                 sys.execute(self.componentPools[sys.id])
 
     def registerComponent(self, component: Component):
-        if component.systemID in self.componentPools.keys():
+        if component.systemID not in self.componentPools.keys():
             raise Exception("No System with ID " + component.systemID)
         if component in self.componentPools[component.systemID]:
             raise Exception("Component already registered.")
@@ -117,7 +117,7 @@ class SystemManager:
             self.componentPools[component.systemID].append(component)
 
     def deregisterComponent(self, component: Component):
-        if component.systemID in self.componentPools.keys():
+        if component.systemID not in self.componentPools.keys():
             raise Exception("No System with ID " + component.systemID)
         if component not in self.componentPools[component.systemID]:
             raise Exception("Cannot deregister component because "

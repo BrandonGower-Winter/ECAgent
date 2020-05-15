@@ -11,6 +11,9 @@ install: venv
 venv :
 	test -d venv || python3 -m venv venv --system-site-packages
 
+test: venv
+	. venv/bin/activate; python -m pytest ./tests/
+
 check: venv
 	. venv/bin/activate; pycodestyle --first ./src/ECAgent.py
 

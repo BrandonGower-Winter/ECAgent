@@ -1,0 +1,25 @@
+from setuptools import setup, find_packages
+
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+setup(
+    name="ECAgent", # Replace with your own username
+    version="0.0.1",
+    author="Brandon Gower-Winter",
+    author_email="brandongowerwinter@gmail.com",
+    description="An Agent-based Modelling framework based on the Entity-Component-System architectural pattern.",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/BrandonGower-Winter/ABMECS",
+    packages=find_packages(where='src'),
+    package_dir={
+        '': 'src',
+    },
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
+    python_requires='>=3.7.5',
+)

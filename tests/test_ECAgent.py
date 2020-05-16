@@ -59,6 +59,27 @@ class test_SystemManager:
 
     # TO DO rest of functions
 
+    def test_getComponents(self):
+        model = Model(Environment())
+        s1 = System("s1", model)
+        model.systemManager.addSystem(s1)
+
+        assert model.systemManager.getComponents("s1") is None
+
+        agent1 = Agent("a1", model)
+        component1 = Component(agent1.id, s1.id, model)
+        agent1.addComponent(component1)
+
+        agent2 = Agent("a2", model)
+        component2 = Component(agent2.id, s1.id, model)
+        agent2.addComponent(component2)
+
+        components = model.systemManager.getComponents("s1")
+
+        assert len(components) == 2
+        assert components[0] == component1
+        assert components[1] == component2
+
 class TestAgent:
 
     def test__init__(self):

@@ -134,6 +134,14 @@ class SystemManager:
         else:
             self.componentPools[component.systemID].remove(component)
 
+    def getComponents(self, sysID: str):
+        """Returns the list of components registered to the system with id
+        = sysID. Returns None if there is no system with id = sysID"""
+        if sysID in self.systems.keys():
+            return self.componentPools[sysID]
+        else:
+            return None
+
 
 class Environment:
     """This is the base environment class.

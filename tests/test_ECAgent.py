@@ -10,6 +10,55 @@ class TestEnvironment:
         void_env = Environment()
         assert len(void_env.agents) == 0
 
+    def test_addAgent(self):
+        model = Model(Environment())
+        agent = Agent("a1", model)
+
+        model.environment.addAgent(agent)
+
+        assert len(model.environment.agents) == 1
+        assert model.environment.getAgent(agent.id) == agent
+
+        with pytest.raises(Exception):
+            model.environment.addAgent(agent)
+
+    def test_removeAgent(self):
+        model = Model(Environment())
+        agent = Agent("a1", model)
+
+        model.environment.addAgent(agent)
+        model.environment.removeAgent(agent.id)
+
+        assert len(model.environment.agents) == 0
+
+        with pytest.raises(Exception):
+            model.environment.removeAgent(agent.id)
+
+    def test_getAgent(self):
+        model = Model(Environment())
+        agent = Agent("a1", model)
+
+        assert model.environment.getAgent(agent.id) is None
+
+        model.environment.addAgent(agent)
+        assert model.environment.getAgent(agent.id) == agent
+
+    def test_getRandomAgent(self):
+        model = Model(Environment())
+        agent1 = Agent("a1", model)
+        agent2 = Agent("a2", model)
+
+        assert model.environment.getRandomAgent() is None
+
+        model.environment.addAgent(agent1)
+
+        assert model.environment.getRandomAgent() == agent1
+
+        model.environment.addAgent(agent2)
+
+        random_agent = model.environment.getRandomAgent()
+        assert random_agent == agent1 or random_agent == agent2
+
 
 class TestModel:
 
@@ -31,7 +80,7 @@ class TestComponent:
         assert component.systemID == "s1"
 
 
-class Test_System:
+class TestSystem:
 
     def test__init__(self):
         model = Model(Environment())
@@ -79,6 +128,7 @@ class test_SystemManager:
         assert len(components) == 2
         assert components[0] == component1
         assert components[1] == component2
+
 
 class TestAgent:
 

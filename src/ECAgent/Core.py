@@ -1,4 +1,5 @@
 from sys import maxsize
+from random import randrange
 
 
 class Model:
@@ -156,12 +157,12 @@ class Environment:
         else:
             self.agents[agent.id] = agent
 
-    def removeAgent(self, agent: Agent):
-        if agent.id not in self.agents.keys():
+    def removeAgent(self, agentID: str):
+        if agentID not in self.agents.keys():
             raise Exception("Cannot remove agent that is "
                             "not in the environment")
         else:
-            del self.agents[agent.id]
+            del self.agents[agentID]
 
     def getAgent(self, id: str):
         """Gets agent obj based on its id.
@@ -170,3 +171,14 @@ class Environment:
             return self.agents[id]
         else:
             return None
+
+    def getRandomAgent(self):
+        """Gets a random agent in the environment.
+        Return None if there are no agents in the environment"""
+
+        if len(self.agents) == 0:
+            return None
+
+        rand = randrange(len(self.agents))
+        key = list(self.agents.keys())[rand]
+        return self.agents[key ]

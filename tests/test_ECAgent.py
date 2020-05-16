@@ -97,3 +97,17 @@ class TestAgent:
 
         with pytest.raises(Exception):
             agent.removeComponent(component)
+
+    def test_getComponent(self):
+        model = Model(Environment())
+        agent = Agent("a1", model)
+        s1 = System("s1", model)
+        model.systemManager.addSystem(s1)
+
+        # Checks  to see if getting a component that doesn't exist returns None
+        assert agent.getComponent(Component) is None
+
+        component = Component(agent.id, "s1", model)
+        agent.addComponent(component)
+        # Check to see if getting a component that does exist returns the component
+        assert agent.getComponent(Component) == component

@@ -26,21 +26,29 @@ class Agent:
     def __init__(self, id: str, model: Model):
         self.id = id
         self.model = model
-        self.components = []
+        self.components = {}
 
     def addComponent(self, component: Component):
-        if component.systemID in [com.systemID for com in self.components]:
+        if type(component) in self.components.keys():
             raise Exception("Agents cannot have multiple of the components")
         else:
-            self.components.append(component)
+            self.components[type(component)] = component
             self.model.systemManager.registerComponent(component)
 
     def removeComponent(self, component: Component):
-        if component.systemID not in [com.systemID for com in self.components]:
+        if type(component) not in self.components.keys():
             raise Exception("Agent does not have component")
         else:
-            self.components.remove(component)
+            del self.components[type(component)]
             self.model.systemManager.deregisterComponent(component)
+
+    def getComponent(self, component_type):
+        """ Gets a component that is the same type as component type.
+        Returns None if component doesn't exist."""
+        if component_type in self.components.keys():
+            return self.components[component_type]
+        else:
+            return None
 
 
 class System:

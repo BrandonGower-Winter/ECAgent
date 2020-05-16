@@ -6,7 +6,6 @@ class Model:
     You inherit this class to again access to all of the ECS functionality """
 
     def __init__(self, environment):
-        self.timestep = 0
         self.environment = environment
         self.systemManager = SystemManager(self)
 
@@ -68,6 +67,7 @@ class SystemManager:
     removing and executing Systems """
 
     def __init__(self, model: Model):
+        self.timestep = 0
         self.systems = {}
         self.executionQueue = []
         self.componentPools = {}
@@ -104,9 +104,10 @@ class SystemManager:
 
     def executeSystems(self):  # Simple execute cycle
         for sys in self.executionQueue:
-            if sys.start <= self.model.timestep <= sys.end and \
-                    sys.start - self.model.timestep % sys.frequency == 0:
+            if sys.start <= self.timestep <= sys.end and \
+                    sys.start - self.timestep % sys.frequency == 0:
                 sys.execute(self.componentPools[sys.id])
+        self.timestep += 1
 
     def registerComponent(self, component: Component):
         if component.systemID not in self.componentPools.keys():

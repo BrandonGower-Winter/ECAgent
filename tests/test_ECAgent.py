@@ -16,8 +16,6 @@ class TestModel:
     def test__init__(self):
         env = Environment()
         model = Model(env)
-
-        assert model.timestep == 0
         assert model.environment == env
         assert model.systemManager is not None
 
@@ -54,6 +52,7 @@ class test_SystemManager:
 
         sys_man = SystemManager(model)
         assert sys_man.model == model
+        assert sys_man.timestep == 0
         assert len(sys_man.systems) == 0
         assert len(sys_man.executionQueue) == 0
         assert len(sys_man.componentPools) == 0

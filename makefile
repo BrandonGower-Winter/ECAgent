@@ -1,8 +1,3 @@
-#Brandon Gower-Winter
-#Image Clustering Assignment Demo
-
-#SHELL:=/bin/bash
-
 BIN:=./venv/bin/
 
 install: venv
@@ -23,11 +18,13 @@ check: venv
 check-verbose: venv
 	. venv/bin/activate; pycodestyle --show-source --show-pep8 ./src/ECAgent/Core.py
 
-upload: package
+dist: package
+
+upload: dist
 	. venv/bin/activate; twine upload --repository pypi dist/*
 
 clean:
 	rm -rf venv
 	rm -rf dist
 	find -iname "*.pyc" -delete
-	rm -rf *.egg-info
+	rm -rf ./src/ECAgent.egg-info

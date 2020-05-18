@@ -1,6 +1,6 @@
 import pytest
-from src.ECAgent.Core import *
 
+from ECAgent.Core import *
 # Unit testing for src framework
 
 

@@ -13,10 +13,10 @@ test: venv
 	. venv/bin/activate; python -m pytest ./tests/
 
 check: venv
-	. venv/bin/activate; pycodestyle --first ./src/ECAgent/Core.py
+	. venv/bin/activate; pycodestyle ./ECAgent/Core.py
 
 check-verbose: venv
-	. venv/bin/activate; pycodestyle --show-source --show-pep8 ./src/ECAgent/Core.py
+	. venv/bin/activate; pycodestyle --show-source --show-pep8 ./ECAgent/Core.py
 
 dist: package
 
@@ -27,4 +27,4 @@ clean:
 	rm -rf venv
 	rm -rf dist
 	find -iname "*.pyc" -delete
-	rm -rf ./src/ECAgent.egg-info
+	rm -rf ECAgent.egg-info

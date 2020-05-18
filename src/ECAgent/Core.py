@@ -14,8 +14,8 @@ class Model:
 class Component:
     """This is the base class for Components"""
 
-    def __init__(self, agentID: str, model: Model):
-        self.agentID = agentID
+    def __init__(self, agent, model: Model):
+        self.agent = agent
         self.model = model
 
 
@@ -42,13 +42,18 @@ class Agent:
             del self.components[type(component)]
             self.model.systemManager.deregisterComponent(component)
 
-    def getComponent(self, component_type):
+    def getComponent(self, component_type: type):
         """ Gets a component that is the same type as component type.
         Returns None if component doesn't exist."""
         if component_type in self.components.keys():
             return self.components[component_type]
         else:
             return None
+
+    def hasComponent(self, component_type: type):
+        """ Returns a (True/False) bool if the agent (does/does not)
+        have a component of type component_type """
+        return component_type in self.components.keys()
 
 
 class System:
@@ -135,7 +140,7 @@ class SystemManager:
             if len(self.componentPools[type(component)]) == 0:
                 del self.componentPools[type(component)]
 
-    def getComponents(self, component : type):
+    def getComponents(self, component: type):
         """Returns the list of components registered to the system with id
         = sysID. Returns None if there is no system with id = sysID"""
         if component in self.componentPools.keys():

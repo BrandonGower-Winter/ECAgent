@@ -73,11 +73,10 @@ class TestComponent:
 
     def test__init__(self):
         model = Model(Environment())
-        component = Component("a1", "s1", model)
+        component = Component("a1", model)
 
         assert component.model == model
         assert component.agentID == "a1"
-        assert component.systemID == "s1"
 
 
 class TestSystem:
@@ -116,14 +115,14 @@ class Test_SystemManager:
         assert Component not in model.systemManager.componentPools.keys()
 
         agent1 = Agent("a1", model)
-        component1 = Component(agent1.id, s1.id, model)
+        component1 = Component(agent1.id, model)
         agent1.addComponent(component1)
 
         assert len(model.systemManager.componentPools[Component]) == 1
         assert model.systemManager.componentPools[Component][0] == component1
 
         agent2 = Agent("a2", model)
-        component2 = Component(agent2.id, s1.id, model)
+        component2 = Component(agent2.id, model)
         agent2.addComponent(component2)
 
         assert len(model.systemManager.componentPools[Component]) == 2
@@ -141,11 +140,11 @@ class Test_SystemManager:
         assert Component not in model.systemManager.componentPools.keys()
 
         agent1 = Agent("a1", model)
-        component1 = Component(agent1.id, s1.id, model)
+        component1 = Component(agent1.id, model)
         agent1.addComponent(component1)
 
         agent2 = Agent("a2", model)
-        component2 = Component(agent2.id, s1.id, model)
+        component2 = Component(agent2.id, model)
         agent2.addComponent(component2)
 
         # deregister component 2 for basic remove check
@@ -171,11 +170,11 @@ class Test_SystemManager:
         assert model.systemManager.getComponents(Component) is None
 
         agent1 = Agent("a1", model)
-        component1 = Component(agent1.id, s1.id, model)
+        component1 = Component(agent1.id, model)
         agent1.addComponent(component1)
 
         agent2 = Agent("a2", model)
-        component2 = Component(agent2.id, s1.id, model)
+        component2 = Component(agent2.id, model)
         agent2.addComponent(component2)
 
         components = model.systemManager.getComponents(Component)
@@ -201,7 +200,7 @@ class TestAgent:
         s1 = System("s1", model)
         model.systemManager.addSystem(s1)
 
-        component = Component(agent.id,s1.id,model)
+        component = Component(agent.id, model)
 
         agent.addComponent(component)
         assert len(agent.components) == 1
@@ -215,7 +214,7 @@ class TestAgent:
         s1 = System("s1", model)
         model.systemManager.addSystem(s1)
 
-        component = Component(agent.id, "s1", model)
+        component = Component(agent.id, model)
         agent.addComponent(component)
 
         agent.removeComponent(component)
@@ -233,7 +232,7 @@ class TestAgent:
         # Checks  to see if getting a component that doesn't exist returns None
         assert agent.getComponent(Component) is None
 
-        component = Component(agent.id, "s1", model)
+        component = Component(agent.id, model)
         agent.addComponent(component)
         # Check to see if getting a component that does exist returns the component
         assert agent.getComponent(Component) == component

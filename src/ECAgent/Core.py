@@ -14,9 +14,8 @@ class Model:
 class Component:
     """This is the base class for Components"""
 
-    def __init__(self, agentID: str, systemID: str, model: Model):
+    def __init__(self, agentID: str, model: Model):
         self.agentID = agentID
-        self.systemID = systemID
         self.model = model
 
 

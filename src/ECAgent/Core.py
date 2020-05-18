@@ -66,7 +66,7 @@ class System:
     def cleanUp(self):
         self.model.systemManager.removeSystem(self.id)
 
-    def execute(self, components: [Component]):
+    def execute(self):
         pass
 
 
@@ -112,7 +112,7 @@ class SystemManager:
         for sys in self.executionQueue:
             if sys.start <= self.timestep <= sys.end and \
                     sys.start - self.timestep % sys.frequency == 0:
-                sys.execute(self.componentPools[sys.id])
+                sys.execute()
         self.timestep += 1
 
     def registerComponent(self, component: Component):

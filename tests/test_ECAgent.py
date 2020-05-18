@@ -106,6 +106,16 @@ class Test_SystemManager:
         assert len(sys_man.componentPools) == 0
 
     # TO REST OF THE LOGIC
+    def test_executeSystems(self):
+        model = Model(Environment())
+        s1 = System("s1", model)
+        model.systemManager.addSystem(s1)
+        s1 = System("s2", model)
+        model.systemManager.addSystem(s1)
+
+        model.systemManager.executeSystems()
+        assert model.systemManager.timestep == 1
+
 
     def test_registerComponent(self):
         model = Model(Environment())

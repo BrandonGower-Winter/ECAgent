@@ -90,7 +90,6 @@ class SystemManager:
             raise Exception("System already registered.")
         else:
             self.systems[s.id] = s  # Add to systems dict
-            self.componentPools[s.id] = []
             # Add to event queue
             for i in range(0, len(self.executionQueue)):
                 if s.priority > self.executionQueue[i].priority:
@@ -109,7 +108,6 @@ class SystemManager:
         else:
             self.executionQueue.remove(self.systems[id])
             del self.systems[id]
-            del self.componentPools[id]
 
     def executeSystems(self):  # Simple execute cycle
         for sys in self.executionQueue:
@@ -119,27 +117,30 @@ class SystemManager:
         self.timestep += 1
 
     def registerComponent(self, component: Component):
-        if component.systemID not in self.componentPools.keys():
-            raise Exception("No System with ID " + component.systemID)
-        if component in self.componentPools[component.systemID]:
+        if type(component) not in self.componentPools.keys():
+            self.componentPools[type(component)] = [component]
+        elif component in self.componentPools[type(component)]:
             raise Exception("Component already registered.")
         else:
-            self.componentPools[component.systemID].append(component)
+            self.componentPools[type(component)].append(component)
 
     def deregisterComponent(self, component: Component):
-        if component.systemID not in self.componentPools.keys():
-            raise Exception("No System with ID " + component.systemID)
-        if component not in self.componentPools[component.systemID]:
+        if type(component) not in self.componentPools.keys():
+            raise Exception("No components with type " +
+                            str(type(component)) + " registered")
+        elif component not in self.componentPools[type(component)]:
             raise Exception("Cannot deregister component because "
                             "it was never registered to begin with.")
         else:
-            self.componentPools[component.systemID].remove(component)
+            self.componentPools[type(component)].remove(component)
+            if len(self.componentPools[type(component)]) == 0:
+                del self.componentPools[type(component)]
 
-    def getComponents(self, sysID: str):
+    def getComponents(self, component : type):
         """Returns the list of components registered to the system with id
         = sysID. Returns None if there is no system with id = sysID"""
-        if sysID in self.systems.keys():
-            return self.componentPools[sysID]
+        if component in self.componentPools.keys():
+            return self.componentPools[component]
         else:
             return None
 
@@ -181,4 +182,4 @@ class Environment:
 
         rand = randrange(len(self.agents))
         key = list(self.agents.keys())[rand]
-        return self.agents[key ]
+        return self.agents[key]

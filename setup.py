@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="ECAgent", # Replace with your own username
-    version="0.0.1",
+    name="ECAgent",
+    version="0.0.2",
     author="Brandon Gower-Winter",
     author_email="brandongowerwinter@gmail.com",
     description="An Agent-based Modelling framework based on the Entity-Component-System architectural pattern.",

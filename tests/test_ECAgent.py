@@ -63,6 +63,10 @@ class TestEnvironment:
 class TestModel:
 
     def test__init__(self):
+        model = Model()
+        assert model.environment is not None
+        assert model.systemManager is not None
+
         env = Environment()
         model = Model(env)
         assert model.environment == env
@@ -72,7 +76,7 @@ class TestModel:
 class TestComponent:
 
     def test__init__(self):
-        model = Model(Environment())
+        model = Model()
         agent = Agent("a1", model)
         component = Component(agent, model)
 
@@ -83,7 +87,7 @@ class TestComponent:
 class TestSystem:
 
     def test__init__(self):
-        model = Model(Environment())
+        model = Model()
 
         system = System("s1",model)
         assert system.model == model
@@ -97,7 +101,7 @@ class TestSystem:
 class Test_SystemManager:
 
     def test__init__(self):
-        model = Model(Environment())
+        model = Model()
 
         sys_man = SystemManager(model)
         assert sys_man.model == model
@@ -108,7 +112,7 @@ class Test_SystemManager:
 
     # TO REST OF THE LOGIC
     def test_executeSystems(self):
-        model = Model(Environment())
+        model = Model()
         s1 = System("s1", model)
         model.systemManager.addSystem(s1)
         s1 = System("s2", model)
@@ -119,7 +123,7 @@ class Test_SystemManager:
 
 
     def test_registerComponent(self):
-        model = Model(Environment())
+        model = Model()
         s1 = System("s1", model)
         model.systemManager.addSystem(s1)
 
@@ -144,7 +148,7 @@ class Test_SystemManager:
             model.systemManager.registerComponent(component1)
 
     def test_deregisterComponent(self):
-        model = Model(Environment())
+        model = Model()
         s1 = System("s1", model)
         model.systemManager.addSystem(s1)
 
@@ -174,7 +178,7 @@ class Test_SystemManager:
             model.systemManager.deregisterComponent(component1)
 
     def test_getComponents(self):
-        model = Model(Environment())
+        model = Model()
         s1 = System("s1", model)
         model.systemManager.addSystem(s1)
 
@@ -198,7 +202,7 @@ class Test_SystemManager:
 class TestAgent:
 
     def test__init__(self):
-        model = Model(Environment())
+        model = Model()
         agent = Agent("a1", model)
 
         assert agent.model == model
@@ -206,7 +210,7 @@ class TestAgent:
         assert len(agent.components) == 0
 
     def test_addComponent(self):
-        model = Model(Environment())
+        model = Model()
         agent = Agent("a1", model)
         s1 = System("s1", model)
         model.systemManager.addSystem(s1)
@@ -220,7 +224,7 @@ class TestAgent:
             agent.addComponent(component)
 
     def test_removeComponent(self):
-        model = Model(Environment())
+        model = Model()
         agent = Agent("a1", model)
         s1 = System("s1", model)
         model.systemManager.addSystem(s1)
@@ -235,7 +239,7 @@ class TestAgent:
             agent.removeComponent(component)
 
     def test_getComponent(self):
-        model = Model(Environment())
+        model = Model()
         agent = Agent("a1", model)
         s1 = System("s1", model)
         model.systemManager.addSystem(s1)
@@ -249,7 +253,7 @@ class TestAgent:
         assert agent.getComponent(Component) == component
 
     def test_hasComponent(self):
-        model = Model(Environment())
+        model = Model()
         agent = Agent("a1", model)
 
         # False check

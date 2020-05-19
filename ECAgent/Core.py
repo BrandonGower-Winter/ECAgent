@@ -6,8 +6,11 @@ class Model:
     """ This is the base class for the ABM model.
     You inherit this class to again access to all of the ECS functionality """
 
-    def __init__(self, environment):
-        self.environment = environment
+    def __init__(self, environment=None):
+        if environment is None:
+            self.environment = Environment()
+        else:
+            self.environment = environment
         self.systemManager = SystemManager(self)
 
 

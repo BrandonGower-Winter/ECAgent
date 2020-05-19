@@ -7,11 +7,12 @@ from ECAgent.Core import *
 class TestEnvironment:
 
     def test__init__(self):
-        void_env = Environment()
-        assert len(void_env.agents) == 0
+        model = Model()
+        assert len(model.environment.agents) == 0
+        assert model.environment.model == model
 
     def test_addAgent(self):
-        model = Model(Environment())
+        model = Model()
         agent = Agent("a1", model)
 
         model.environment.addAgent(agent)
@@ -23,7 +24,7 @@ class TestEnvironment:
             model.environment.addAgent(agent)
 
     def test_removeAgent(self):
-        model = Model(Environment())
+        model = Model()
         agent = Agent("a1", model)
 
         model.environment.addAgent(agent)
@@ -35,7 +36,7 @@ class TestEnvironment:
             model.environment.removeAgent(agent.id)
 
     def test_getAgent(self):
-        model = Model(Environment())
+        model = Model()
         agent = Agent("a1", model)
 
         assert model.environment.getAgent(agent.id) is None
@@ -44,7 +45,12 @@ class TestEnvironment:
         assert model.environment.getAgent(agent.id) == agent
 
     def test_getRandomAgent(self):
-        model = Model(Environment())
+
+        env = Environment()
+
+        assert env.getRandomAgent() is None
+
+        model = Model()
         agent1 = Agent("a1", model)
         agent2 = Agent("a2", model)
 
@@ -66,11 +72,13 @@ class TestModel:
         model = Model()
         assert model.environment is not None
         assert model.systemManager is not None
+        assert model.random is not None
 
         env = Environment()
-        model = Model(env)
+        model = Model(environment=env,seed=30)
         assert model.environment == env
         assert model.systemManager is not None
+        assert model.random.randint(25, 50) == 42
 
 
 class TestComponent:

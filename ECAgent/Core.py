@@ -1,17 +1,26 @@
+import random
 from sys import maxsize
-from random import randrange
 
 
 class Model:
     """ This is the base class for the ABM model.
     You inherit this class to again access to all of the ECS functionality """
 
-    def __init__(self, environment=None):
+    def __init__(self, environment=None, seed: int = None):
         if environment is None:
             self.environment = Environment()
         else:
             self.environment = environment
+
+        # Set the environment model
+        self.environment.model = self
         self.systemManager = SystemManager(self)
+
+        # Initialize RNG. It is object based because we want to ensure
+        # that object results are reproducable when batch execution
+        # is added.
+
+        self.random = random.Random(seed)
 
 
 class Component:
@@ -158,6 +167,7 @@ class Environment:
 
     def __init__(self):
         self.agents = {}
+        self.model = None
 
     def addAgent(self, agent: Agent):
         if agent.id in self.agents.keys():
@@ -184,9 +194,9 @@ class Environment:
         """Gets a random agent in the environment.
         Return None if there are no agents in the environment"""
 
-        if len(self.agents) == 0:
+        if len(self.agents) == 0 or self.model is None:
             return None
 
-        rand = randrange(len(self.agents))
+        rand = self.model.random.randrange(len(self.agents))
         key = list(self.agents.keys())[rand]
         return self.agents[key]

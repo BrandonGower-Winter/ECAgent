@@ -13,10 +13,10 @@ test: venv
 	. venv/bin/activate; python -m pytest ./tests/
 
 check: venv
-	. venv/bin/activate; pycodestyle ./ECAgent/Core.py
+	. venv/bin/activate; flake8 ./ECAgent/
 
 check-verbose: venv
-	. venv/bin/activate; pycodestyle --show-source --show-pep8 ./ECAgent/Core.py
+	. venv/bin/activate; flake8 --show-source ./ECAgent/
 
 dist: package
 

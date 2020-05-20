@@ -1,4 +1,4 @@
-pycodestyle
+flake8
 pytest
 setuptools
 twine

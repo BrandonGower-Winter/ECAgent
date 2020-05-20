@@ -58,12 +58,27 @@ class TestEnvironment:
 
         model.environment.addAgent(agent1)
 
-        assert model.environment.getRandomAgent() == agent1
+        assert model.environment.getRandomAgent() is agent1
 
         model.environment.addAgent(agent2)
 
         random_agent = model.environment.getRandomAgent()
-        assert random_agent == agent1 or random_agent == agent2
+        assert random_agent is agent1 or random_agent is agent2
+
+        # Test Component filter
+        class CustomComponent(Component):
+
+            def __init__(self, a, m):
+                super().__init__(a, m)
+
+        # Test for case in which no agents meet filter requirements
+
+        assert model.environment.getRandomAgent(CustomComponent) is None
+
+        # Test case where agent does meet requirement
+        agent1.addComponent(CustomComponent(agent1, model))
+
+        assert model.environment.getRandomAgent(CustomComponent) is agent1
 
 
 class TestModel:

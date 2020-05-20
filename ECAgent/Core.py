@@ -193,13 +193,28 @@ class Environment:
         else:
             return None
 
-    def getRandomAgent(self):
+    def getRandomAgent(self, *args):
         """Gets a random agent in the environment.
-        Return None if there are no agents in the environment"""
+        Return None if there are no agents in the environment.
+        By supplying a tuple of Components, this function will return an
+        agent that contains all of those components"""
 
         if len(self.agents) == 0 or self.model is None:
             return None
 
-        rand = self.model.random.randrange(len(self.agents))
-        key = list(self.agents.keys())[rand]
-        return self.agents[key]
+        valid_agents = []
+
+        if len(args) == 0:
+            valid_agents = [self.agents[agent] for agent in self.agents]
+        else:
+            for agentKey in self.agents:
+                # Unpack args to pass into hasComponent()
+                if self.agents[agentKey].hasComponent(*args):
+                    valid_agents.append(self.agents[agentKey])
+
+        # Return none if no agent matches filter
+        if len(valid_agents) == 0:
+            return None
+
+        rand = self.model.random.randrange(0, len(valid_agents))
+        return valid_agents[rand]

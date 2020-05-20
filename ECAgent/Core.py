@@ -62,10 +62,13 @@ class Agent:
         else:
             return None
 
-    def hasComponent(self, component_type: type):
+    def hasComponent(self, *args) -> bool:
         """ Returns a (True/False) bool if the agent (does/does not)
         have a component of type component_type """
-        return component_type in self.components.keys()
+        for component in args:
+            if component not in self.components.keys():
+                return False
+        return True
 
 
 class System:

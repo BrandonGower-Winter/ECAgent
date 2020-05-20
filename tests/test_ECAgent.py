@@ -106,7 +106,7 @@ class TestSystem:
         assert system.priority == 0
 
 
-class Test_SystemManager:
+class TestSystemManager:
 
     def test__init__(self):
         model = Model()
@@ -271,3 +271,21 @@ class TestAgent:
         agent.addComponent(component)
         # True check
         assert agent.hasComponent(Component)
+
+        # Check for multiple components
+
+        class CustomComponent(Component):
+
+            def __init__(self, a, m):
+                super().__init__(a, m)
+
+        # Test should fail on multiple components
+
+        assert not agent.hasComponent(Component, TestComponent)
+
+        # Test should pass on multiple components
+
+        agent.addComponent(CustomComponent(agent,model))
+
+        assert agent.hasComponent(Component, CustomComponent)
+

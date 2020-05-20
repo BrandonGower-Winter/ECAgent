@@ -1,27 +1,32 @@
 BIN:=./venv/bin/
 
+ACTIVATE:=. venv/bin/activate;
+
 install: venv
-	. venv/bin/activate; pip3 install -Ur requirements.txt
+	$(ACTIVATE) pip3 install -Ur requirements.txt
 
 venv :
 	test -d venv || python3 -m venv venv --system-site-packages
 
 package: venv
-	. venv/bin/activate; python setup.py sdist bdist_wheel
+	$(ACTIVATE) python setup.py sdist bdist_wheel
 
 test: venv
-	. venv/bin/activate; python -m pytest ./tests/
+	$(ACTIVATE) python -m pytest ./tests/
+
+test-coverage: venv
+	$(ACTIVATE) python -m pytest --cov=ECAgent tests/
 
 check: venv
 	. venv/bin/activate; flake8 ./ECAgent/
 
 check-verbose: venv
-	. venv/bin/activate; flake8 --show-source ./ECAgent/
+	$(ACTIVATE) flake8 --show-source ./ECAgent/
 
 dist: package
 
 upload: dist
-	. venv/bin/activate; twine upload --repository pypi dist/*
+	$(ACTIVATE) twine upload --repository pypi dist/*
 
 clean:
 	rm -rf venv

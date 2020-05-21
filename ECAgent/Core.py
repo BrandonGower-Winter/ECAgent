@@ -145,8 +145,7 @@ class SystemManager:
 
     def deregisterComponent(self, component: Component):
         if type(component) not in self.componentPools.keys():
-            raise Exception("No components with type " +
-                            str(type(component)) + " registered")
+            raise Exception("No components with type " + str(type(component)) + " registered")
         elif component not in self.componentPools[type(component)]:
             raise Exception("Cannot deregister component because "
                             "it was never registered to begin with.")

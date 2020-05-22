@@ -217,3 +217,20 @@ class Environment:
 
         rand = self.model.random.randrange(0, len(valid_agents))
         return valid_agents[rand]
+
+    def getAgents(self, *args):
+        """ Returns a list of all agents that contain the components specified in args.
+        If args is None, getAgents() will return a list of all agents in the environment.
+        If there are no agents that match the filter supplied by args, getAgents() returns an empty list."""
+
+        # If no component filter is supplied, return all agents
+        if len(args) == 0:
+            return [self.agents[agentKey] for agentKey in self.agents]
+
+        # If a component filter is supplied, filter for agents that meet the condition
+        matching_agents = []
+        for agentKey in self.agents:
+            if self.agents[agentKey].hasComponent(*args):
+                matching_agents.append(self.agents[agentKey])
+
+        return matching_agents

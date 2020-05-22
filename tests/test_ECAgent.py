@@ -80,6 +80,29 @@ class TestEnvironment:
 
         assert model.environment.getRandomAgent(CustomComponent) is agent1
 
+    def test_getAgents(self):
+        model = Model()
+
+        # Test empty list is returned when non agents occupy the environment
+        assert model.environment.getAgents() == []
+
+        # Test list when no filter is supplied but agents do occupy the environment
+
+        agent1 = Agent("a1", model)
+        agent2 = Agent("a2", model)
+
+        model.environment.addAgent(agent1)
+        model.environment.addAgent(agent2)
+
+        assert model.environment.getAgents() == [agent1, agent2]
+
+        # Test component filter when no agents meet the filter
+        assert model.environment.getAgents(Component) == []
+
+        # Test component filter when some agents meet the filter
+        agent1.addComponent(Component(agent1, model))
+        assert model.environment.getAgents(Component) == [agent1]
+
 
 class TestModel:
 

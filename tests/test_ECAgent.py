@@ -114,6 +114,16 @@ class TestEnvironment:
         agent1.addComponent(Component(agent1, model))
         assert model.environment.getAgents(Component) == [agent1]
 
+    def test_setModel(self):
+        model = Model()
+        env = Environment()
+
+        assert env.model is not model
+
+        env.setModel(model)
+
+        assert env.model is model
+
 
 class TestModel:
 
@@ -289,11 +299,11 @@ class TestAgent:
         component = Component(agent, model)
         agent.addComponent(component)
 
-        agent.removeComponent(component)
+        agent.removeComponent(Component)
         assert len(agent.components) == 0
 
         with pytest.raises(Exception):
-            agent.removeComponent(component)
+            agent.removeComponent(Component)
 
     def test_getComponent(self):
         model = Model()

@@ -51,12 +51,12 @@ class Agent:
             self.components[type(component)] = component
             self.model.systemManager.registerComponent(component)
 
-    def removeComponent(self, component: Component):
-        if type(component) not in self.components.keys():
+    def removeComponent(self, component: type):
+        if component not in self.components.keys():
             raise Exception("Agent does not have component")
         else:
-            del self.components[type(component)]
-            self.model.systemManager.deregisterComponent(component)
+            self.model.systemManager.deregisterComponent(self.components[component])
+            del self.components[component]
 
     def getComponent(self, component_type: type):
         """ Gets a component that is the same type as component type.
@@ -178,6 +178,9 @@ class Environment(Agent):
     def __getitem__(self, item: str):
         " Overloads the [] operator. Calls the getAgent() function. "
         return self.getAgent(item)
+
+    def setModel(self, model: Model):
+        self.model = model
 
     def addAgent(self, agent: Agent):
         if agent.id in self.agents.keys():

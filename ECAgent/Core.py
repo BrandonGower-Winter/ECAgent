@@ -40,6 +40,10 @@ class Agent:
         self.model = model
         self.components = {}
 
+    def __getitem__(self, item: type):
+        """ [] Override that called the getComponent() function. """
+        return self.getComponent(item)
+
     def addComponent(self, component: Component):
         if type(component) in self.components.keys():
             raise Exception("Agents cannot have multiple of the components")

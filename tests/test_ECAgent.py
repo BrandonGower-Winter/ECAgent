@@ -287,8 +287,6 @@ class TestAgent:
     def test_getComponent(self):
         model = Model()
         agent = Agent("a1", model)
-        s1 = System("s1", model)
-        model.systemManager.addSystem(s1)
 
         # Checks  to see if getting a component that doesn't exist returns None
         assert agent.getComponent(Component) is None
@@ -296,7 +294,19 @@ class TestAgent:
         component = Component(agent, model)
         agent.addComponent(component)
         # Check to see if getting a component that does exist returns the component
-        assert agent.getComponent(Component) == component
+        assert agent.getComponent(Component) is component
+
+    def test__getitem__(self):
+        model = Model()
+        agent = Agent("a1", model)
+
+        # Checks  to see if getting a component that doesn't exist returns None
+        assert agent[Component] is None
+
+        component = Component(agent, model)
+        agent.addComponent(component)
+        # Check to see if getting a component that does exist returns the component
+        assert agent[Component] is component
 
     def test_hasComponent(self):
         model = Model()

@@ -8,8 +8,10 @@ class TestEnvironment:
 
     def test__init__(self):
         model = Model()
+        assert len(model.environment.components) == 0
         assert len(model.environment.agents) == 0
-        assert model.environment.model == model
+        assert model.environment.model is model
+        assert model.environment.id == "ENVIRONMENT"
 
     def test_addAgent(self):
         model = Model()

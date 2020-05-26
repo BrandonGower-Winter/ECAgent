@@ -167,13 +167,13 @@ class SystemManager:
             return None
 
 
-class Environment:
+class Environment(Agent):
     """This is the base environment class.
     It is a void environment which means that is has no spacial properties"""
 
-    def __init__(self):
+    def __init__(self, id: str = 'ENVIRONMENT'):
+        super().__init__(id, None)
         self.agents = {}
-        self.model = None
 
     def __getitem__(self, item: str):
         " Overloads the [] operator. Calls the getAgent() function. "

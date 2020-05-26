@@ -38,7 +38,7 @@ class TestLineWorld:
 
         for i in range(len(env.cells)):
             assert env.cells[i].model is None
-            assert env.cells[i].id
+            assert env.cells[i].id == str(i)
 
     def test_addAgent(self):
         model = Model(LineWorld(5))
@@ -65,7 +65,7 @@ class TestLineWorld:
         # Test case when position is specified
         model.environment.removeAgent(agent.id)
 
-        model.environment.addAgent(agent, 2)
+        model.environment.addAgent(agent, xPos=2)
         assert len(model.environment.agents) == 1
         assert model.environment.getAgent(agent.id) == agent
         assert agent[PositionComponent].x == 2
@@ -109,3 +109,100 @@ class TestLineWorld:
 
         # Test non empty case
         assert model.environment.getAgentsAt(0) == [agent]
+
+    def test_getDimensions(self):
+        env = LineWorld(5)
+
+        assert env.getDimensions() == 5
+
+
+class TestGridWorld:
+
+    def test__init__(self):
+        # Test failed initialization
+        with pytest.raises(Exception):
+            GridWorld(0, 5)
+
+        with pytest.raises(Exception):
+            GridWorld(5, 0)
+
+        # Test default init()
+
+        env = GridWorld(5, 5)
+        assert env.width == 5
+        assert env.height == 5
+        assert len(env.cells) == 25
+        assert env.id == 'ENVIRONMENT'
+        assert env.model is None
+        assert len(env.agents) == 0
+
+        for i in range(len(env.cells)):
+            assert env.cells[i].model is None
+            assert env.cells[i].id == str(i)
+
+    def test_addAgent(self):
+        model = Model(GridWorld(5,5))
+        agent = Agent("a1", model)
+
+        # Test case when agent is added outside of the environment's dimensions [<0]
+        with pytest.raises(Exception):
+            model.environment.addAgent(agent, xPos=-1, yPos=0)
+
+        with pytest.raises(Exception):
+            model.environment.addAgent(agent, xPos=0, yPos=-1)
+
+        # Test case when agent is added outside of the environment's dimensions [>width]
+        with pytest.raises(Exception):
+            model.environment.addAgent(agent, xPos=5, yPos=0)
+
+        with pytest.raises(Exception):
+            model.environment.addAgent(agent, xPos=0, yPos=5)
+
+        # Test default case
+        model.environment.addAgent(agent)
+        assert len(model.environment.agents) == 1
+        assert model.environment[agent.id] is agent
+        assert agent[PositionComponent].x == 0
+        assert agent[PositionComponent].y == 0
+
+        # Test when agent is added twice
+        with pytest.raises(Exception):
+            model.environment.addAgent(agent)
+
+        # Test case when position is specified
+        model.environment.removeAgent(agent.id)
+
+        model.environment.addAgent(agent, xPos=2, yPos=2)
+        assert len(model.environment.agents) == 1
+        assert model.environment[agent.id] is agent
+        assert agent[PositionComponent].x == 2
+        assert agent[PositionComponent].y == 2
+
+    def test_removeAgent(self):
+        model = Model(GridWorld(5,5))
+        agent = Agent("a1", model)
+        model.environment.addAgent(agent)
+        model.environment.removeAgent(agent.id)
+        # Test removal
+        assert len(model.environment.agents) == 0
+        assert agent[PositionComponent] is None
+        # Test removal when agent doesn't exist in t
+        with pytest.raises(Exception):
+            model.environment.removeAgent(agent.id)
+
+    def test_getAgentsAt(self):
+        model = Model(GridWorld(5,5))
+        agent = Agent("a1", model)
+
+        model.environment.addAgent(agent, 0, 0)
+
+        # Test empty case
+        assert model.environment.getAgentsAt(5,5) == []
+
+        # Test non empty case
+        assert model.environment.getAgentsAt(0,0) == [agent]
+
+    def test_getDimensions(self):
+        env = GridWorld(3,5)
+
+        assert env.getDimensions() == (3,5)

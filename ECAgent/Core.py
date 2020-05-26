@@ -175,6 +175,10 @@ class Environment:
         self.agents = {}
         self.model = None
 
+    def __getitem__(self, item: str):
+        " Overloads the [] operator. Calls the getAgent() function. "
+        return self.getAgent(item)
+
     def addAgent(self, agent: Agent):
         if agent.id in self.agents.keys():
             raise Exception("Agent has already been added to the environment")

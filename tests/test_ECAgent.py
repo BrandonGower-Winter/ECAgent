@@ -44,6 +44,15 @@ class TestEnvironment:
         model.environment.addAgent(agent)
         assert model.environment.getAgent(agent.id) == agent
 
+    def test__getitem__(self):
+        model = Model()
+        agent = Agent("a1", model)
+
+        assert model.environment[agent.id] is None
+
+        model.environment.addAgent(agent)
+        assert model.environment[agent.id] == agent
+
     def test_getRandomAgent(self):
 
         env = Environment()

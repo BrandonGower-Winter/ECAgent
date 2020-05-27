@@ -115,6 +115,13 @@ class TestLineWorld:
 
         assert env.getDimensions() == 5
 
+    def test_getCell(self):
+        env = LineWorld(5)
+
+        assert env.getCell(-1) is None
+        assert env.getCell(5) is None
+        assert env.getCell(0) is not None
+
 
 class TestGridWorld:
 
@@ -222,6 +229,15 @@ class TestGridWorld:
         env = GridWorld(3,5)
 
         assert env.getDimensions() == (3,5)
+
+    def test_getCell(self):
+        env = GridWorld(5, 5)
+
+        assert env.getCell(-1, 0) is None
+        assert env.getCell(5, 0) is None
+        assert env.getCell(0, -1) is None
+        assert env.getCell(0, 5) is None
+        assert env.getCell(0, 0) is not None
 
 
 class TestCubeWorld:
@@ -338,3 +354,14 @@ class TestCubeWorld:
         env = CubeWorld(1, 2, 3)
 
         assert env.getDimensions() == (1, 2, 3)
+
+    def test_getCell(self):
+        env = CubeWorld(5, 5, 5)
+
+        assert env.getCell(-1, 0, 0) is None
+        assert env.getCell(5, 0, 0) is None
+        assert env.getCell(0, -1, 0) is None
+        assert env.getCell(0, 5, 0) is None
+        assert env.getCell(0, 0, -1) is None
+        assert env.getCell(0, 0, 5) is None
+        assert env.getCell(0, 0, 0) is not None

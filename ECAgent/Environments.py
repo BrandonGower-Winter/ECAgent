@@ -65,6 +65,12 @@ class LineWorld(Environment):
     def getDimensions(self):
         return self.width
 
+    def getCell(self, x: int):
+        if x < 0 or x >= len(self.cells):
+            return None
+        else:
+            return self.cells[x]
+
 
 class GridWorld(Environment):
     """ GridWorld is a discrete environment with 2 axes (x,y-axes). It can be used in place of the base Environment
@@ -120,6 +126,12 @@ class GridWorld(Environment):
 
     def getDimensions(self):
         return self.width, self.height
+
+    def getCell(self, x, y):
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            return None
+        else:
+            return self.cells[x + (y * self.width)]
 
 
 class CubeWorld(Environment):
@@ -178,3 +190,9 @@ class CubeWorld(Environment):
 
     def getDimensions(self):
         return self.width, self.height, self.depth
+
+    def getCell(self, x, y, z):
+        if x < 0 or x >= self.width or y < 0 or y >= self.height or z < 0 or z >= self.depth:
+            return None
+        else:
+            return self.cells[x + self.width * (y + self.depth * z)]

@@ -48,6 +48,10 @@ class Agent:
         """Returns the number of components attached to a given agent"""
         return len(self.components)
 
+    def __contains__(self, item: type):
+        """ Returns whether an agent has a particular component of not """
+        return self.hasComponent(item)
+
     def addComponent(self, component: Component):
         if type(component) in self.components.keys():
             raise Exception("Agents cannot have multiple of the components")

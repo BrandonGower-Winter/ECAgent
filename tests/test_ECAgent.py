@@ -384,3 +384,14 @@ class TestAgent:
 
         assert agent.hasComponent(Component, CustomComponent)
 
+    def test__contains__(self):
+        model = Model()
+        agent = Agent("a1", model)
+
+        # False check
+        assert Component not in agent
+
+        component = Component(agent, model)
+        agent.addComponent(component)
+        # True check
+        assert Component in agent

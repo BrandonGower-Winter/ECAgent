@@ -253,3 +253,7 @@ class Environment(Agent):
     def __len__(self):
         """ Returns the number of agents currently in the environment """
         return len(self.agents)
+
+    def getDimensions(self):
+        """ Returns the dimensions of the environment. For the base environment class it returns None """
+        return None

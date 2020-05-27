@@ -134,6 +134,11 @@ class TestEnvironment:
         env.addAgent(Agent("a1", None))
         assert len(env) == 1
 
+    def test_getDimensions(self):
+        env = Environment()
+
+        assert env.getDimensions() is None
+
 
 class TestModel:
 

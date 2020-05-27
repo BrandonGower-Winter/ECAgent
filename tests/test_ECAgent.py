@@ -134,6 +134,15 @@ class TestEnvironment:
         env.addAgent(Agent("a1", None))
         assert len(env) == 1
 
+    def test__contains__(self):
+        env = Environment()
+        # Test Empty case
+        assert "a1" not in env
+
+        # Test once agent has been added
+        env.addAgent(Agent("a1", None))
+        assert "a1" in env
+
     def test_getDimensions(self):
         env = Environment()
 

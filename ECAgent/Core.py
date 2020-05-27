@@ -187,6 +187,10 @@ class Environment(Agent):
         " Overloads the [] operator. Calls the getAgent() function. "
         return self.getAgent(item)
 
+    def __contains__(self, item: str):
+        """Returns true if Environment contains an agent with the specified ID"""
+        return self[item] is not None
+
     def setModel(self, model: Model):
         self.model = model
 

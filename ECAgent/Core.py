@@ -249,3 +249,7 @@ class Environment(Agent):
                 matching_agents.append(self.agents[agentKey])
 
         return matching_agents
+
+    def __len__(self):
+        """ Returns the number of agents currently in the environment """
+        return len(self.agents)

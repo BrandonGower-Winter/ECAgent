@@ -124,6 +124,16 @@ class TestEnvironment:
 
         assert env.model is model
 
+    def test__len__(self):
+        env = Environment()
+
+        # Test Empty case
+        assert len(env) == 0
+
+        # Test once agent has been added
+        env.addAgent(Agent("a1", None))
+        assert len(env) == 1
+
 
 class TestModel:
 

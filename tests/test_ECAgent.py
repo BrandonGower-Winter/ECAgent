@@ -329,6 +329,17 @@ class TestAgent:
         # Check to see if getting a component that does exist returns the component
         assert agent[Component] is component
 
+    def test__len__(self):
+        model = Model()
+        agent = Agent("a1", model)
+
+        # Test empty case
+        assert len(agent) == 0
+
+        # Test case when component is added
+        agent.addComponent(Component(agent, model))
+        assert len(agent) == 1
+
     def test_hasComponent(self):
         model = Model()
         agent = Agent("a1", model)

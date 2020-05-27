@@ -44,6 +44,10 @@ class Agent:
         """ [] Override that called the getComponent() function. """
         return self.getComponent(item)
 
+    def __len__(self) -> int:
+        """Returns the number of components attached to a given agent"""
+        return len(self.components)
+
     def addComponent(self, component: Component):
         if type(component) in self.components.keys():
             raise Exception("Agents cannot have multiple of the components")

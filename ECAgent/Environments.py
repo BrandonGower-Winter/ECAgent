@@ -19,7 +19,7 @@ class LineWorld(Environment):
 
     A LineWorld's dimensions are defined by a width property.
 
-    LineWorld.addComponent(comp) adds component comp to each of the cells in the environment."""
+    LineWorld.addCellComponent(comp) adds component comp to each of the cells in the environment."""
 
     def __init__(self, width, model, id: str = 'ENVIRONMENT'):
 
@@ -33,6 +33,7 @@ class LineWorld(Environment):
         # Create cells
         for x in range(width):
             self.cells.append(Agent(str(x), self.model))
+            self.cells[x].addComponent(PositionComponent(self.cells[x], self.model, x=x))
 
     def addAgent(self, agent: Agent, xPos: int = 0):
         """Adds an agent to the environment. Overrides the base class function.
@@ -56,7 +57,9 @@ class LineWorld(Environment):
         super().setModel(model)
 
         for cell in self.cells:
+            cell.removeComponent(PositionComponent)
             cell.model = model
+            cell.addComponent(PositionComponent(cell, self.model, x=int(cell.id)))
 
     def getAgentsAt(self, xPos: int):
         """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell"""
@@ -78,7 +81,7 @@ class GridWorld(Environment):
 
     A GridWorld's dimensions are defined by a width and height properties.
 
-    GridWorld.addComponent(comp) adds component comp to each of the cells in the environment."""
+    GridWorld.addCellComponent(comp) adds component comp to each of the cells in the environment."""
 
     def __init__(self, width, height, model, id: str = 'ENVIRONMENT'):
 
@@ -93,7 +96,9 @@ class GridWorld(Environment):
         # Create cells
         for y in range(height):
             for x in range(width):
-                self.cells.append(Agent(str(x + (y * self.width)), self.model))
+                agentID = x + (y * self.width)
+                self.cells.append(Agent(str(agentID), self.model))
+                self.cells[agentID].addComponent(PositionComponent(self.cells[agentID], self.model, x=x, y=y))
 
     def addAgent(self, agent: Agent, xPos: int = 0, yPos: int = 0):
         """Adds an agent to the environment. Overrides the base class function.
@@ -117,7 +122,10 @@ class GridWorld(Environment):
         super().setModel(model)
 
         for cell in self.cells:
+            x, y = cell[PositionComponent].x, cell[PositionComponent].y
+            cell.removeComponent(PositionComponent)
             cell.model = model
+            cell.addComponent(PositionComponent(cell, self.model, x=x, y=y))
 
     def getAgentsAt(self, xPos: int, yPos: int):
         """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell"""
@@ -140,7 +148,7 @@ class CubeWorld(Environment):
 
     A CubeWorld's dimensions are defined by a width, height and depth properties.
 
-    CubeWorld.addComponent(comp) adds component comp to each of the cells in the environment."""
+    CubeWorld.addCellComponent(comp) adds component comp to each of the cells in the environment."""
 
     def __init__(self, width, height, depth, model, id: str = 'ENVIRONMENT'):
 
@@ -157,7 +165,10 @@ class CubeWorld(Environment):
         for z in range(depth):
             for y in range(height):
                 for x in range(width):
-                    self.cells.append(Agent(str(x + self.width * (y + self.depth * z)), self.model))
+                    agentID = (z * self.width * self.height) + (y * width) + x;
+                    self.cells.append(Agent(str(agentID), self.model))
+                    print(agentID)
+                    self.cells[agentID].addComponent(PositionComponent(self.cells[agentID], model, x, y, z))
 
     def addAgent(self, agent: Agent, xPos: int = 0, yPos: int = 0, zPos: int = 0.0):
         """Adds an agent to the environment. Overrides the base class function.
@@ -181,7 +192,12 @@ class CubeWorld(Environment):
         super().setModel(model)
 
         for cell in self.cells:
+            xPos = cell[PositionComponent].x
+            yPos = cell[PositionComponent].y
+            zPos = cell[PositionComponent].z
+            cell.removeComponent(PositionComponent)
             cell.model = model
+            cell.addComponent(PositionComponent(cell, self.model, xPos, yPos, zPos))
 
     def getAgentsAt(self, xPos: int, yPos: int, zPos: int):
         """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell"""

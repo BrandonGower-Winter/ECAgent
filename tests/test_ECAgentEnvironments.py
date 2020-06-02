@@ -71,6 +71,18 @@ class TestLineWorld:
         assert model.environment.getAgent(agent.id) == agent
         assert agent[PositionComponent].x == 2
 
+    def test_addCellComponent(self):
+
+        def generator(cell: Agent):
+            cell.addComponent(Component(cell, cell.model))
+
+        env = LineWorld(5, Model())
+
+        env.addCellComponent(generator)
+
+        for cell in env.cells:
+            assert cell.hasComponent(Component)
+
     def test_removeAgent(self):
         model = Model(LineWorld(5, Model()))
         agent = Agent("a1", model)
@@ -190,6 +202,18 @@ class TestGridWorld:
         assert model.environment[agent.id] is agent
         assert agent[PositionComponent].x == 2
         assert agent[PositionComponent].y == 2
+
+    def test_addCellComponent(self):
+
+        def generator(cell: Agent):
+            cell.addComponent(Component(cell, cell.model))
+
+        env = GridWorld(5, 5, Model())
+
+        env.addCellComponent(generator)
+
+        for cell in env.cells:
+            assert cell.hasComponent(Component)
 
     def test_removeAgent(self):
         model = Model(GridWorld(5, 5, Model()))
@@ -320,6 +344,18 @@ class TestCubeWorld:
         assert len(model.environment.agents) == 1
         assert model.environment.getAgent(agent.id) == agent
         assert agent[PositionComponent].x == 1 and agent[PositionComponent].y == 2 and agent[PositionComponent].z == 3
+
+    def test_addCellComponent(self):
+
+        def generator(cell: Agent):
+            cell.addComponent(Component(cell, cell.model))
+
+        env = CubeWorld(5, 5, 5, Model())
+
+        env.addCellComponent(generator)
+
+        for cell in env.cells:
+            assert cell.hasComponent(Component)
 
     def test_removeAgent(self):
         model = Model(CubeWorld(5, 5, 5, Model()))

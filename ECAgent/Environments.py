@@ -46,6 +46,12 @@ class LineWorld(Environment):
         agent.addComponent(PositionComponent(agent, agent.model, x=xPos))
         super().addAgent(agent)
 
+    def addCellComponent(self, generator):
+        """ Adds the component supplied by the generator functor to each of the cells.
+        The functor is supplied with the cell as input"""
+        for cell in self.cells:
+            generator(cell)
+
     def removeAgent(self, agentID: str):
         """ Removes the agent from the environment. Will also remove the PositionComponent from the agent"""
         if agentID in self.agents:
@@ -111,6 +117,12 @@ class GridWorld(Environment):
 
         agent.addComponent(PositionComponent(agent, agent.model, x=xPos, y=yPos))
         super().addAgent(agent)
+
+    def addCellComponent(self, generator):
+        """ Adds the component supplied by the generator functor to each of the cells.
+        The functor is supplied with the cell as input"""
+        for cell in self.cells:
+            generator(cell)
 
     def removeAgent(self, agentID: str):
         """ Removes the agent from the environment. Will also remove the PositionComponent from the agent"""
@@ -181,6 +193,12 @@ class CubeWorld(Environment):
 
         agent.addComponent(PositionComponent(agent, agent.model, x=xPos, y=yPos, z=zPos))
         super().addAgent(agent)
+
+    def addCellComponent(self, generator):
+        """ Adds the component supplied by the generator functor to each of the cells.
+        The functor is supplied with the cell as input"""
+        for cell in self.cells:
+            generator(cell)
 
     def removeAgent(self, agentID: str):
         """ Removes the agent from the environment. Will also remove the PositionComponent from the agent"""

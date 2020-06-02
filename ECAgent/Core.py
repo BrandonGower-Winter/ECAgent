@@ -8,7 +8,7 @@ class Model:
 
     def __init__(self, environment=None, seed: int = None):
         if environment is None:
-            self.environment = Environment()
+            self.environment = Environment(self)
         else:
             self.environment = environment
 
@@ -179,8 +179,8 @@ class Environment(Agent):
     """This is the base environment class.
     It is a void environment which means that is has no spacial properties"""
 
-    def __init__(self, id: str = 'ENVIRONMENT'):
-        super().__init__(id, None)
+    def __init__(self, model, id: str = 'ENVIRONMENT'):
+        super().__init__(id, model)
         self.agents = {}
 
     def __getitem__(self, item: str):

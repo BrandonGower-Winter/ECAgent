@@ -57,7 +57,7 @@ class TestEnvironment:
 
     def test_getRandomAgent(self):
 
-        env = Environment()
+        env = Environment(None)
 
         assert env.getRandomAgent() is None
 
@@ -116,7 +116,7 @@ class TestEnvironment:
 
     def test_setModel(self):
         model = Model()
-        env = Environment()
+        env = Environment(None)
 
         assert env.model is not model
 
@@ -125,7 +125,7 @@ class TestEnvironment:
         assert env.model is model
 
     def test__len__(self):
-        env = Environment()
+        env = Environment(None)
 
         # Test Empty case
         assert len(env) == 0
@@ -135,7 +135,7 @@ class TestEnvironment:
         assert len(env) == 1
 
     def test__contains__(self):
-        env = Environment()
+        env = Environment(None)
         # Test Empty case
         assert "a1" not in env
 
@@ -144,7 +144,7 @@ class TestEnvironment:
         assert "a1" in env
 
     def test_getDimensions(self):
-        env = Environment()
+        env = Environment(None)
 
         assert env.getDimensions() is None
 
@@ -157,7 +157,7 @@ class TestModel:
         assert model.systemManager is not None
         assert model.random is not None
 
-        env = Environment()
+        env = Environment(model)
         model = Model(environment=env,seed=30)
         assert model.environment == env
         assert model.systemManager is not None

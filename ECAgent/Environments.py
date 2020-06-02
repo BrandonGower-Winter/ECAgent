@@ -21,18 +21,18 @@ class LineWorld(Environment):
 
     LineWorld.addComponent(comp) adds component comp to each of the cells in the environment."""
 
-    def __init__(self, width, id: str = 'ENVIRONMENT'):
+    def __init__(self, width, model, id: str = 'ENVIRONMENT'):
 
         if width < 1:
             raise Exception("Cannot create a LineWorld with a negative width.")
 
-        super().__init__(id)
+        super().__init__(model, id=id)
         self.width = width
         self.cells = []
 
         # Create cells
         for x in range(width):
-            self.cells.append(Agent(str(x), None))
+            self.cells.append(Agent(str(x), self.model))
 
     def addAgent(self, agent: Agent, xPos: int = 0):
         """Adds an agent to the environment. Overrides the base class function.
@@ -80,12 +80,12 @@ class GridWorld(Environment):
 
     GridWorld.addComponent(comp) adds component comp to each of the cells in the environment."""
 
-    def __init__(self, width, height, id: str = 'ENVIRONMENT'):
+    def __init__(self, width, height, model, id: str = 'ENVIRONMENT'):
 
         if width < 1 or height < 1:
             raise Exception("Cannot create a GridWorld with a negative width or height.")
 
-        super().__init__(id)
+        super().__init__(model, id=id)
         self.width = width
         self.height = height
         self.cells = []
@@ -93,7 +93,7 @@ class GridWorld(Environment):
         # Create cells
         for y in range(height):
             for x in range(width):
-                self.cells.append(Agent(str(x + (y * self.width)), None))
+                self.cells.append(Agent(str(x + (y * self.width)), self.model))
 
     def addAgent(self, agent: Agent, xPos: int = 0, yPos: int = 0):
         """Adds an agent to the environment. Overrides the base class function.
@@ -142,12 +142,12 @@ class CubeWorld(Environment):
 
     CubeWorld.addComponent(comp) adds component comp to each of the cells in the environment."""
 
-    def __init__(self, width, height, depth, id: str = 'ENVIRONMENT'):
+    def __init__(self, width, height, depth, model, id: str = 'ENVIRONMENT'):
 
         if width < 1 or height < 1 or depth < 1:
             raise Exception("Cannot create a CubeWorld with a negative width or height.")
 
-        super().__init__(id)
+        super().__init__(model, id=id)
         self.width = width
         self.height = height
         self.depth = depth
@@ -157,7 +157,7 @@ class CubeWorld(Environment):
         for z in range(depth):
             for y in range(height):
                 for x in range(width):
-                    self.cells.append(Agent(str(x + self.width * (y + self.depth * z)), None))
+                    self.cells.append(Agent(str(x + self.width * (y + self.depth * z)), self.model))
 
     def addAgent(self, agent: Agent, xPos: int = 0, yPos: int = 0, zPos: int = 0.0):
         """Adds an agent to the environment. Overrides the base class function.

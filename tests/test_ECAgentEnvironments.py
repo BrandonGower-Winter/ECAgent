@@ -25,11 +25,11 @@ class TestLineWorld:
     def test__init__(self):
         # Test failed initialization
         with pytest.raises(Exception):
-            LineWorld(-1)
+            LineWorld(-1, None)
 
         # Test default init()
 
-        env = LineWorld(5)
+        env = LineWorld(5, None)
         assert env.width == 5
         assert len(env.cells) == 5
         assert env.id == 'ENVIRONMENT'
@@ -41,7 +41,7 @@ class TestLineWorld:
             assert env.cells[i].id == str(i)
 
     def test_addAgent(self):
-        model = Model(LineWorld(5))
+        model = Model(LineWorld(5, None))
         agent = Agent("a1", model)
 
         # Test case when agent is added outside of the environment's dimensions [<0]
@@ -71,7 +71,7 @@ class TestLineWorld:
         assert agent[PositionComponent].x == 2
 
     def test_removeAgent(self):
-        model = Model(LineWorld(5))
+        model = Model(LineWorld(5, None))
         agent = Agent("a1", model)
         model.environment.addAgent(agent)
         model.environment.removeAgent(agent.id)
@@ -84,7 +84,7 @@ class TestLineWorld:
 
     def test_setModel(self):
         model = Model()
-        env = LineWorld(5)
+        env = LineWorld(5, None)
 
         assert env.model is not model
         # Test for all cells:
@@ -99,7 +99,7 @@ class TestLineWorld:
             assert env.cells[x].model is model
 
     def test_getAgentsAt(self):
-        model = Model(LineWorld(5))
+        model = Model(LineWorld(5, None))
         agent = Agent("a1", model)
 
         model.environment.addAgent(agent, 0)
@@ -111,12 +111,12 @@ class TestLineWorld:
         assert model.environment.getAgentsAt(0) == [agent]
 
     def test_getDimensions(self):
-        env = LineWorld(5)
+        env = LineWorld(5, None)
 
         assert env.getDimensions() == 5
 
     def test_getCell(self):
-        env = LineWorld(5)
+        env = LineWorld(5, None)
 
         assert env.getCell(-1) is None
         assert env.getCell(5) is None
@@ -128,14 +128,14 @@ class TestGridWorld:
     def test__init__(self):
         # Test failed initialization
         with pytest.raises(Exception):
-            GridWorld(0, 5)
+            GridWorld(0, 5, None)
 
         with pytest.raises(Exception):
-            GridWorld(5, 0)
+            GridWorld(5, 0, None)
 
         # Test default init()
 
-        env = GridWorld(5, 5)
+        env = GridWorld(5, 5, None)
         assert env.width == 5
         assert env.height == 5
         assert len(env.cells) == 25
@@ -148,7 +148,7 @@ class TestGridWorld:
             assert env.cells[i].id == str(i)
 
     def test_addAgent(self):
-        model = Model(GridWorld(5,5))
+        model = Model(GridWorld(5,5, None))
         agent = Agent("a1", model)
 
         # Test case when agent is added outside of the environment's dimensions [<0]
@@ -186,7 +186,7 @@ class TestGridWorld:
         assert agent[PositionComponent].y == 2
 
     def test_removeAgent(self):
-        model = Model(GridWorld(5,5))
+        model = Model(GridWorld(5, 5, None))
         agent = Agent("a1", model)
         model.environment.addAgent(agent)
         model.environment.removeAgent(agent.id)
@@ -198,7 +198,7 @@ class TestGridWorld:
             model.environment.removeAgent(agent.id)
 
     def test_getAgentsAt(self):
-        model = Model(GridWorld(5,5))
+        model = Model(GridWorld(5, 5, None))
         agent = Agent("a1", model)
 
         model.environment.addAgent(agent, 0, 0)
@@ -211,7 +211,7 @@ class TestGridWorld:
 
     def test_setModel(self):
         model = Model()
-        env = GridWorld(5, 5)
+        env = GridWorld(5, 5, None)
 
         assert env.model is not model
         # Test for all cells:
@@ -226,12 +226,12 @@ class TestGridWorld:
             assert env.cells[x].model is model
 
     def test_getDimensions(self):
-        env = GridWorld(3,5)
+        env = GridWorld(3,5, None)
 
         assert env.getDimensions() == (3,5)
 
     def test_getCell(self):
-        env = GridWorld(5, 5)
+        env = GridWorld(5, 5, None)
 
         assert env.getCell(-1, 0) is None
         assert env.getCell(5, 0) is None
@@ -245,17 +245,17 @@ class TestCubeWorld:
     def test__init__(self):
         # Test failed initialization
         with pytest.raises(Exception):
-            CubeWorld(0, 5, 5)
+            CubeWorld(0, 5, 5, None)
 
         with pytest.raises(Exception):
-            CubeWorld(5, 0, 5)
+            CubeWorld(5, 0, 5, None)
 
         with pytest.raises(Exception):
-            CubeWorld(5, 5, 0)
+            CubeWorld(5, 5, 0, None)
 
         # Test default init()
 
-        env = CubeWorld(5, 5, 5)
+        env = CubeWorld(5, 5, 5, None)
         assert env.width == 5
         assert env.height == 5
         assert env.depth == 5
@@ -269,7 +269,7 @@ class TestCubeWorld:
             assert env.cells[i].id == str(i)
 
     def test_addAgent(self):
-        model = Model(CubeWorld(5, 5, 5))
+        model = Model(CubeWorld(5, 5, 5, None))
         agent = Agent("a1", model)
 
         # Test case when agent is added outside of the environment's dimensions [<0]
@@ -311,7 +311,7 @@ class TestCubeWorld:
         assert agent[PositionComponent].x == 1 and agent[PositionComponent].y == 2 and agent[PositionComponent].z == 3
 
     def test_removeAgent(self):
-        model = Model(CubeWorld(5, 5, 5))
+        model = Model(CubeWorld(5, 5, 5, None))
         agent = Agent("a1", model)
         model.environment.addAgent(agent)
         model.environment.removeAgent(agent.id)
@@ -324,7 +324,7 @@ class TestCubeWorld:
 
     def test_setModel(self):
         model = Model()
-        env = CubeWorld(5, 5, 5)
+        env = CubeWorld(5, 5, 5, None)
 
         assert env.model is not model
         # Test for all cells:
@@ -339,7 +339,7 @@ class TestCubeWorld:
             assert env.cells[x].model is model
 
     def test_getAgentsAt(self):
-        model = Model(CubeWorld(5, 5, 5))
+        model = Model(CubeWorld(5, 5, 5, None))
         agent = Agent("a1", model)
 
         model.environment.addAgent(agent, 0, 0, 0)
@@ -351,12 +351,12 @@ class TestCubeWorld:
         assert model.environment.getAgentsAt(0, 0, 0) == [agent]
 
     def test_getDimensions(self):
-        env = CubeWorld(1, 2, 3)
+        env = CubeWorld(1, 2, 3, None)
 
         assert env.getDimensions() == (1, 2, 3)
 
     def test_getCell(self):
-        env = CubeWorld(5, 5, 5)
+        env = CubeWorld(5, 5, 5, None)
 
         assert env.getCell(-1, 0, 0) is None
         assert env.getCell(5, 0, 0) is None

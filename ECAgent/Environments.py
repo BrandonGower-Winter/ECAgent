@@ -32,7 +32,7 @@ class LineWorld(Environment):
 
         # Create cells
         for x in range(width):
-            self.cells.append(Agent(str(x), self.model))
+            self.cells.append(Agent('CELL_' + str(x), self.model))
             self.cells[x].addComponent(PositionComponent(self.cells[x], self.model, x=x))
 
     def addAgent(self, agent: Agent, xPos: int = 0):
@@ -57,9 +57,10 @@ class LineWorld(Environment):
         super().setModel(model)
 
         for cell in self.cells:
+            xPos = cell[PositionComponent].x
             cell.removeComponent(PositionComponent)
             cell.model = model
-            cell.addComponent(PositionComponent(cell, self.model, x=int(cell.id)))
+            cell.addComponent(PositionComponent(cell, self.model, x=xPos))
 
     def getAgentsAt(self, xPos: int):
         """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell"""
@@ -97,7 +98,7 @@ class GridWorld(Environment):
         for y in range(height):
             for x in range(width):
                 agentID = x + (y * self.width)
-                self.cells.append(Agent(str(agentID), self.model))
+                self.cells.append(Agent('CELL_' + str(agentID), self.model))
                 self.cells[agentID].addComponent(PositionComponent(self.cells[agentID], self.model, x=x, y=y))
 
     def addAgent(self, agent: Agent, xPos: int = 0, yPos: int = 0):
@@ -165,8 +166,8 @@ class CubeWorld(Environment):
         for z in range(depth):
             for y in range(height):
                 for x in range(width):
-                    agentID = (z * self.width * self.height) + (y * width) + x;
-                    self.cells.append(Agent(str(agentID), self.model))
+                    agentID = (z * self.width * self.height) + (y * width) + x
+                    self.cells.append(Agent('CELL_' + str(agentID), self.model))
                     print(agentID)
                     self.cells[agentID].addComponent(PositionComponent(self.cells[agentID], model, x, y, z))
 

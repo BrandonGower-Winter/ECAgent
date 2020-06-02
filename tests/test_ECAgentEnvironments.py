@@ -25,7 +25,7 @@ class TestLineWorld:
     def test__init__(self):
         # Test failed initialization
         with pytest.raises(Exception):
-            LineWorld(-1, None)
+            LineWorld(-1, Model())
 
         # Test default init()
         model = Model()
@@ -38,7 +38,7 @@ class TestLineWorld:
 
         for i in range(len(env.cells)):
             assert env.cells[i].model is model
-            assert env.cells[i].id == str(i)
+            assert env.cells[i].id == 'CELL_' + str(i)
             assert env.cells[i].hasComponent(PositionComponent) and env.cells[i][PositionComponent].x == i
 
     def test_addAgent(self):
@@ -149,7 +149,7 @@ class TestGridWorld:
 
         for i in range(len(env.cells)):
             assert env.cells[i].model is model
-            assert env.cells[i].id == str(i)
+            assert env.cells[i].id == 'CELL_' + str(i)
             assert env.cells[i].hasComponent(PositionComponent)
 
 
@@ -276,7 +276,7 @@ class TestCubeWorld:
 
         for i in range(len(env.cells)):
             assert env.cells[i].model is model
-            assert env.cells[i].id == str(i)
+            assert env.cells[i].id == 'CELL_' + str(i)
             assert env.cells[i].hasComponent(PositionComponent)
 
     def test_addAgent(self):

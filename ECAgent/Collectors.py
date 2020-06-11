@@ -10,7 +10,7 @@ class Collector(System):
      class automatically calls the collect() method whenever the execute() method is called. If you do need to override
      the execute method, make sure you also call the collect() method to follow the intended behaviour of a Collector
      object."""
-    def __init__(self, id: str, model: Model, priority=100, frequency=1, start=0, end=maxsize):
+    def __init__(self, id: str, model: Model, priority=-1, frequency=1, start=0, end=maxsize):
         super().__init__(id, model, priority, frequency, start, end)
 
         self.records = []
@@ -49,7 +49,7 @@ class AgentCollector(Collector):
     To see the agent collector in action, see the Environment and Data Collection tutorial."""
 
     def __init__(self, model: Model, agentFunc, compositeFunc=None, includeTimstep=False, id="AgentCollector",
-                 priority=100, frequency=1, start=0, end=maxsize):
+                 priority=-1, frequency=1, start=0, end=maxsize):
         super().__init__(id, model, priority, frequency, start, end)
 
         self.agentFunc = agentFunc

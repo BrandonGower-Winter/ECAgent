@@ -16,7 +16,7 @@ class TestCollector:
         assert col.start == 0
         assert col.end == maxsize
         assert col.frequency == 1
-        assert col.priority == 100
+        assert col.priority == -1
         assert len(col.records) == 0
 
         # Test explicit values
@@ -46,7 +46,7 @@ class TestAgentCollector:
         assert col.start == 0
         assert col.end == maxsize
         assert col.frequency == 1
-        assert col.priority == 100
+        assert col.priority == -1
         assert len(col.records) == 0
 
         assert col.agentFunc is dummyFunc

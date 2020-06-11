@@ -85,6 +85,21 @@ class LineWorld(Environment):
         else:
             return self.cells[x]
 
+    def getNeighbours(self, cell: Agent, radius: int = 1, moore: bool = False) -> [Agent]:
+        """Returns a list of all the neighbouring cells within the specified radius. If moore = true the supplied cell
+        will also be included in that list"""
+        neighbours = []
+        lower_bound = max(0, cell[PositionComponent].x - radius)
+        upper_bound = min(self.width, cell[PositionComponent].x + radius + 1)  # +1 to account for range() exclusion
+
+        for x in range(lower_bound, upper_bound):
+            if moore:
+                neighbours.append(self.cells[x])
+            elif cell[PositionComponent].x != x:
+                neighbours.append(self.cells[x])
+
+        return neighbours
+
 
 class GridWorld(Environment):
     """ GridWorld is a discrete environment with 2 axes (x,y-axes). It can be used in place of the base Environment

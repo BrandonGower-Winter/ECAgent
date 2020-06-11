@@ -23,6 +23,7 @@ class TestPositionComponent:
         pos = PositionComponent(None, None, 1, 2, 3)
         assert pos.getPosition() == (1, 2, 3)
 
+
 class TestLineWorld:
 
     def test__init__(self):
@@ -142,6 +143,29 @@ class TestLineWorld:
         assert env.getCell(-1) is None
         assert env.getCell(5) is None
         assert env.getCell(0) is not None
+
+    def test_getNeighbours(self):
+        model = Model()
+        lineworld = LineWorld(5, model)
+
+        # Test default case
+        neighbours = lineworld.getNeighbours(lineworld.getCell(2))
+        print([cell[PositionComponent].x for cell in neighbours])
+        assert neighbours[0] is lineworld.cells[1]
+        assert neighbours[1] is lineworld.cells[3]
+
+        # Test variable range case
+        neighbours = lineworld.getNeighbours(lineworld.getCell(2), radius=3)
+        assert neighbours[0] is lineworld.cells[0]
+        assert neighbours[1] is lineworld.cells[1]
+        assert neighbours[2] is lineworld.cells[3]
+        assert neighbours[3] is lineworld.cells[4]
+
+        # Test moore = true
+        neighbours = lineworld.getNeighbours(lineworld.getCell(2), moore=True)
+        assert neighbours[0] is lineworld.cells[1]
+        assert neighbours[1] is lineworld.cells[2]
+        assert neighbours[2] is lineworld.cells[3]
 
 
 class TestGridWorld:

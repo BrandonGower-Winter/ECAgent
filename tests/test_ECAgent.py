@@ -157,9 +157,8 @@ class TestModel:
         assert model.systemManager is not None
         assert model.random is not None
 
-        env = Environment(model)
-        model = Model(environment=env,seed=30)
-        assert model.environment == env
+        model = Model(seed=30)
+        assert model.environment is not None
         assert model.systemManager is not None
         assert model.random.randint(25, 50) == 42
 

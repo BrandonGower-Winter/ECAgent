@@ -42,7 +42,8 @@ class TestLineWorld:
             assert env.cells[i].hasComponent(PositionComponent) and env.cells[i][PositionComponent].x == i
 
     def test_addAgent(self):
-        model = Model(LineWorld(5, Model()))
+        model = Model()
+        model.environment = LineWorld(5, model)
         agent = Agent("a1", model)
 
         # Test case when agent is added outside of the environment's dimensions [<0]
@@ -84,7 +85,8 @@ class TestLineWorld:
             assert cell.hasComponent(Component)
 
     def test_removeAgent(self):
-        model = Model(LineWorld(5, Model()))
+        model = Model()
+        model.environment = LineWorld(5, model)
         agent = Agent("a1", model)
         model.environment.addAgent(agent)
         model.environment.removeAgent(agent.id)
@@ -114,7 +116,8 @@ class TestLineWorld:
             assert env.cells[x].hasComponent(PositionComponent) and env.cells[x][PositionComponent].x == x
 
     def test_getAgentsAt(self):
-        model = Model(LineWorld(5, Model()))
+        model = Model()
+        model.environment = LineWorld(5, model)
         agent = Agent("a1", model)
 
         model.environment.addAgent(agent, 0)
@@ -166,7 +169,8 @@ class TestGridWorld:
 
 
     def test_addAgent(self):
-        model = Model(GridWorld(5, 5, Model()))
+        model = Model()
+        model.environment = GridWorld(5, 5, model)
         agent = Agent("a1", model)
 
         # Test case when agent is added outside of the environment's dimensions [<0]
@@ -216,7 +220,8 @@ class TestGridWorld:
             assert cell.hasComponent(Component)
 
     def test_removeAgent(self):
-        model = Model(GridWorld(5, 5, Model()))
+        model = Model()
+        model.environment = GridWorld(5, 5, model)
         agent = Agent("a1", model)
         model.environment.addAgent(agent)
         model.environment.removeAgent(agent.id)
@@ -228,7 +233,8 @@ class TestGridWorld:
             model.environment.removeAgent(agent.id)
 
     def test_getAgentsAt(self):
-        model = Model(GridWorld(5, 5, Model()))
+        model = Model()
+        model.environment = GridWorld(5, 5, model)
         agent = Agent("a1", model)
 
         model.environment.addAgent(agent, 0, 0)
@@ -304,7 +310,8 @@ class TestCubeWorld:
             assert env.cells[i].hasComponent(PositionComponent)
 
     def test_addAgent(self):
-        model = Model(CubeWorld(5, 5, 5, Model()))
+        model = Model()
+        model.environment = CubeWorld(5, 5, 5, model)
         agent = Agent("a1", model)
 
         # Test case when agent is added outside of the environment's dimensions [<0]
@@ -358,7 +365,8 @@ class TestCubeWorld:
             assert cell.hasComponent(Component)
 
     def test_removeAgent(self):
-        model = Model(CubeWorld(5, 5, 5, Model()))
+        model = Model()
+        model.environment = CubeWorld(5, 5, 5, model)
         agent = Agent("a1", model)
         model.environment.addAgent(agent)
         model.environment.removeAgent(agent.id)
@@ -388,7 +396,8 @@ class TestCubeWorld:
             assert env.cells[x].hasComponent(PositionComponent)
 
     def test_getAgentsAt(self):
-        model = Model(CubeWorld(5, 5, 5, Model()))
+        model = Model()
+        model.environment = CubeWorld(5, 5, 5, model)
         agent = Agent("a1", model)
 
         model.environment.addAgent(agent, 0, 0, 0)

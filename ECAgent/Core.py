@@ -6,14 +6,9 @@ class Model:
     """ This is the base class for the ABM model.
     You inherit this class to again access to all of the ECS functionality """
 
-    def __init__(self, environment=None, seed: int = None):
-        if environment is None:
-            self.environment = Environment(self)
-        else:
-            self.environment = environment
+    def __init__(self, seed: int = None):
 
-        # Set the environment model
-        self.environment.model = self
+        self.environment = Environment(self)
         self.systemManager = SystemManager(self)
 
         # Initialize RNG. It is object based because we want to ensure

@@ -180,7 +180,6 @@ class CubeWorld(Environment):
                 for x in range(width):
                     agentID = (z * self.width * self.height) + (y * width) + x
                     self.cells.append(Agent('CELL_' + str(agentID), self.model))
-                    print(agentID)
                     self.cells[agentID].addComponent(PositionComponent(self.cells[agentID], model, x, y, z))
 
     def addAgent(self, agent: Agent, xPos: int = 0, yPos: int = 0, zPos: int = 0.0):

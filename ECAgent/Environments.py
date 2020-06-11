@@ -12,6 +12,10 @@ class PositionComponent(Component):
         self.y = y
         self.z = z
 
+    def getPosition(self) -> (float, float, float):
+        """Returns the x,y and z values of the component as a tuple"""
+        return self.x, self.y, self.z
+
 
 class LineWorld(Environment):
     """ LineWorld is a discrete environment with only 1 axis (x-axis). It can be used in place of the base Environment

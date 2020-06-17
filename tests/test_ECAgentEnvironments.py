@@ -4,6 +4,10 @@ from ECAgent.Core import *
 from ECAgent.Environments import *
 
 
+def test_discreteGridPostoID():
+    assert (4 * 3 * 5) + (2 * 3) + 1 == discreteGirdPosToID(1, 2, 3, 4, 5)
+
+
 class TestPositionComponent:
 
     def test__init__(self):
@@ -150,7 +154,6 @@ class TestLineWorld:
 
         # Test default case
         neighbours = lineworld.getNeighbours(lineworld.getCell(2))
-        print([cell[PositionComponent].x for cell in neighbours])
         assert neighbours[0] is lineworld.cells[1]
         assert neighbours[1] is lineworld.cells[3]
 
@@ -193,7 +196,6 @@ class TestGridWorld:
             assert env.cells[i].model is model
             assert env.cells[i].id == 'CELL_' + str(i)
             assert env.cells[i].hasComponent(PositionComponent)
-
 
     def test_addAgent(self):
         model = Model()
@@ -305,6 +307,52 @@ class TestGridWorld:
         assert env.getCell(0, -1) is None
         assert env.getCell(0, 5) is None
         assert env.getCell(0, 0) is not None
+
+    def test_getNeighbours(self):
+        model = Model()
+        gridworld = GridWorld(3, 3, model)
+
+        # Test default case
+        neighbours = gridworld.getNeighbours(gridworld.getCell(1, 1))
+        print([str(cell[PositionComponent].x) + str(cell[PositionComponent].y) for cell in neighbours])
+        assert neighbours[0] is gridworld.cells[0]
+        assert neighbours[1] is gridworld.cells[1]
+        assert neighbours[2] is gridworld.cells[2]
+
+        assert neighbours[3] is gridworld.cells[3]
+        assert neighbours[4] is gridworld.cells[5]
+
+        assert neighbours[5] is gridworld.cells[6]
+        assert neighbours[6] is gridworld.cells[7]
+        assert neighbours[7] is gridworld.cells[8]
+
+        # Test variable range case
+        neighbours = gridworld.getNeighbours(gridworld.getCell(1,1), radius=1)
+        assert neighbours[0] is gridworld.cells[0]
+        assert neighbours[1] is gridworld.cells[1]
+        assert neighbours[2] is gridworld.cells[2]
+
+        assert neighbours[3] is gridworld.cells[3]
+        assert neighbours[4] is gridworld.cells[5]
+
+        assert neighbours[5] is gridworld.cells[6]
+        assert neighbours[6] is gridworld.cells[7]
+        assert neighbours[7] is gridworld.cells[8]
+
+        # Test moore = true
+        neighbours = gridworld.getNeighbours(gridworld.getCell(1,1), moore=True)
+
+        assert neighbours[0] is gridworld.cells[0]
+        assert neighbours[1] is gridworld.cells[1]
+        assert neighbours[2] is gridworld.cells[2]
+
+        assert neighbours[3] is gridworld.cells[3]
+        assert neighbours[4] is gridworld.cells[4]
+        assert neighbours[5] is gridworld.cells[5]
+
+        assert neighbours[6] is gridworld.cells[6]
+        assert neighbours[7] is gridworld.cells[7]
+        assert neighbours[8] is gridworld.cells[8]
 
 
 class TestCubeWorld:

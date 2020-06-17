@@ -1,6 +1,12 @@
 from ECAgent.Core import Agent, Environment, Component, Model
 
 
+def discreteGirdPosToID(x: int, y: int = 0, width: int = 0, z: int = 0, height: int = 0):
+    """Returns a unique number of based on the x, y and z coordinates entered.
+    Uniqueness is dimension dependent"""
+    return (z * width * height) + (y * width) + x
+
+
 class PositionComponent(Component):
     """ A position component. It contains three float properties: x, y, z.
     This component can be used to store the position of an Agent in a 1-3D world.
@@ -122,7 +128,7 @@ class GridWorld(Environment):
         # Create cells
         for y in range(height):
             for x in range(width):
-                agentID = x + (y * self.width)
+                agentID = discreteGirdPosToID(x, y, self.width)
                 self.cells.append(Agent('CELL_' + str(agentID), self.model))
                 self.cells[agentID].addComponent(PositionComponent(self.cells[agentID], self.model, x=x, y=y))
 
@@ -173,6 +179,27 @@ class GridWorld(Environment):
         else:
             return self.cells[x + (y * self.width)]
 
+    def getNeighbours(self, cell: Agent, radius: int = 1, moore: bool = False) -> [Agent]:
+        """Returns a list of all the neighbouring cells within the specified radius. If moore = true the supplied cell
+        will also be included in that list"""
+        neighbours = []
+        xlower_bound = max(0, cell[PositionComponent].x - radius)
+        xupper_bound = min(self.width, cell[PositionComponent].x + radius + 1)  # +1 to account for range() exclusion
+
+        ylower_bound = max(0, cell[PositionComponent].y - radius)
+        yupper_bound = min(self.height, cell[PositionComponent].y + radius + 1)  # +1 to account for range() exclusion
+
+        for y in range(ylower_bound, yupper_bound):
+            for x in range(xlower_bound, xupper_bound):
+                id = discreteGirdPosToID(x, y, self.width)
+                if cell[PositionComponent].x == x and cell[PositionComponent].y == y:
+                    if moore:
+                        neighbours.append(self.cells[id])
+                else:
+                    neighbours.append(self.cells[id])
+
+        return neighbours
+
 
 class CubeWorld(Environment):
     """ CubeWorld is a discrete environment with 3 axes (x,y,z-axes). It can be used in place of the base Environment
@@ -197,7 +224,7 @@ class CubeWorld(Environment):
         for z in range(depth):
             for y in range(height):
                 for x in range(width):
-                    agentID = (z * self.width * self.height) + (y * width) + x
+                    agentID = discreteGirdPosToID(x, y, width, z, height)
                     self.cells.append(Agent('CELL_' + str(agentID), self.model))
                     self.cells[agentID].addComponent(PositionComponent(self.cells[agentID], model, x, y, z))
 

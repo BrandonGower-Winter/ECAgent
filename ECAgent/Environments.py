@@ -275,4 +275,29 @@ class CubeWorld(Environment):
         if x < 0 or x >= self.width or y < 0 or y >= self.height or z < 0 or z >= self.depth:
             return None
         else:
-            return self.cells[x + self.width * (y + self.depth * z)]
+            return self.cells[discreteGirdPosToID(x, y, self.width, z, self.height)]
+
+    def getNeighbours(self, cell: Agent, radius: int = 1, moore: bool = False) -> [Agent]:
+        """Returns a list of all the neighbouring cells within the specified radius. If moore = true the supplied cell
+        will also be included in that list"""
+        neighbours = []
+        xlower_bound = max(0, cell[PositionComponent].x - radius)
+        xupper_bound = min(self.width, cell[PositionComponent].x + radius + 1)  # +1 to account for range() exclusion
+
+        ylower_bound = max(0, cell[PositionComponent].y - radius)
+        yupper_bound = min(self.height, cell[PositionComponent].y + radius + 1)  # +1 to account for range() exclusion
+
+        zlower_bound = max(0, cell[PositionComponent].z - radius)
+        zupper_bound = min(self.depth, cell[PositionComponent].z + radius + 1)  # +1 to account for range() exclusion
+        for z in range(zlower_bound, zupper_bound):
+            for y in range(ylower_bound, yupper_bound):
+                for x in range(xlower_bound, xupper_bound):
+                    id = discreteGirdPosToID(x, y, self.width, z, self.height)
+                    if cell[PositionComponent].x == x and cell[PositionComponent].y == y and \
+                            cell[PositionComponent].z == z:
+                        if moore:
+                            neighbours.append(self.cells[id])
+                    else:
+                        neighbours.append(self.cells[id])
+
+        return neighbours

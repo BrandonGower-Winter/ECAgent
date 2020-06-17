@@ -314,7 +314,6 @@ class TestGridWorld:
 
         # Test default case
         neighbours = gridworld.getNeighbours(gridworld.getCell(1, 1))
-        print([str(cell[PositionComponent].x) + str(cell[PositionComponent].y) for cell in neighbours])
         assert neighbours[0] is gridworld.cells[0]
         assert neighbours[1] is gridworld.cells[1]
         assert neighbours[2] is gridworld.cells[2]
@@ -498,3 +497,40 @@ class TestCubeWorld:
         assert env.getCell(0, 0, -1) is None
         assert env.getCell(0, 0, 5) is None
         assert env.getCell(0, 0, 0) is not None
+
+    def test_getNeighbours(self):
+        model = Model()
+        cubeworld = CubeWorld(3, 3, 3, model)
+
+        # Test default case
+        neighbours = cubeworld.getNeighbours(cubeworld.getCell(0, 0, 0))
+        print(len(neighbours))
+        assert neighbours[0] is cubeworld.cells[1]
+        assert neighbours[1] is cubeworld.cells[discreteGirdPosToID(0, 1, cubeworld.width, 0, cubeworld.height)]
+        assert neighbours[2] is cubeworld.cells[discreteGirdPosToID(1, 1, cubeworld.width, 0, cubeworld.height)]
+        assert neighbours[3] is cubeworld.cells[discreteGirdPosToID(0, 0, cubeworld.width, 1, cubeworld.height)]
+        assert neighbours[4] is cubeworld.cells[discreteGirdPosToID(1, 0, cubeworld.width, 1, cubeworld.height)]
+        assert neighbours[5] is cubeworld.cells[discreteGirdPosToID(0, 1, cubeworld.width, 1, cubeworld.height)]
+        assert neighbours[6] is cubeworld.cells[discreteGirdPosToID(1, 1, cubeworld.width, 1, cubeworld.height)]
+
+        # Test variable range case
+        neighbours = cubeworld.getNeighbours(cubeworld.getCell(0, 0, 0), radius=1)
+        assert neighbours[0] is cubeworld.cells[1]
+        assert neighbours[1] is cubeworld.cells[discreteGirdPosToID(0, 1, cubeworld.width, 0, cubeworld.height)]
+        assert neighbours[2] is cubeworld.cells[discreteGirdPosToID(1, 1, cubeworld.width, 0, cubeworld.height)]
+        assert neighbours[3] is cubeworld.cells[discreteGirdPosToID(0, 0, cubeworld.width, 1, cubeworld.height)]
+        assert neighbours[4] is cubeworld.cells[discreteGirdPosToID(1, 0, cubeworld.width, 1, cubeworld.height)]
+        assert neighbours[5] is cubeworld.cells[discreteGirdPosToID(0, 1, cubeworld.width, 1, cubeworld.height)]
+        assert neighbours[6] is cubeworld.cells[discreteGirdPosToID(1, 1, cubeworld.width, 1, cubeworld.height)]
+
+
+        # Test moore = true
+        neighbours = cubeworld.getNeighbours(cubeworld.getCell(0, 0, 0), moore=True)
+        assert neighbours[0] is cubeworld.cells[0]
+        assert neighbours[1] is cubeworld.cells[1]
+        assert neighbours[2] is cubeworld.cells[discreteGirdPosToID(0, 1, cubeworld.width, 0, cubeworld.height)]
+        assert neighbours[3] is cubeworld.cells[discreteGirdPosToID(1, 1, cubeworld.width, 0, cubeworld.height)]
+        assert neighbours[4] is cubeworld.cells[discreteGirdPosToID(0, 0, cubeworld.width, 1, cubeworld.height)]
+        assert neighbours[5] is cubeworld.cells[discreteGirdPosToID(1, 0, cubeworld.width, 1, cubeworld.height)]
+        assert neighbours[6] is cubeworld.cells[discreteGirdPosToID(0, 1, cubeworld.width, 1, cubeworld.height)]
+        assert neighbours[7] is cubeworld.cells[discreteGirdPosToID(1, 1, cubeworld.width, 1, cubeworld.height)]

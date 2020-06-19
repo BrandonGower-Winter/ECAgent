@@ -1,4 +1,5 @@
 numpy
+dash
 flake8
 pytest
 pytest-cov

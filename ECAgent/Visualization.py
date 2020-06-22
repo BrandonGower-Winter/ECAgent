@@ -155,3 +155,35 @@ def addLabel(vs: VisualSystem, label_id, content):
             ],
         )
     )
+
+
+def addSlider(vs: VisualSystem, slider_id: str, slider_name: str, set_val, min_val: float = 0.0, max_val: float = 1.0,
+              step: float = 0.01):
+    """This function will add a slider to the parameter window of the visual system. It will also automatically add
+    a callback function that will supply your custom function 'set_val' with the value of the slider"""
+
+    # Add html
+    vs.parameters.append(
+        html.Div(
+            className="padding-top-bot",
+            children=[
+                html.H6('{}: [{}]'.format(slider_name, max_val), id=slider_id + '-title'),
+                dcc.Slider(
+                    id=slider_id,
+                    min=min_val,
+                    max=max_val,
+                    value=max_val,
+                    step=step
+                )
+            ],
+        )
+    )
+
+    # Add callback
+
+    def set_slider_val(value):
+        set_val(value)
+        return '{}: [{}]'.format(slider_name, value)
+
+    vs.app.callback(dash.dependencies.Output(slider_id + '-title', 'children'),
+                    [dash.dependencies.Input(slider_id, 'value')])(set_slider_val)

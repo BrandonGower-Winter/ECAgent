@@ -12,5 +12,10 @@ if __name__ == '__main__':
 
     addLabel(vs, 'test-label', 'Test Label...')
 
+    def set_val(value):
+        print(value)
+
+    addSlider(vs, 'test-slider', "Test Slider", set_val)
+
     model.systemManager.addSystem(vs)
     vs.app.run_server(debug=True)

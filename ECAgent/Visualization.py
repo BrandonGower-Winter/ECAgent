@@ -1,6 +1,7 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import plotly.graph_objs as go
 
 from sys import maxsize
 from ECAgent.Core import System, Model
@@ -58,7 +59,34 @@ class VisualSystem(System):
     def createBaseLayout(self):
         """Creates the base layout"""
 
+        # Create banner
+        banner = html.Div(
+            className="app-banner row",
+            children=[
+                html.H2(className="h2-title", children=self.id),
+                html.H2(className="h2-title-mobile", children=self.id),
+            ],
+        )
         # If framerate > 0, create the play, stop, and restart iteration info
+        if self.frameFreq > 0:
+            banner.children.append(
+                html.Div(
+                    className='div-play-buttons',
+                    id='dynamic-button',
+                    children=[
+                        html.Button("Play", id='play-stop-button', n_clicks=0),
+                        html.Button('Restart', id='restart-button', n_clicks=0),
+                        html.Button('Step', id='next-button', n_clicks=0)
+                    ]
+                )
+            )
+
+            # Apply Callbacks
+            self.app.callback(
+                dash.dependencies.Output('play-stop-button', 'children'),
+                [dash.dependencies.Input('play-stop-button', 'n_clicks')]
+            )(play_button_callback)
+
         # Do that here...
         # Add parameter header
         self.parameters.append(html.Div(
@@ -77,13 +105,7 @@ class VisualSystem(System):
                 # Error Message
                 html.Div(id="error-message"),
                 # Top Banner
-                html.Div(
-                    className="app-banner row",
-                    children=[
-                        html.H2(className="h2-title", children=self.id),
-                        html.H2(className="h2-title-mobile", children=self.id),
-                    ],
-                ),
+                banner,
                 # Body of the App
                 html.Div(
                     className="row app-body",
@@ -103,3 +125,29 @@ class VisualSystem(System):
                 ),
             ]
         )
+
+
+# ####################################### Callbacks ###########################################
+
+
+def play_button_callback(n_clicks):
+    if n_clicks % 2 == 0:
+        return 'Play'
+    else:
+        return 'Stop'
+
+
+# ############################## Graph and Parameter Functionality ##############################
+
+
+def addDCCGraph(vs: VisualSystem, graphID: str, title: str, figure: go.Figure, classname: str = 'bg-white',
+                addBreak: bool = True):
+    vs.displays.append(html.Div(
+        className=classname,
+        children=[
+            html.H5(title),
+            dcc.Graph(id=graphID, figure=figure)
+        ]
+    ))
+    if addBreak:
+        vs.displays.append(html.Br())

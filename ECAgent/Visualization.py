@@ -89,16 +89,7 @@ class VisualSystem(System):
 
         # Do that here...
         # Add parameter header
-        self.parameters.append(html.Div(
-            className="bg-white user-control",
-            children=[
-                html.Div(
-                    className="padding-top-bot",
-                    children=[
-                        html.H6("Parameters"),
-                    ],
-                )
-            ]))
+        addLabel(self, 'parameter-heading', 'Parameters:')
 
         self.app.layout = html.Div(
             children=[
@@ -113,7 +104,9 @@ class VisualSystem(System):
                         # User Controls
                         html.Div(
                             className="four columns card",
-                            children=self.parameters,
+                            children=html.Div(
+                                className="bg-white user-control",
+                                children=self.parameters)
                         ),
                         # Graph
                         html.Div(
@@ -151,3 +144,14 @@ def addDCCGraph(vs: VisualSystem, graphID: str, title: str, figure: go.Figure, c
     ))
     if addBreak:
         vs.displays.append(html.Br())
+
+
+def addLabel(vs: VisualSystem, label_id, content):
+    vs.parameters.append(
+        html.Div(
+            className="padding-top-bot",
+            children=[
+                html.H6(content, id=label_id),
+            ],
+        )
+    )

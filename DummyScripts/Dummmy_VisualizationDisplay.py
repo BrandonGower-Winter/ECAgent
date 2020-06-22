@@ -10,5 +10,7 @@ if __name__ == '__main__':
     addDCCGraph(vs, 'animal', 'Animal Graph', fig)
     addDCCGraph(vs, 'not-animal', 'Not Animal Graph', fig, addBreak=False)
 
+    addLabel(vs, 'test-label', 'Test Label...')
+
     model.systemManager.addSystem(vs)
     vs.app.run_server(debug=True)

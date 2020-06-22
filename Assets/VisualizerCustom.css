@@ -19,6 +19,7 @@ body{
 .div-play-buttons{
   display: inline-block;
   float: right;
+  margin-top: 1.8rem;
 }
 
 .logo{

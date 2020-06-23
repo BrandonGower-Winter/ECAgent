@@ -133,12 +133,47 @@ def play_button_callback(n_clicks):
 # ############################## Graph and Parameter Functionality ##############################
 
 
-def addDCCGraph(vs: VisualSystem, graphID: str, title: str, figure: go.Figure, classname: str = 'bg-white',
+def createScatterPlot(title, data: [[[float], [float], str]], template: str = 'plotly'):
+    """Creates a Scatter plot Figure. This function supports multiple traces supplied to the 'data' parameter
+    Data should be supplied in the following format:
+    [[xdata_1,ydata_1, trace_name_1], [xdata_2, ydata_2, trace_name_2], ..., [xdata_n,ydata_n, trace_name_n]]
+
+    The 'trace_name' property is optional. If it is supplied, the trace in question will have its name set to the
+    value of 'trace_name'.
+    """
+    traces = []
+    for data_packet in data:
+        scatter = go.Scatter(x=data_packet[0], y=data_packet[1])
+        traces.append(scatter)
+        if len(data_packet) > 2:
+            scatter.name = data_packet[2]
+
+    return go.Figure(data=traces, layout=go.Layout(title=title, template=template))
+
+
+def createBarGraph(title: str, data: [[[float], [float], str]], template: str = 'plotly'):
+    """Creates a Bar Graph Figure. This function supports multiple traces supplied to the 'data' parameter
+        Data should be supplied in the following format:
+        [[xdata_1,ydata_1, trace_name_1], [xdata_2, ydata_2, trace_name_2], ..., [xdata_n,ydata_n, trace_name_n]]
+
+        The 'trace_name' property is optional. If it is supplied, the trace in question will have its name set to the
+        value of 'trace_name'.
+        """
+    traces = []
+    for data_packet in data:
+        bar = go.Bar(x=data_packet[0], y=data_packet[1])
+        traces.append(bar)
+        if len(data_packet) > 2:
+            bar.name = data_packet[2]
+
+    return go.Figure(data=traces, layout=go.Layout(title=title, template=template))
+
+
+def addDCCGraph(vs: VisualSystem, graphID: str, figure: go.Figure, classname: str = 'bg-white',
                 addBreak: bool = True):
     vs.displays.append(html.Div(
         className=classname,
         children=[
-            html.H5(title),
             dcc.Graph(id=graphID, figure=figure)
         ]
     ))

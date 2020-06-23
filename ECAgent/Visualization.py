@@ -10,6 +10,8 @@ from ECAgent.Core import System, Model
 external_stylesheets = ['https://rawgit.com/BrandonGower-Winter/ABMECS/master/Assets/VisualizerCustom.css',
                         'https://rawgit.com/BrandonGower-Winter/ABMECS/master/Assets/VisualizerBase.css']
 
+chart_height_default = 500
+
 
 class VisualSystem(System):
     """
@@ -133,7 +135,7 @@ def play_button_callback(n_clicks):
 # ############################## Graph and Parameter Functionality ##############################
 
 
-def createScatterPlot(title, data: [[[float], [float], str]], template: str = 'plotly'):
+def createScatterPlot(title, data: [[[float], [float], str]], template: str = 'plotly', height = chart_height_default):
     """Creates a Scatter plot Figure. This function supports multiple traces supplied to the 'data' parameter
     Data should be supplied in the following format:
     [[xdata_1,ydata_1, trace_name_1], [xdata_2, ydata_2, trace_name_2], ..., [xdata_n,ydata_n, trace_name_n]]
@@ -148,10 +150,10 @@ def createScatterPlot(title, data: [[[float], [float], str]], template: str = 'p
         if len(data_packet) > 2:
             scatter.name = data_packet[2]
 
-    return go.Figure(data=traces, layout=go.Layout(title=title, template=template))
+    return go.Figure(data=traces, layout=go.Layout(title=title, template=template, height=height))
 
 
-def createBarGraph(title: str, data: [[[float], [float], str]], template: str = 'plotly'):
+def createBarGraph(title: str, data: [[[float], [float], str]], template: str = 'plotly', height=chart_height_default):
     """Creates a Bar Graph Figure. This function supports multiple traces supplied to the 'data' parameter
         Data should be supplied in the following format:
         [[xdata_1,ydata_1, trace_name_1], [xdata_2, ydata_2, trace_name_2], ..., [xdata_n,ydata_n, trace_name_n]]
@@ -166,7 +168,33 @@ def createBarGraph(title: str, data: [[[float], [float], str]], template: str = 
         if len(data_packet) > 2:
             bar.name = data_packet[2]
 
-    return go.Figure(data=traces, layout=go.Layout(title=title, template=template))
+    return go.Figure(data=traces, layout=go.Layout(title=title, template=template, height=height))
+
+
+def createHeatMap(title: str, data: [[float]], xLabel: str = None, yLabel:str = None, zLabel: str = None,
+                  xData: [] = None, yData: [] = None, colorScale: [[float, str]] = None, template: str = 'plotly',
+                  height = chart_height_default):
+
+    """Creates a HeatMap Figure object using Plotly graph objects. The data object determines the dimensions of the
+    heatmap. The len(data) will be the height. The len(data[i]) will be the width of the heatmap. The Heatmap is
+    constructed in a bottom-up and left-to-right manner.
+
+    Discrete X and Y categories can be specified, this is done by supplying xData and yData with the X and Y category
+    name respectively. The len(xData) must be equal to the width of your Heatmap, while len(yData) must be equal to the
+    height of your Heatmap.
+
+    A custom color scale can be supplied, ensure that it follows the correct format and that the threshold values are
+    normalized and that the color scales are in rgb like so 'rgb(r_val, g_val, b_val)'"""
+
+    return go.Figure(data=go.Heatmap(
+        z=data,
+        x=xData,
+        y=yData,
+        colorbar={'title': zLabel},
+        colorscale=colorScale,
+        xgap=0.1,
+        ygap=0.1
+    ), layout=go.Layout(title=title, template=template, height=height))
 
 
 def addDCCGraph(vs: VisualSystem, graphID: str, figure: go.Figure, classname: str = 'bg-white',

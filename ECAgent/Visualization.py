@@ -33,6 +33,8 @@ class VisualInterface:
         self.model = model
         self.frameFreq = frameFreq
 
+        self.running = False  # Is used to determine whether a dynamic model is running or not.
+
         # Create app
         self.app = dash.Dash(
             self.name, meta_tags=[{"name": "viewport", "content": "width=device-width"}],
@@ -64,8 +66,13 @@ class VisualInterface:
                 html.H2(className="h2-title-mobile", children=self.name),
             ],
         )
-        # If framerate > 0, create the play, stop, and restart iteration info
+
+        # Add parameter header
+        addLabel(self, 'parameter-heading', 'Parameters:')
+
+        # If framerate > 0, create the play, stop, and restart buttons and Timestep label
         if not self.isStatic():
+            # Add Play/Restart/Step Buttons
             banner.children.append(
                 html.Div(
                     className='div-play-buttons',
@@ -73,20 +80,30 @@ class VisualInterface:
                     children=[
                         html.Button("Play", id='play-stop-button', n_clicks=0),
                         html.Button('Restart', id='restart-button', n_clicks=0),
-                        html.Button('Step', id='next-button', n_clicks=0)
+                        html.Button('Step', id='step-button', n_clicks=0),
+                        dcc.Interval(
+                            id='interval-component',
+                            interval=self.frameFreq,
+                            n_intervals=0
+                        )
                     ]
                 )
             )
 
-            # Apply Callbacks
+            # Add Timestep label
+            self.parameters.append(addLabel(self, 'timestep-label', 'Timestep: 0'))
+
+            # Apply Play/Stop Callback
             self.app.callback(
                 dash.dependencies.Output('play-stop-button', 'children'),
                 [dash.dependencies.Input('play-stop-button', 'n_clicks')]
-            )(play_button_callback)
-
-        # Do that here...
-        # Add parameter header
-        addLabel(self, 'parameter-heading', 'Parameters:')
+            )(self.play_button_callback)
+            # Apply executeSystems() on interval callback and Step button callback
+            self.app.callback(
+                dash.dependencies.Output('timestep-label', 'children'),
+                [dash.dependencies.Input('interval-component', 'n_intervals'),
+                 dash.dependencies.Input('step-button', 'n_clicks')]
+            )(self.execute_system_on_play_callback)
 
         self.app.layout = html.Div(
             children=[
@@ -117,16 +134,24 @@ class VisualInterface:
             ]
         )
 
+# #################################### Class Callbacks ###########################################
+    def play_button_callback(self, n_clicks):
+        if n_clicks % 2 == 0:
+            self.running = False
+            return 'Play'
+        else:
+            self.running = True
+            return 'Stop'
 
-# ####################################### Callbacks ###########################################
+    def execute_system_on_play_callback(self, n_intervals, n_clicks):
+        context = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+        if context == 'step-button':
+            if not self.running:
+                self.model.systemManager.executeSystems()
+        elif self.running:
+            self.model.systemManager.executeSystems()
 
-
-def play_button_callback(n_clicks):
-    if n_clicks % 2 == 0:
-        return 'Play'
-    else:
-        return 'Stop'
-
+        return "Timestep: {}".format(self.model.systemManager.timestep)
 
 # ############################## Graph and Parameter Functionality ##############################
 

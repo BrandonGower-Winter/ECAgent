@@ -5,7 +5,7 @@ from ECAgent.Visualization import *
 
 if __name__ == '__main__':
     model = Model()
-    vs = VisualInterface("Test Visual", model, frameFreq=0.1)
+    vs = VisualInterface("Test Visual", model, frameFreq=1000)
 
     heatmapData = []
 

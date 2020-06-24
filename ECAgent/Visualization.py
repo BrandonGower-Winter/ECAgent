@@ -113,7 +113,8 @@ class VisualSystem(System):
                         # Graph
                         html.Div(
                             className="eight columns card-left",
-                            children=self.displays
+                            children=self.displays,
+                            style={'margin-left': 0}
                         ),
                         dcc.Store(id="error", storage_type="memory"),
                     ],
@@ -135,7 +136,8 @@ def play_button_callback(n_clicks):
 # ############################## Graph and Parameter Functionality ##############################
 
 
-def createScatterPlot(title, data: [[[float], [float], str]], template: str = 'plotly', height = chart_height_default):
+def createScatterPlot(title, data: [[[float], [float], str]], template: str = 'plotly',
+                      height: int = chart_height_default):
     """Creates a Scatter plot Figure. This function supports multiple traces supplied to the 'data' parameter
     Data should be supplied in the following format:
     [[xdata_1,ydata_1, trace_name_1], [xdata_2, ydata_2, trace_name_2], ..., [xdata_n,ydata_n, trace_name_n]]
@@ -153,7 +155,8 @@ def createScatterPlot(title, data: [[[float], [float], str]], template: str = 'p
     return go.Figure(data=traces, layout=go.Layout(title=title, template=template, height=height))
 
 
-def createBarGraph(title: str, data: [[[float], [float], str]], template: str = 'plotly', height=chart_height_default):
+def createBarGraph(title: str, data: [[[float], [float], str]], template: str = 'plotly',
+                   height: int = chart_height_default):
     """Creates a Bar Graph Figure. This function supports multiple traces supplied to the 'data' parameter
         Data should be supplied in the following format:
         [[xdata_1,ydata_1, trace_name_1], [xdata_2, ydata_2, trace_name_2], ..., [xdata_n,ydata_n, trace_name_n]]
@@ -171,9 +174,9 @@ def createBarGraph(title: str, data: [[[float], [float], str]], template: str = 
     return go.Figure(data=traces, layout=go.Layout(title=title, template=template, height=height))
 
 
-def createHeatMap(title: str, data: [[float]], xLabel: str = None, yLabel:str = None, zLabel: str = None,
+def createHeatMap(title: str, data: [[float]], xLabel: str = None, yLabel: str = None, zLabel: str = None,
                   xData: [] = None, yData: [] = None, colorScale: [[float, str]] = None, template: str = 'plotly',
-                  height = chart_height_default):
+                  height: int = chart_height_default):
 
     """Creates a HeatMap Figure object using Plotly graph objects. The data object determines the dimensions of the
     heatmap. The len(data) will be the height. The len(data[i]) will be the width of the heatmap. The Heatmap is
@@ -203,7 +206,8 @@ def addDCCGraph(vs: VisualSystem, graphID: str, figure: go.Figure, classname: st
         className=classname,
         children=[
             dcc.Graph(id=graphID, figure=figure)
-        ]
+        ],
+        style={'height': figure.layout.height}
     ))
     if addBreak:
         vs.displays.append(html.Br())

@@ -3,44 +3,39 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
 
-from sys import maxsize
-from ECAgent.Core import System, Model
+from ECAgent.Core import Model
 
 # Can be used to customize CSS of Visualizer
 external_stylesheets = ['https://rawgit.com/BrandonGower-Winter/ABMECS/master/Assets/VisualizerCustom.css',
                         'https://rawgit.com/BrandonGower-Winter/ABMECS/master/Assets/VisualizerBase.css']
 
-chart_height_default = 500
 
-
-class VisualSystem(System):
+class VisualInterface:
     """
-    Ths is the base class for Visual Systems. It inherits from the ECAgent.Core.System class.
-    VisualSystems's utilize the dash package to create a WebApp to allow individuals to view the results in of their
-    model once completed or in real-time. By overriding the render() function you can create your own WebApps using any
-    of dash's components.
+    Ths is the base class for Visual Interfaces.
+    VisualInterface's utilize the dash package to create a WebApp to allow individuals to view the results of their
+    model once a run has been completed or in real-time.
 
-    There are a few things to note about the VisualSystem class:
-    * By calling the super.init() method, your WebApp will have features setup for you: Namely, play, stop, restart and
-    step. It'll also include a banner with your System's id as a name on it.
-    * A frameFreq of 0.0 means that your system is static and will only be called once every 'self.frequency' steps.
+    There are a few things to note about the VisualInterface class:
+    * By calling the VisualInterface.__init__() method, your WebApp will have features setup for you: Namely, play,
+    stop, restart and step. It'll also include a banner with your System's name as a title on it.
+    * A frameFreq of 0.0 means that your system is static and will only ever be constructed once.
     If you want a dynamic WebApp, you must set the frameFreq to some non-zero positive number. If your frameFreq is 0.0,
     the play, stop, restart and step buttons will not be added to your WebApp.
-    * The server will start once you initialize a VisualSystem.
-    * frameFreq is different to frequency. frameFreq is the rate at which SystemManage.executeSystems() method
-     is called while frequency is how how often your render() method will be called.
-     You can calculate how often your WebApp will update it's contents like so: frameFreq * frequency.
+    * The server/WebApp will start once you call the VisualInterface.app.run_server().
+    * The frameFreq property determines how frequently (in milliseconds) the SystemManager.executeSystems() method is
+    called and how often your your graphs will update.
     """
 
-    def __init__(self, id, model: Model, frameFreq: float = 0.0,
-                 priority: int = -1, start: int = 0, end: int = maxsize, frequency: int = 1):
-        super().__init__(id, model, priority, frequency, start, end)
+    def __init__(self, name, model: Model, frameFreq: float = 0.0):
 
+        self.name = name
+        self.model = model
         self.frameFreq = frameFreq
 
         # Create app
         self.app = dash.Dash(
-            self.id, meta_tags=[{"name": "viewport", "content": "width=device-width"}],
+            self.name, meta_tags=[{"name": "viewport", "content": "width=device-width"}],
             external_stylesheets=external_stylesheets
         )
         # Create parameter lists
@@ -65,12 +60,12 @@ class VisualSystem(System):
         banner = html.Div(
             className="app-banner row",
             children=[
-                html.H2(className="h2-title", children=self.id),
-                html.H2(className="h2-title-mobile", children=self.id),
+                html.H2(className="h2-title", children=self.name),
+                html.H2(className="h2-title-mobile", children=self.name),
             ],
         )
         # If framerate > 0, create the play, stop, and restart iteration info
-        if self.frameFreq > 0:
+        if not self.isStatic():
             banner.children.append(
                 html.Div(
                     className='div-play-buttons',
@@ -197,7 +192,7 @@ def createHeatMap(title: str, data: [[float]], xLabel: str = None, yLabel: str =
     ), layout=go.Layout(title=title, **layout_kwargs))
 
 
-def addDCCGraph(vs: VisualSystem, graphID: str, figure: go.Figure, classname: str = 'bg-white',
+def addDCCGraph(vs: VisualInterface, graphID: str, figure: go.Figure, classname: str = 'bg-white',
                 addBreak: bool = True):
     vs.displays.append(html.Div(
         className=classname,
@@ -210,7 +205,7 @@ def addDCCGraph(vs: VisualSystem, graphID: str, figure: go.Figure, classname: st
         vs.displays.append(html.Br())
 
 
-def addLabel(vs: VisualSystem, label_id, content):
+def addLabel(vs: VisualInterface, label_id, content):
     vs.parameters.append(
         html.Div(
             className="padding-top-bot",
@@ -221,9 +216,9 @@ def addLabel(vs: VisualSystem, label_id, content):
     )
 
 
-def addSlider(vs: VisualSystem, slider_id: str, slider_name: str, set_val, min_val: float = 0.0, max_val: float = 1.0,
-              step: float = 0.01):
-    """This function will add a slider to the parameter window of the visual system. It will also automatically add
+def addSlider(vs: VisualInterface, slider_id: str, slider_name: str, set_val, min_val: float = 0.0,
+              max_val: float = 1.0, step: float = 0.01):
+    """This function will add a slider to the parameter window of the visual interface. It will also automatically add
     a callback function that will supply your custom function 'set_val' with the value of the slider"""
 
     # Add html

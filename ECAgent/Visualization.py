@@ -217,7 +217,7 @@ def createHeatMap(title: str, data: [[float]], xLabel: str = None, yLabel: str =
     ), layout=go.Layout(title=title, **layout_kwargs))
 
 
-def addDCCGraph(vs: VisualInterface, graphID: str, figure: go.Figure, classname: str = 'bg-white',
+def addGraph(vs: VisualInterface, graphID: str, figure: go.Figure, classname: str = 'bg-white',
                 addBreak: bool = True):
     vs.displays.append(html.Div(
         className=classname,
@@ -226,6 +226,25 @@ def addDCCGraph(vs: VisualInterface, graphID: str, figure: go.Figure, classname:
         ],
         style={'height': figure.layout.height}
     ))
+    if addBreak:
+        vs.displays.append(html.Br())
+
+
+def addLiveGraph(vs: VisualInterface, graphID: str, height, callback, classname: str = 'bg-white',
+                addBreak: bool = True):
+    vs.displays.append(html.Div(
+        className=classname,
+        children=[
+            dcc.Graph(id=graphID)
+        ],
+        style={'height': height}
+    ))
+    # Add Callback
+    vs.app.callback(
+        dash.dependencies.Output(graphID, 'figure'),
+        [dash.dependencies.Input('interval-component', 'n_intervals')]
+    )(callback)
+
     if addBreak:
         vs.displays.append(html.Br())
 

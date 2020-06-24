@@ -217,8 +217,7 @@ def createHeatMap(title: str, data: [[float]], xLabel: str = None, yLabel: str =
     ), layout=go.Layout(title=title, **layout_kwargs))
 
 
-def addGraph(vs: VisualInterface, graphID: str, figure: go.Figure, classname: str = 'bg-white',
-                addBreak: bool = True):
+def addGraph(vs: VisualInterface, graphID: str, figure: go.Figure, classname: str = 'bg-white', addBreak: bool = True):
     vs.displays.append(html.Div(
         className=classname,
         children=[
@@ -231,7 +230,7 @@ def addGraph(vs: VisualInterface, graphID: str, figure: go.Figure, classname: st
 
 
 def addLiveGraph(vs: VisualInterface, graphID: str, height, callback, classname: str = 'bg-white',
-                addBreak: bool = True):
+                 addBreak: bool = True):
     vs.displays.append(html.Div(
         className=classname,
         children=[

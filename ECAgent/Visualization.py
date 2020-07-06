@@ -192,7 +192,7 @@ def createBarGraph(title: str, data: [[[float], [float], dict]], layout_kwargs: 
     return go.Figure(data=traces, layout=go.Layout(title=title, **layout_kwargs))
 
 
-def createHeatMap(title: str, data: [[float]], heatmap_kwargs:dict = {} , layout_kwargs: dict = {}):
+def createHeatMap(title: str, data: [[float]], heatmap_kwargs: dict = {}, layout_kwargs: dict = {}):
 
     """Creates a HeatMap Figure object using Plotly graph objects. The data object determines the dimensions of the
     heatmap. The len(data) will be the height. The len(data[i]) will be the width of the heatmap. The Heatmap is

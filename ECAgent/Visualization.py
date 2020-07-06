@@ -192,7 +192,7 @@ def createBarGraph(title: str, data: [[[float], [float], str]], **layout_kwargs)
     return go.Figure(data=traces, layout=go.Layout(title=title, **layout_kwargs))
 
 
-def createHeatMap(title: str, data: [[float]], xLabel: str = None, yLabel: str = None, zLabel: str = None,
+def createHeatMap(title: str, data: [[float]], zLabel: str = None,
                   xData: [] = None, yData: [] = None, colorScale: [[float, str]] = None, **layout_kwargs):
 
     """Creates a HeatMap Figure object using Plotly graph objects. The data object determines the dimensions of the
@@ -214,6 +214,22 @@ def createHeatMap(title: str, data: [[float]], xLabel: str = None, yLabel: str =
         colorscale=colorScale,
         xgap=0.1,
         ygap=0.1
+    ), layout=go.Layout(title=title, **layout_kwargs))
+
+
+def createContourMap(title: str, data: [[float]], contour_kwargs: dict = {}, layout_kwargs: dict = {}):
+
+    """Creates a Contour Figure object using Plotly graph objects. The data object determines the dimensions of the
+    Contour plot. The len(data) will be the height. The len(data[i]) will be the width of the contour plot.
+    The contour plot is constructed in a bottom-up and left-to-right manner.
+
+    The contour plot can be customized using the contour_kwargs dict. The dict will be supplied to the contour plot
+    graph object when it is created. See the plotly api for a list of customizable properties. This can be similarly be
+    applied to layout_kwargs which can change the layout of contour plot."""
+
+    return go.Figure(data=go.Contour(
+        z=data,
+        **contour_kwargs
     ), layout=go.Layout(title=title, **layout_kwargs))
 
 

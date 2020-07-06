@@ -28,8 +28,17 @@ if __name__ == '__main__':
 
     fig3 = createHeatMap('Test HeatMap',
                          data=heatmapData,
-                         xLabel="xPos", yLabel="yPos", zLabel="Fertility",
+                         zLabel="Fertility",
                          height=1000)
+
+    fig4 = createContourMap("Test Contour Map",
+                            [[10, 10.625, 12.5, 15.625, 20],
+                             [5.625, 6.25, 8.125, 11.25, 15.625],
+                             [2.5, 3.125, 5., 8.125, 12.5],
+                             [0.625, 1.25, 3.125, 6.25, 10.625],
+                             [0, 0.625, 2.5, 5.625, 10]],
+                            contour_kwargs={'colorscale': 'Electric'},
+                            layout_kwargs={'height': 1000})
 
     def createScatter(n_intervals):
         data = []
@@ -41,8 +50,8 @@ if __name__ == '__main__':
 
     addGraph(vs, 'test-bar', fig1)
     addLiveGraph(vs, 'test-scatter', 500, createScatter)
-    addGraph(vs, 'test-heatmap', fig3, addBreak=False)
-
+    addGraph(vs, 'test-heatmap', fig3)
+    addGraph(vs, 'test-contour', fig4, addBreak=False)
     addLabel(vs, 'test-label', 'Test Label...')
 
     def set_val(value):

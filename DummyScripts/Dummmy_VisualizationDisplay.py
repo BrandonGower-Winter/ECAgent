@@ -22,14 +22,15 @@ if __name__ == '__main__':
             heatmapData.append(row)
 
     fig1 = createBarGraph('Test Bar Graph', [
-        [[1, 2, 3], [4, 1, 2], 'Test 1'],
-        [[1, 2, 3], [1, 2, 3], 'Test 2']
+        [[1, 2, 3], [4, 1, 2], {'name': 'Test 1'}],
+        [[1, 2, 3], [1, 2, 3], {'name': 'Test 2'}]
     ])
 
     fig3 = createHeatMap('Test HeatMap',
                          data=heatmapData,
-                         zLabel="Fertility",
-                         height=1000)
+                         heatmap_kwargs={'colorbar': {'title': 'Heat'},
+                                         'xgap': 0.1, 'ygap': 0.1},
+                         layout_kwargs={'height': 1000})
 
     fig4 = createContourMap("Test Contour Map",
                             [[10, 10.625, 12.5, 15.625, 20],
@@ -46,7 +47,7 @@ if __name__ == '__main__':
             data.append(x)
 
         return createScatterPlot('Test Scatter Plot', [
-        [data, data, 'Example']], template='plotly_dark')
+        [data, data, {'name': 'Example'}]], layout_kwargs={'template': 'plotly_dark'})
 
     addGraph(vs, 'test-bar', fig1)
     addLiveGraph(vs, 'test-scatter', 500, createScatter)

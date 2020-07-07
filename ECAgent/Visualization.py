@@ -227,6 +227,22 @@ def createContourMap(title: str, data: [[float]], contour_kwargs: dict = {}, lay
     ), layout=go.Layout(title=title, **layout_kwargs))
 
 
+def createTable(title: str, headers: [str], cells: [[]], header_kwargs: dict = {}, cell_kwargs: dict = {},
+                layout_kwargs: dict = {}):
+    """Creates a Table figure using Plotly graph objects. Table headers and cells need to be supplied separately.
+    The data format for the headers and cells are as follows:
+    Headers: [hdr1, hdr2,...,hdrN]
+    Cells: [column1_data, column2_data,..., columnN_data].
+
+    The Table headers and cells are customized separately using the header_kwargs and cell_kwargs parameters. The
+    layout of the Table can also be customized using the layout_kwargs."""
+
+    return go.Figure(data=go.Table(
+        header=dict(values=headers, **header_kwargs),
+        cells=dict(values=cells, **cell_kwargs)
+    ), layout=go.Layout(title=title, **layout_kwargs))
+
+
 def addGraph(vs: VisualInterface, graphID: str, figure: go.Figure, classname: str = 'bg-white', addBreak: bool = True):
     vs.displays.append(html.Div(
         className=classname,

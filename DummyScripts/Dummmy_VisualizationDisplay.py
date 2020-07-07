@@ -44,6 +44,12 @@ if __name__ == '__main__':
     addRect(fig4, 2, 2, width=2, fillcolor='red', opacity=0.5)
     addCircle(fig3, 10, 10, radius=5, opacity=0.5)
 
+    tbl1 = createTable('Test table',
+                       ['A Scores', 'B Scores'],
+                       [[100, 90, 80, 90],[95, 85, 75, 95]],
+                       header_kwargs=dict(line_color='darkslategray', fill_color='lightskyblue', align='left'),
+                       cell_kwargs=dict(line_color='darkslategray', fill_color='lightcyan', align='left'))
+
     def createScatter(n_intervals):
         data = []
         for x in range(model.systemManager.timestep):
@@ -55,7 +61,8 @@ if __name__ == '__main__':
     addGraph(vs, 'test-bar', fig1)
     addLiveGraph(vs, 'test-scatter', 500, createScatter)
     addGraph(vs, 'test-heatmap', fig3)
-    addGraph(vs, 'test-contour', fig4, addBreak=False)
+    addGraph(vs, 'test-contour', fig4)
+    addGraph(vs, 'test-table', tbl1, addBreak=False)
     addLabel(vs, 'test-label', 'Test Label...')
 
     def set_val(value):

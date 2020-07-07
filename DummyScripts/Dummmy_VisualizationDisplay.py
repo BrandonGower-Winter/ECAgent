@@ -42,7 +42,7 @@ if __name__ == '__main__':
                             layout_kwargs={'height': 1000})
 
     addRect(fig4, 2, 2, width=2, fillcolor='red', opacity=0.5)
-
+    addCircle(fig3, 10, 10, radius=5, opacity=0.5)
 
     def createScatter(n_intervals):
         data = []

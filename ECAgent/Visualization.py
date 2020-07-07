@@ -313,3 +313,20 @@ def addRect(fig: go.Figure, x, y, width=1, height=1, **shape_kwargs):
         type='rect',
         **shape_kwargs
     )
+
+
+def addCircle(fig: go.Figure, x, y, radius=0.5, **shape_kwargs):
+    """Adds a circle to Figure 'fig'. x & y are the coordinates of the center of the circle"""
+    x0 = x - radius
+    x1 = x + radius
+    y0 = y - radius
+    y1 = y + radius
+
+    fig.add_shape(
+        x0=x0,
+        x1=x1,
+        y0=y0,
+        y1=y1,
+        type='circle',
+        **shape_kwargs
+    )

@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="ECAgent",
-    version="0.0.5",
+    version="0.0.6",
     author="Brandon Gower-Winter",
     author_email="brandongowerwinter@gmail.com",
     description="An Agent-based Modelling framework based on the Entity-Component-System architectural pattern.",

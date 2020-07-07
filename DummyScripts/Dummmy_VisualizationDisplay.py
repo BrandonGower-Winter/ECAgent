@@ -41,6 +41,9 @@ if __name__ == '__main__':
                             contour_kwargs={'colorscale': 'Electric'},
                             layout_kwargs={'height': 1000})
 
+    addRect(fig4, 2, 2, width=2, fillcolor='red', opacity=0.5)
+
+
     def createScatter(n_intervals):
         data = []
         for x in range(model.systemManager.timestep):

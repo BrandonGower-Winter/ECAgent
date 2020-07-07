@@ -299,3 +299,17 @@ def addSlider(vs: VisualInterface, slider_id: str, slider_name: str, set_val, mi
 
     vs.app.callback(dash.dependencies.Output(slider_id + '-title', 'children'),
                     [dash.dependencies.Input(slider_id, 'value')])(set_slider_val)
+
+
+def addRect(fig: go.Figure, x, y, width=1, height=1, **shape_kwargs):
+    """Adds a rectangle to Figure 'fig'. x & y refer to the coordinates of the bottom left corner of the rectangle."""
+    x1 = x + width
+    y1 = y + height
+    fig.add_shape(
+        x0=x,
+        y0=y,
+        x1=x1,
+        y1=y1,
+        type='rect',
+        **shape_kwargs
+    )

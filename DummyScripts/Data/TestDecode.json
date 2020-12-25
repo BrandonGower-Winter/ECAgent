@@ -1,5 +1,5 @@
 {
-  "iterations" : 10,
+  "iterations" : 20,
   "epochs" : 0,
   "custom_params" : {},
 
@@ -9,5 +9,17 @@
     "params" : {
       "seed" : 123456
     }
-  }
+  },
+
+  "systems" : [
+      {
+        "name" :  "TestSystem",
+        "module" : "__main__",
+        "params" :
+        {
+          "id" : "testsys",
+          "priority" : 0
+        }
+      }
+    ]
 }

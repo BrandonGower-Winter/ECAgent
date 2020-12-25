@@ -50,6 +50,13 @@ class JsonDecoder(Decoder):
             generatedModel = modelClass.decode(data['model']['params'])
 
             # Add Systems
+            for systemDict in data['systems']:
+                systemClass = JsonDecoder.str_to_class(systemDict['name'], systemDict['module'])
+                # Add reference to the model in the systemDict so that it can be used when creating the system
+                systemDict['params']['model'] = generatedModel
+
+                system = systemClass.decode(systemDict['params'])
+                generatedModel.systemManager.addSystem(system)
 
             # Add Agents
 

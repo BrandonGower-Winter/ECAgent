@@ -58,10 +58,15 @@ if __name__ == '__main__':
         return createScatterPlot('Test Scatter Plot', [
         [data, data, {'name': 'Example'}]], layout_kwargs={'template': 'plotly_dark'})
 
+    fig5 = createPieChart('Pie Chart', ['Test 1', 'Test 2', 'Test 3'], [50, 10, 40],
+                          pie_kwargs=dict(marker=dict(colors=['gold', 'darkorange', 'green'],
+                                                      line=dict(color='#000000', width=2))))
+
     addGraph(vs, 'test-bar', fig1)
     addLiveGraph(vs, 'test-scatter', 500, createScatter)
     addGraph(vs, 'test-heatmap', fig3)
     addGraph(vs, 'test-contour', fig4)
+    addGraph(vs, 'test-pie', fig5)
     addGraph(vs, 'test-table', tbl1, addBreak=False)
     addLabel(vs, 'test-label', 'Test Label...')
 

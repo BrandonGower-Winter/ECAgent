@@ -243,6 +243,19 @@ def createTable(title: str, headers: [str], cells: [[]], header_kwargs: dict = {
     ), layout=go.Layout(title=title, **layout_kwargs))
 
 
+def createPieChart(title: str, labels: [str], values: [float], pie_kwargs: dict = {}, layout_kwargs: dict = {}):
+    """ Creates a Pie Chart Figure using Plotly graph objects. Chart labels and values need to be supplied separately.
+    The data format for the labels and values are as follows:
+    Labels: [lbl1, lbl2,..., lblN]
+    Values: [val1, val2,..., valN]
+
+    The Pie chart can be customized using the pie_kwargs parameter. The layout of the Pie chart can be customized using
+    the layout_kwargs parameter."""
+
+    return go.Figure(data=go.Pie(labels=labels, values=values, **pie_kwargs),
+                     layout=go.Layout(title=title, **layout_kwargs))
+
+
 def addGraph(vs: VisualInterface, graphID: str, figure: go.Figure, classname: str = 'bg-white', addBreak: bool = True):
     vs.displays.append(html.Div(
         className=classname,

@@ -1,0 +1,13 @@
+{
+  "iterations" : 10,
+  "epochs" : 0,
+  "custom_params" : {},
+
+  "model" : {
+    "name" : "TestModel",
+    "module" : "__main__",
+    "params" : {
+      "seed" : 123456
+    }
+  }
+}

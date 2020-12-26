@@ -1,5 +1,5 @@
 {
-  "iterations" : 20,
+  "iterations" : 10,
   "epochs" : 0,
   "custom_params" : {},
 
@@ -21,5 +21,21 @@
           "priority" : 0
         }
       }
-    ]
+    ],
+
+  "agents" : [
+    {
+      "name" : "TestAgent",
+      "module" : "__main__",
+      "id_prefix" : "ta",
+      "number" : 10,
+      "components" :
+        {
+          "TestComponent" :
+          {
+            "wealth" : 0
+          }
+        }
+    }
+  ]
 }

@@ -59,5 +59,16 @@ class JsonDecoder(Decoder):
                 generatedModel.systemManager.addSystem(system)
 
             # Add Agents
+            for agentDict in data['agents']:
+                agentClass = JsonDecoder.str_to_class(agentDict['name'], agentDict['module'])
+
+                # Add reference to the model in systemDict so that it can be used when creating the agents
+                agentDict['model'] = generatedModel
+
+                # Create agents
+                for i in range(0, agentDict['number']):
+                    # Add the index of the agent to the agentDict
+                    agentDict['agent_index'] = i
+                    generatedModel.environment.addAgent(agentClass.decode(agentDict))
 
             return generatedModel

@@ -1,4 +1,4 @@
-from ECAgent.Core import Model, System
+from ECAgent.Core import *
 from ECAgent.Decode import IDecodable,JsonDecoder
 
 
@@ -27,6 +27,26 @@ class TestSystem(System, IDecodable):
         return TestSystem(**params)
 
 
+class TestComponent(Component):
+
+    def __init__(self, agent, model, wealth):
+        super().__init__(agent, model)
+
+        self.wealth = model.random.randrange(0,10)
+
+
+class TestAgent(Agent, IDecodable):
+
+    def __init__(self, id: str, model: Model, wealth):
+        super().__init__(id, model)
+        self.addComponent(TestComponent(self, model, wealth))
+
+    @staticmethod
+    def decode(params: dict):
+        return TestAgent(params['id_prefix'] + str(params['agent_index']), params['model'],
+                         params['components']['TestComponent']['wealth'])
+
+
 if __name__ == '__main__':
     decoder = JsonDecoder()
     model = decoder.decode('Data/TestDecode.json')
@@ -40,3 +60,6 @@ if __name__ == '__main__':
 
     for x in range(0, decoder.iterations):
         model.systemManager.executeSystems()
+
+    for agent in model.environment.agents:
+        print(agent, ":", model.environment.agents[agent][TestComponent].wealth)

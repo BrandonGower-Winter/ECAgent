@@ -3,9 +3,12 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open("package.json", 'r') as fh:
+    version_number = fh.read()
+
 setup(
     name="ECAgent",
-    version="0.0.6",
+    version='0.0.6',
     author="Brandon Gower-Winter",
     author_email="brandongowerwinter@gmail.com",
     description="An Agent-based Modelling framework based on the Entity-Component-System architectural pattern.",

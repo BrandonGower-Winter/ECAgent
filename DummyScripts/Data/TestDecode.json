@@ -5,7 +5,6 @@
 
   "model" : {
     "name" : "TestModel",
-    "module" : "__main__",
     "params" : {
       "seed" : 123456
     }
@@ -14,7 +13,6 @@
   "systems" : [
       {
         "name" :  "TestSystem",
-        "module" : "__main__",
         "params" :
         {
           "id" : "testsys",
@@ -26,7 +24,6 @@
   "agents" : [
     {
       "name" : "TestAgent",
-      "module" : "__main__",
       "id_prefix" : "ta",
       "number" : 10,
       "components" :

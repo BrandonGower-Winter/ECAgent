@@ -46,12 +46,15 @@ class JsonDecoder(Decoder):
             self.custom_params = data['custom_params']
 
             # Create Base Model
-            modelClass = JsonDecoder.str_to_class(data['model']['name'], data['model']['module'])
+            module_name = data['model']['module'] if 'module' in data['model'] else '__main__'
+
+            modelClass = JsonDecoder.str_to_class(data['model']['name'], module_name)
             generatedModel = modelClass.decode(data['model']['params'])
 
             # Add Systems
             for systemDict in data['systems']:
-                systemClass = JsonDecoder.str_to_class(systemDict['name'], systemDict['module'])
+                module_name = systemDict['module'] if 'module' in systemDict else '__main__'
+                systemClass = JsonDecoder.str_to_class(systemDict['name'], module_name)
                 # Add reference to the model in the systemDict so that it can be used when creating the system
                 systemDict['params']['model'] = generatedModel
 
@@ -60,7 +63,8 @@ class JsonDecoder(Decoder):
 
             # Add Agents
             for agentDict in data['agents']:
-                agentClass = JsonDecoder.str_to_class(agentDict['name'], agentDict['module'])
+                module_name = agentDict['module'] if 'module' in agentDict else '__main__'
+                agentClass = JsonDecoder.str_to_class(agentDict['name'], module_name)
 
                 # Add reference to the model in systemDict so that it can be used when creating the agents
                 agentDict['model'] = generatedModel

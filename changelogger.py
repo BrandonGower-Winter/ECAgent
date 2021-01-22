@@ -73,7 +73,7 @@ def format_commits(title, list_of_commits):
         content = '##' + title + ':\n\n'
 
         for commit in list_of_commits:
-            content += '- ' + commit[0] + '[' + commit[1] + '](' + repo_url + commit[1] + ')\n'
+            content += '- ' + commit[0] + ' ([' + commit[1][0:6] + '](' + repo_url + commit[1] + '))\n'
 
     return content
 
@@ -87,8 +87,8 @@ if __name__ == '__main__':
 
     package_data['version'] = version
 
-    with open('package.json', 'w+') as json_file:
-        json_file.write(json.dumps(package_data, indent=4))
+    #with open('package.json', 'w+') as json_file:
+        #json_file.write(json.dumps(package_data, indent=4))
 
     # Write new changelog to CHANGELOG.md
     with open('CHANGELOG.md', 'w+') as changelog_file:

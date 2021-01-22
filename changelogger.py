@@ -6,7 +6,7 @@ git_log_command = ['git', 'log', '--format=%B%H--DELIM--']
 git_describe_command = ['git', 'describe', '--long']
 
 git_tag_command = ['git', 'tag', '-a']
-git_stage_command = ['git', 'add' 'package.json', 'CHANGELOG.md']
+git_stage_command = ['git', 'add', 'package.json', 'CHANGELOG.md']
 git_commit_command = ['git', 'commit', '-m']
 
 repo_url = 'https://github.com/BrandonGower-Winter/ABMECS/commit/'

@@ -17,8 +17,8 @@ class IDecodable:
 
 class Decoder:
     @staticmethod
-    def str_to_class(class_name, module_name):
-        return getattr(sys.modules[module_name], class_name)
+    def str_to_class(class_name: str, module_name: str):
+        return getattr(sys.modules[module_name], class_name, None)
 
     def __init__(self):
         self.iterations = -1

@@ -1,8 +1,10 @@
 import json
 import subprocess
+import sys
 
 git_log_command = ['git', 'log', '--format=%B%H--DELIM--']
 repo_url = 'https://github.com/BrandonGower-Winter/ABMECS/commit/'
+
 
 def generate_changelog(version_type=2):
     process = subprocess.Popen(git_log_command,
@@ -33,14 +35,12 @@ def generate_changelog(version_type=2):
         except ValueError:
             continue
 
-
     # Get Version Data
     with open('package.json') as json_file:
         data = json.load(json_file)
         version = adjust_version(data['version'].split('.'), version_type)
 
-    changelog = format_changelog_markdown(version, features, fixes, performance)
-    print(changelog)
+        return version, format_changelog_markdown(version, features, fixes, performance)
 
 
 def adjust_version(version, version_type):
@@ -60,7 +60,7 @@ def format_changelog_markdown(version, features, fixes, performance):
     # Add Features
     changelog += format_commits('Features', features)
     # Add Fixes
-    changelog+= format_commits('Fixes', fixes)
+    changelog += format_commits('Fixes', fixes)
     # Add Performance
     changelog += format_commits('Performance', performance)
 
@@ -79,4 +79,17 @@ def format_commits(title, list_of_commits):
 
 
 if __name__ == '__main__':
-    generate_changelog()
+    version, changelog = generate_changelog(int(sys.argv[1]))
+
+    # Update version number in package file
+    with open('package.json') as json_file:
+        package_data = json.load(json_file)
+
+    package_data['version'] = version
+
+    with open('package.json', 'w+') as json_file:
+        json_file.write(json.dumps(package_data, indent=4))
+
+    # Write new changelog to CHANGELOG.md
+    with open('CHANGELOG.md', 'w+') as changelog_file:
+        changelog_file.write(changelog)

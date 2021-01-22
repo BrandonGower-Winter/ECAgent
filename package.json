@@ -1,14 +1,14 @@
 {
-    "description": "An Agent-based Modelling framework based on the Entity-Component-System architectural pattern.", 
-    "author": "Brandon Gower-Winter", 
-    "author_email": "brandongowerwinter@gmail.com", 
-    "url": "https://github.com/BrandonGower-Winter/ABMECS", 
-    "version": "0.0.7", 
-    "python_requires": ">=3.6", 
+    "description": "An Agent-based Modelling framework based on the Entity-Component-System architectural pattern.",
+    "author": "Brandon Gower-Winter",
+    "author_email": "brandongowerwinter@gmail.com",
+    "url": "https://github.com/BrandonGower-Winter/ABMECS",
+    "version": "0.1.0",
+    "python_requires": ">=3.6",
     "classifiers": [
-        "Programming Language :: Python :: 3", 
-        "License :: OSI Approved :: MIT License", 
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent"
-    ], 
+    ],
     "name": "ECAgent"
 }

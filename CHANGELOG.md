@@ -1,11 +1,8 @@
-#Version: 0.0.7
+#Version: 0.1.0
 
 ##Features:
 
--  changelogger.py will now automatically stage, commit and tag new versions. ([15fd74](https://github.com/BrandonGower-Winter/ABMECS/commit/15fd74bd64e7ef64a3829f7fc4ab37f28093f069))
--  Changelogger.py now returns new version number as well as the markdown generated changelog as output. Will only update the package.json file and CHANGELOG.md file if it is run as the main application ([7c03c6](https://github.com/BrandonGower-Winter/ABMECS/commit/7c03c6a8182fcff3d02d618adea89d2ef949a892))
-##Fixes:
-
-- Fixed issue where the lack of tag message was causing the 'git tag' command to fail ([650368](https://github.com/BrandonGower-Winter/ABMECS/commit/650368512eaff2f8fe8eeb246d33e3eb3847b836))
-- Fixed an issue where the changelogger was not adding the pakcage.json file ([703d6f](https://github.com/BrandonGower-Winter/ABMECS/commit/703d6f664685ad35070d84575b3bfd04a5b6b03c))
--  Modified changelogger to correctly truncate commit sha and add brackets around said sha. ([b118ce](https://github.com/BrandonGower-Winter/ABMECS/commit/b118ceb508aa074c8d9efd1314f0862d27ff4b70))
+- Added JsonDecoder class. This class turns json data into an executable model. See the Wiki and Tutorials for more information. ([28b8e2](https://github.com/BrandonGower-Winter/ABMECS/commit/28b8e2874f5f8fbd44f1874a405aff5507f9c06c))
+- Added Decoder base class. This the class that all decoders inherit from and can used to create your own custom decoders. ([7b5607](https://github.com/BrandonGower-Winter/ABMECS/commit/7b5607f18fc9f9e57113be9ad2d4468172e7d7fd))
+-  Added IDecodable interface. This class needs to be inherited from if you want a Decoder to pick up your custom classes. ([d4a1cb](https://github.com/BrandonGower-Winter/ABMECS/commit/d4a1cb4e5718c336556b7dd09b067af5ea6b93a9))
+- Added 3 commands to the makefile to allow for automated versioning of patches, minor updates and major updates respectively. They are 'prepare_patch', 'prepare_minor_update' and 'prepare_major_update' respectively. ([a4146a](https://github.com/BrandonGower-Winter/ABMECS/commit/a4146aef23e0a4161da3a37df93082192dc2c394))

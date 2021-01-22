@@ -28,6 +28,15 @@ dist: package
 upload: dist
 	$(ACTIVATE) twine upload --repository pypi dist/*
 
+prepare_patch:
+	$(ACTIVATE) python changelogger.py 2
+
+prepare_minor_update:
+	$(ACTIVATE) python changelogger.py 1
+
+prepare_major_update:
+	$(ACTIVATE) python changelogger.py 0
+
 clean:
 	rm -rf venv
 	rm -rf dist

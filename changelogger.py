@@ -3,10 +3,23 @@ import subprocess
 import sys
 
 git_log_command = ['git', 'log', '--format=%B%H--DELIM--']
+git_describe_command = ['git', 'describe', '--long']
+
+git_tag_command = ['git', 'tag', '-a']
+git_stage_command = ['git', 'add' 'package.json', 'CHANGELOG.md']
+git_commit_command = ['git', 'commit', '-m']
+
 repo_url = 'https://github.com/BrandonGower-Winter/ABMECS/commit/'
 
 
 def generate_changelog(version_type=2):
+    vprocess = subprocess.Popen(git_describe_command,
+                               stdout=subprocess.PIPE)
+
+    tag = vprocess.communicate()[0].decode('UTF-8').split('-')[0]
+
+    git_log_command.insert(2, tag + '..HEAD')
+
     process = subprocess.Popen(git_log_command,
                                stdout=subprocess.PIPE)
 
@@ -22,13 +35,13 @@ def generate_changelog(version_type=2):
         try:
             msg, sha = commit.split('\n')
 
-            if (msg.startswith('feat:')):
+            if msg.startswith('feat:'):
                 msg = msg.replace('feat:', '')
                 features.append((msg, sha))
-            elif (msg.startswith('fix:')):
+            elif msg.startswith('fix:'):
                 msg = msg.replace('fix:', '')
                 fixes.append((msg, sha))
-            elif (msg.startswith('perf:')):
+            elif msg.startswith('perf:'):
                 msg = msg.replace('perf:', '')
                 performance.append((msg, sha))
 
@@ -87,9 +100,21 @@ if __name__ == '__main__':
 
     package_data['version'] = version
 
-    #with open('package.json', 'w+') as json_file:
-        #json_file.write(json.dumps(package_data, indent=4))
+    with open('package.json', 'w+') as json_file:
+        json_file.write(json.dumps(package_data, indent=4))
 
     # Write new changelog to CHANGELOG.md
     with open('CHANGELOG.md', 'w+') as changelog_file:
         changelog_file.write(changelog)
+
+    # Stage CHANGELOG and package.json
+    subprocess.Popen(git_stage_command).communicate()
+
+    # Commit CHANGELOG and package.json
+    git_commit_command.append('"auto: Created package data for version: ' + version + ' and generated the accompanying '
+                                                                                      'CHANGELOG.md."')
+    subprocess.Popen(git_commit_command).communicate()
+
+    # Add version tag to tag command and run it
+    git_tag_command.append('v' + version)
+    subprocess.Popen(git_tag_command).communicate()

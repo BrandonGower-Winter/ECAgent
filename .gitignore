@@ -130,3 +130,7 @@ dmypy.json
 
 # Pycharm
 .idea/
+
+# Generated Changelog
+CHANGELOG.md
+package.json

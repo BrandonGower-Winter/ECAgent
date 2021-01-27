@@ -44,11 +44,11 @@ class LineWorld(Environment):
 
         super().__init__(model, id=id)
         self.width = width
-        self.cells = []
+        self.cells = numpy.empty(shape=(width,), dtype='object')
 
         # Create cells
         for x in range(width):
-            self.cells.append(Agent('CELL_' + str(x), self.model))
+            self.cells[x] = Agent('CELL_' + str(x), self.model)
             self.cells[x].addComponent(PositionComponent(self.cells[x], self.model, x=x))
 
     def addAgent(self, agent: Agent, xPos: int = 0):
@@ -131,13 +131,13 @@ class GridWorld(Environment):
         super().__init__(model, id=id)
         self.width = width
         self.height = height
-        self.cells = []
+        self.cells = numpy.empty(shape=(width * height,), dtype='object')
 
         # Create cells
         for y in range(height):
             for x in range(width):
                 agentID = discreteGridPosToID(x, y, self.width)
-                self.cells.append(Agent('CELL_' + str(agentID), self.model))
+                self.cells[agentID] = Agent('CELL_' + str(agentID), self.model)
                 self.cells[agentID].addComponent(PositionComponent(self.cells[agentID], self.model, x=x, y=y))
 
     def addAgent(self, agent: Agent, xPos: int = 0, yPos: int = 0):
@@ -228,14 +228,14 @@ class CubeWorld(Environment):
         self.width = width
         self.height = height
         self.depth = depth
-        self.cells = []
+        self.cells = numpy.empty(shape=(width * height * depth,), dtype='object')
 
         # Create cells
         for z in range(depth):
             for y in range(height):
                 for x in range(width):
                     agentID = discreteGridPosToID(x, y, width, z, height)
-                    self.cells.append(Agent('CELL_' + str(agentID), self.model))
+                    self.cells[agentID] = Agent('CELL_' + str(agentID), self.model)
                     self.cells[agentID].addComponent(PositionComponent(self.cells[agentID], model, x, y, z))
 
     def addAgent(self, agent: Agent, xPos: int = 0, yPos: int = 0, zPos: int = 0.0):

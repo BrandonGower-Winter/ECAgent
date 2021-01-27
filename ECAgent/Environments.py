@@ -1,5 +1,3 @@
-import numpy
-
 from ECAgent.Core import Agent, Environment, Component, Model
 
 
@@ -44,12 +42,14 @@ class LineWorld(Environment):
 
         super().__init__(model, id=id)
         self.width = width
-        self.cells = numpy.empty(shape=(width,), dtype='object')
+
+        def generate_cell(x):
+            agent = Agent('CELL_' + str(x), self.model)
+            agent.addComponent(PositionComponent(agent, self.model, x=x))
+            return agent
 
         # Create cells
-        for x in range(width):
-            self.cells[x] = Agent('CELL_' + str(x), self.model)
-            self.cells[x].addComponent(PositionComponent(self.cells[x], self.model, x=x))
+        self.cells = [generate_cell(x) for x in range(width)]
 
     def addAgent(self, agent: Agent, xPos: int = 0):
         """Adds an agent to the environment. Overrides the base class function.
@@ -131,14 +131,15 @@ class GridWorld(Environment):
         super().__init__(model, id=id)
         self.width = width
         self.height = height
-        self.cells = numpy.empty(shape=(width * height,), dtype='object')
+
+        def generate_cell(x, y):
+            agentID = discreteGridPosToID(x, y, self.width)
+            agent = Agent('CELL_' + str(agentID), self.model)
+            agent.addComponent(PositionComponent(agent, self.model, x=x, y=y))
+            return agent
 
         # Create cells
-        for y in range(height):
-            for x in range(width):
-                agentID = discreteGridPosToID(x, y, self.width)
-                self.cells[agentID] = Agent('CELL_' + str(agentID), self.model)
-                self.cells[agentID].addComponent(PositionComponent(self.cells[agentID], self.model, x=x, y=y))
+        self.cells = [generate_cell(x, y) for y in range(height) for x in range(width)]
 
     def addAgent(self, agent: Agent, xPos: int = 0, yPos: int = 0):
         """Adds an agent to the environment. Overrides the base class function.
@@ -228,15 +229,15 @@ class CubeWorld(Environment):
         self.width = width
         self.height = height
         self.depth = depth
-        self.cells = numpy.empty(shape=(width * height * depth,), dtype='object')
+
+        def generate_cell(x, y, z):
+            agentID = discreteGridPosToID(x, y, width, z, height)
+            agent = Agent('CELL_' + str(agentID), self.model)
+            agent.addComponent(PositionComponent(agent, model, x, y, z))
+            return agent
 
         # Create cells
-        for z in range(depth):
-            for y in range(height):
-                for x in range(width):
-                    agentID = discreteGridPosToID(x, y, width, z, height)
-                    self.cells[agentID] = Agent('CELL_' + str(agentID), self.model)
-                    self.cells[agentID].addComponent(PositionComponent(self.cells[agentID], model, x, y, z))
+        self.cells = [generate_cell(x, y, z) for z in range(depth) for y in range(height) for x in range(width)]
 
     def addAgent(self, agent: Agent, xPos: int = 0, yPos: int = 0, zPos: int = 0.0):
         """Adds an agent to the environment. Overrides the base class function.

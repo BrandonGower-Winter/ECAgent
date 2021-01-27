@@ -6,6 +6,8 @@ class Model:
     """ This is the base class for the ABM model.
     You inherit this class to again access to all of the ECS functionality """
 
+    __slots__ = ['environment', 'systemManager', 'random']
+
     def __init__(self, seed: int = None):
 
         self.environment = Environment(self)
@@ -21,6 +23,8 @@ class Model:
 class Component:
     """This is the base class for Components"""
 
+    __slots__ = ['agent', 'model']
+
     def __init__(self, agent, model: Model):
         self.agent = agent
         self.model = model
@@ -29,6 +33,8 @@ class Component:
 class Agent:
     """This is the base class for Agent objects.
     Agents can be thought of as Entities"""
+
+    __slots__ = ['id', 'model', 'components']
 
     def __init__(self, id: str, model: Model):
         self.id = id
@@ -81,6 +87,8 @@ class Agent:
 class System:
     """This is the base class for the systems in the ECS architecture"""
 
+    __slots__ = ['id', 'model', 'priority', 'frequency', 'start', 'end']
+
     def __init__(self, id: str, model: Model, priority: int = 0,
                  frequency: int = 1, start=0, end=maxsize):
         self.id = id
@@ -100,6 +108,8 @@ class System:
 class SystemManager:
     """ This class is responsible for managing the adding,
     removing and executing Systems """
+
+    __slots__ = ['timestep', 'systems', 'executionQueue', 'componentPools', 'model']
 
     def __init__(self, model: Model):
         self.timestep = 0
@@ -173,6 +183,8 @@ class SystemManager:
 class Environment(Agent):
     """This is the base environment class.
     It is a void environment which means that is has no spacial properties"""
+
+    __slots__ = ['agents']
 
     def __init__(self, model, id: str = 'ENVIRONMENT'):
         super().__init__(id, model)

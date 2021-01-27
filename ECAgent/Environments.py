@@ -12,6 +12,8 @@ class PositionComponent(Component):
     This component can be used to store the position of an Agent in a 1-3D world.
     It is used by the LineWorld, GridWorld and CubeWorld classes to do exactly that."""
 
+    __slots__ = ['x', 'y', 'z']
+
     def __init__(self, agent, model, x: float = 0.0, y: float = 0.0, z: float = 0.0) -> None:
         super().__init__(agent, model)
         self.x = x

@@ -39,15 +39,13 @@ class TestLineWorld:
         model = Model()
         env = LineWorld(5, model)
         assert env.width == 5
-        assert len(env.cells) == 5
+        assert len(env.cells['pos']) == 5
         assert env.id == 'ENVIRONMENT'
         assert env.model is model
         assert len(env.agents) == 0
 
-        for i in range(len(env.cells)):
-            assert env.cells[i].model is model
-            assert env.cells[i].id == 'CELL_' + str(i)
-            assert env.cells[i].hasComponent(PositionComponent) and env.cells[i][PositionComponent].x == i
+        for i in range(len(env.cells['pos'])):
+            assert env.cells['pos'][i] == i
 
     def test_addAgent(self):
         model = Model()
@@ -82,15 +80,14 @@ class TestLineWorld:
 
     def test_addCellComponent(self):
 
-        def generator(cell: Agent):
-            cell.addComponent(Component(cell, cell.model))
+        def generator(id: int, df):
+            return id
 
         env = LineWorld(5, Model())
 
-        env.addCellComponent(generator)
+        env.addCellComponent('test_comp', generator)
 
-        for cell in env.cells:
-            assert cell.hasComponent(Component)
+        assert len(env.cells['test_comp']) == 5
 
     def test_removeAgent(self):
         model = Model()
@@ -111,17 +108,9 @@ class TestLineWorld:
         env = LineWorld(5, temp)
 
         assert env.model is temp
-        # Test for all cells:
-        for x in range(5):
-            assert env.cells[x].model is temp
 
         env.setModel(model)
         assert env.model is model
-
-        # Test for all model for all cells
-        for x in range(5):
-            assert env.cells[x].model is model
-            assert env.cells[x].hasComponent(PositionComponent) and env.cells[x][PositionComponent].x == x
 
     def test_getAgentsAt(self):
         model = Model()
@@ -153,22 +142,22 @@ class TestLineWorld:
         lineworld = LineWorld(5, model)
 
         # Test default case
-        neighbours = lineworld.getNeighbours(lineworld.getCell(2))
-        assert neighbours[0] is lineworld.cells[1]
-        assert neighbours[1] is lineworld.cells[3]
+        neighbours = lineworld.getNeighbours(2)
+        assert neighbours[0] == 1
+        assert neighbours[1] == 3
 
         # Test variable range case
-        neighbours = lineworld.getNeighbours(lineworld.getCell(2), radius=3)
-        assert neighbours[0] is lineworld.cells[0]
-        assert neighbours[1] is lineworld.cells[1]
-        assert neighbours[2] is lineworld.cells[3]
-        assert neighbours[3] is lineworld.cells[4]
+        neighbours = lineworld.getNeighbours(2, radius=3)
+        assert neighbours[0] == 0
+        assert neighbours[1] == 1
+        assert neighbours[2] == 3
+        assert neighbours[3] == 4
 
         # Test moore = true
-        neighbours = lineworld.getNeighbours(lineworld.getCell(2), moore=True)
-        assert neighbours[0] is lineworld.cells[1]
-        assert neighbours[1] is lineworld.cells[2]
-        assert neighbours[2] is lineworld.cells[3]
+        neighbours = lineworld.getNeighbours(2, moore=True)
+        assert neighbours[0] == 1
+        assert neighbours[1] == 2
+        assert neighbours[2] == 3
 
 
 class TestGridWorld:
@@ -187,15 +176,14 @@ class TestGridWorld:
         env = GridWorld(5, 5, model)
         assert env.width == 5
         assert env.height == 5
-        assert len(env.cells) == 25
+        assert len(env.cells['pos']) == 25
         assert env.id == 'ENVIRONMENT'
         assert env.model is model
         assert len(env.agents) == 0
 
-        for i in range(len(env.cells)):
-            assert env.cells[i].model is model
-            assert env.cells[i].id == 'CELL_' + str(i)
-            assert env.cells[i].hasComponent(PositionComponent)
+        for x in range(5):
+            for y in range(5):
+                assert env.cells['pos'][discreteGridPosToID(x, y, 5)] == (x, y)
 
     def test_addAgent(self):
         model = Model()
@@ -238,15 +226,14 @@ class TestGridWorld:
 
     def test_addCellComponent(self):
 
-        def generator(cell: Agent):
-            cell.addComponent(Component(cell, cell.model))
+        def generator(pos: (int, int), df):
+            return discreteGridPosToID(pos[0], pos[1])
 
         env = GridWorld(5, 5, Model())
 
-        env.addCellComponent(generator)
+        env.addCellComponent('unique_id', generator)
 
-        for cell in env.cells:
-            assert cell.hasComponent(Component)
+        assert len(env.cells['unique_id']) == 25
 
     def test_removeAgent(self):
         model = Model()
@@ -280,19 +267,9 @@ class TestGridWorld:
         env = GridWorld(5, 5, temp)
 
         assert env.model is temp
-        # Test for all cells:
-        for x in range(25):
-            assert env.cells[x].model is temp
 
         env.setModel(model)
         assert env.model is model
-
-        # Test for all model for all cells
-        for x in range(25):
-            assert env.cells[x].model is model
-            xPos = x % 5
-            yPos = x // 5
-            assert env.cells[x][PositionComponent].x == xPos and env.cells[x][PositionComponent].y == yPos
 
     def test_getDimensions(self):
         env = GridWorld(3,5, Model())
@@ -313,45 +290,45 @@ class TestGridWorld:
         gridworld = GridWorld(3, 3, model)
 
         # Test default case
-        neighbours = gridworld.getNeighbours(gridworld.getCell(1, 1))
-        assert neighbours[0] is gridworld.cells[0]
-        assert neighbours[1] is gridworld.cells[1]
-        assert neighbours[2] is gridworld.cells[2]
+        neighbours = gridworld.getNeighbours((1, 1))
+        assert neighbours[0] == 0
+        assert neighbours[1] == 1
+        assert neighbours[2] == 2
 
-        assert neighbours[3] is gridworld.cells[3]
-        assert neighbours[4] is gridworld.cells[5]
+        assert neighbours[3] == 3
+        assert neighbours[4] == 5
 
-        assert neighbours[5] is gridworld.cells[6]
-        assert neighbours[6] is gridworld.cells[7]
-        assert neighbours[7] is gridworld.cells[8]
+        assert neighbours[5] == 6
+        assert neighbours[6] == 7
+        assert neighbours[7] == 8
 
         # Test variable range case
-        neighbours = gridworld.getNeighbours(gridworld.getCell(1,1), radius=1)
-        assert neighbours[0] is gridworld.cells[0]
-        assert neighbours[1] is gridworld.cells[1]
-        assert neighbours[2] is gridworld.cells[2]
+        neighbours = gridworld.getNeighbours((1, 1), radius=1)
+        assert neighbours[0] == 0
+        assert neighbours[1] == 1
+        assert neighbours[2] == 2
 
-        assert neighbours[3] is gridworld.cells[3]
-        assert neighbours[4] is gridworld.cells[5]
+        assert neighbours[3] == 3
+        assert neighbours[4] == 5
 
-        assert neighbours[5] is gridworld.cells[6]
-        assert neighbours[6] is gridworld.cells[7]
-        assert neighbours[7] is gridworld.cells[8]
+        assert neighbours[5] == 6
+        assert neighbours[6] == 7
+        assert neighbours[7] == 8
 
         # Test moore = true
-        neighbours = gridworld.getNeighbours(gridworld.getCell(1,1), moore=True)
+        neighbours = gridworld.getNeighbours((1, 1), moore=True)
 
-        assert neighbours[0] is gridworld.cells[0]
-        assert neighbours[1] is gridworld.cells[1]
-        assert neighbours[2] is gridworld.cells[2]
+        assert neighbours[0] == 0
+        assert neighbours[1] == 1
+        assert neighbours[2] == 2
 
-        assert neighbours[3] is gridworld.cells[3]
-        assert neighbours[4] is gridworld.cells[4]
-        assert neighbours[5] is gridworld.cells[5]
+        assert neighbours[3] == 3
+        assert neighbours[4] == 4
+        assert neighbours[5] == 5
 
-        assert neighbours[6] is gridworld.cells[6]
-        assert neighbours[7] is gridworld.cells[7]
-        assert neighbours[8] is gridworld.cells[8]
+        assert neighbours[6] == 6
+        assert neighbours[7] == 7
+        assert neighbours[8] == 8
 
 
 class TestCubeWorld:
@@ -373,15 +350,14 @@ class TestCubeWorld:
         assert env.width == 5
         assert env.height == 5
         assert env.depth == 5
-        assert len(env.cells) == 125
+        assert len(env.cells['pos']) == 125
         assert env.id == 'ENVIRONMENT'
         assert env.model is model
         assert len(env.agents) == 0
 
-        for i in range(len(env.cells)):
-            assert env.cells[i].model is model
-            assert env.cells[i].id == 'CELL_' + str(i)
-            assert env.cells[i].hasComponent(PositionComponent)
+        for i in range(len(env.cells['pos'])):
+            pos = env.cells['pos'][i]
+            assert discreteGridPosToID(pos[0], pos[1], 5, pos[2], 5) == i
 
     def test_addAgent(self):
         model = Model()
@@ -428,15 +404,14 @@ class TestCubeWorld:
 
     def test_addCellComponent(self):
 
-        def generator(cell: Agent):
-            cell.addComponent(Component(cell, cell.model))
+        def generator(pos: (int, int, int), pd):
+            return discreteGridPosToID(pos[0], pos[1], 5, pos[2], 5)
 
         env = CubeWorld(5, 5, 5, Model())
 
-        env.addCellComponent(generator)
+        env.addCellComponent('unique_id', generator)
 
-        for cell in env.cells:
-            assert cell.hasComponent(Component)
+        assert len(env.cells['unique_id']) == 125
 
     def test_removeAgent(self):
         model = Model()
@@ -457,17 +432,9 @@ class TestCubeWorld:
         env = CubeWorld(5, 5, 5, temp)
 
         assert env.model is temp
-        # Test for all cells:
-        for x in range(125):
-            assert env.cells[x].model is temp
 
         env.setModel(model)
         assert env.model is model
-
-        # Test for all model for all cells
-        for x in range(125):
-            assert env.cells[x].model is model
-            assert env.cells[x].hasComponent(PositionComponent)
 
     def test_getAgentsAt(self):
         model = Model()
@@ -503,34 +470,33 @@ class TestCubeWorld:
         cubeworld = CubeWorld(3, 3, 3, model)
 
         # Test default case
-        neighbours = cubeworld.getNeighbours(cubeworld.getCell(0, 0, 0))
-        print(len(neighbours))
-        assert neighbours[0] is cubeworld.cells[1]
-        assert neighbours[1] is cubeworld.cells[discreteGridPosToID(0, 1, cubeworld.width, 0, cubeworld.height)]
-        assert neighbours[2] is cubeworld.cells[discreteGridPosToID(1, 1, cubeworld.width, 0, cubeworld.height)]
-        assert neighbours[3] is cubeworld.cells[discreteGridPosToID(0, 0, cubeworld.width, 1, cubeworld.height)]
-        assert neighbours[4] is cubeworld.cells[discreteGridPosToID(1, 0, cubeworld.width, 1, cubeworld.height)]
-        assert neighbours[5] is cubeworld.cells[discreteGridPosToID(0, 1, cubeworld.width, 1, cubeworld.height)]
-        assert neighbours[6] is cubeworld.cells[discreteGridPosToID(1, 1, cubeworld.width, 1, cubeworld.height)]
+        neighbours = cubeworld.getNeighbours((0, 0, 0))
+        assert neighbours[0] == 1
+        assert neighbours[1] == discreteGridPosToID(0, 1, cubeworld.width, 0, cubeworld.height)
+        assert neighbours[2] == discreteGridPosToID(1, 1, cubeworld.width, 0, cubeworld.height)
+        assert neighbours[3] == discreteGridPosToID(0, 0, cubeworld.width, 1, cubeworld.height)
+        assert neighbours[4] == discreteGridPosToID(1, 0, cubeworld.width, 1, cubeworld.height)
+        assert neighbours[5] == discreteGridPosToID(0, 1, cubeworld.width, 1, cubeworld.height)
+        assert neighbours[6] == discreteGridPosToID(1, 1, cubeworld.width, 1, cubeworld.height)
 
         # Test variable range case
-        neighbours = cubeworld.getNeighbours(cubeworld.getCell(0, 0, 0), radius=1)
-        assert neighbours[0] is cubeworld.cells[1]
-        assert neighbours[1] is cubeworld.cells[discreteGridPosToID(0, 1, cubeworld.width, 0, cubeworld.height)]
-        assert neighbours[2] is cubeworld.cells[discreteGridPosToID(1, 1, cubeworld.width, 0, cubeworld.height)]
-        assert neighbours[3] is cubeworld.cells[discreteGridPosToID(0, 0, cubeworld.width, 1, cubeworld.height)]
-        assert neighbours[4] is cubeworld.cells[discreteGridPosToID(1, 0, cubeworld.width, 1, cubeworld.height)]
-        assert neighbours[5] is cubeworld.cells[discreteGridPosToID(0, 1, cubeworld.width, 1, cubeworld.height)]
-        assert neighbours[6] is cubeworld.cells[discreteGridPosToID(1, 1, cubeworld.width, 1, cubeworld.height)]
+        neighbours = cubeworld.getNeighbours((0, 0, 0), radius=1)
+        assert neighbours[0] == 1
+        assert neighbours[1] == discreteGridPosToID(0, 1, cubeworld.width, 0, cubeworld.height)
+        assert neighbours[2] == discreteGridPosToID(1, 1, cubeworld.width, 0, cubeworld.height)
+        assert neighbours[3] == discreteGridPosToID(0, 0, cubeworld.width, 1, cubeworld.height)
+        assert neighbours[4] == discreteGridPosToID(1, 0, cubeworld.width, 1, cubeworld.height)
+        assert neighbours[5] == discreteGridPosToID(0, 1, cubeworld.width, 1, cubeworld.height)
+        assert neighbours[6] == discreteGridPosToID(1, 1, cubeworld.width, 1, cubeworld.height)
 
 
         # Test moore = true
-        neighbours = cubeworld.getNeighbours(cubeworld.getCell(0, 0, 0), moore=True)
-        assert neighbours[0] is cubeworld.cells[0]
-        assert neighbours[1] is cubeworld.cells[1]
-        assert neighbours[2] is cubeworld.cells[discreteGridPosToID(0, 1, cubeworld.width, 0, cubeworld.height)]
-        assert neighbours[3] is cubeworld.cells[discreteGridPosToID(1, 1, cubeworld.width, 0, cubeworld.height)]
-        assert neighbours[4] is cubeworld.cells[discreteGridPosToID(0, 0, cubeworld.width, 1, cubeworld.height)]
-        assert neighbours[5] is cubeworld.cells[discreteGridPosToID(1, 0, cubeworld.width, 1, cubeworld.height)]
-        assert neighbours[6] is cubeworld.cells[discreteGridPosToID(0, 1, cubeworld.width, 1, cubeworld.height)]
-        assert neighbours[7] is cubeworld.cells[discreteGridPosToID(1, 1, cubeworld.width, 1, cubeworld.height)]
+        neighbours = cubeworld.getNeighbours((0, 0, 0), moore=True)
+        assert neighbours[0] == 0
+        assert neighbours[1] == 1
+        assert neighbours[2] == discreteGridPosToID(0, 1, cubeworld.width, 0, cubeworld.height)
+        assert neighbours[3] == discreteGridPosToID(1, 1, cubeworld.width, 0, cubeworld.height)
+        assert neighbours[4] == discreteGridPosToID(0, 0, cubeworld.width, 1, cubeworld.height)
+        assert neighbours[5] == discreteGridPosToID(1, 0, cubeworld.width, 1, cubeworld.height)
+        assert neighbours[6] == discreteGridPosToID(0, 1, cubeworld.width, 1, cubeworld.height)
+        assert neighbours[7] == discreteGridPosToID(1, 1, cubeworld.width, 1, cubeworld.height)

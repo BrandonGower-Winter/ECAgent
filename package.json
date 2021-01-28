@@ -3,7 +3,7 @@
     "author": "Brandon Gower-Winter",
     "author_email": "brandongowerwinter@gmail.com",
     "url": "https://github.com/BrandonGower-Winter/ABMECS",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "python_requires": ">=3.6",
     "classifiers": [
         "Programming Language :: Python :: 3",

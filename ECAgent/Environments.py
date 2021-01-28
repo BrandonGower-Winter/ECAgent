@@ -190,7 +190,6 @@ class GridWorld(Environment):
                 else:
                     neighbours.append(id)
 
-        print(len(neighbours))
         return neighbours
 
 

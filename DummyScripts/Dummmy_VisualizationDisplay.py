@@ -64,17 +64,22 @@ if __name__ == '__main__':
                           pie_kwargs=dict(marker=dict(colors=['gold', 'darkorange', 'green'],
                                                       line=dict(color='#000000', width=2))))
 
-    addGraph(vs, 'test-bar', fig1)
-    addLiveGraph(vs, 'test-scatter', createScatter(None), createScatter)
-    addGraph(vs, 'test-heatmap', fig3)
-    addGraph(vs, 'test-contour', fig4)
-    addGraph(vs, 'test-pie', fig5)
-    addGraph(vs, 'test-table', tbl1, addBreak=False)
-    addLabel(vs, 'test-label', 'Test Label...')
-    addLiveLabel(vs, 'test-live-label', 'Random Output: ', liveLabelCallback)
+    labels = ['Bar Graph', 'Scatter Plot', 'Heatmap', 'Contour Graph', 'Test Table']
+    tabs = [
+        createGraph('test-bar', fig1),
+        createLiveGraph('test-scatter', createScatter(None), vs, createScatter),
+        createGraph('test-heatmap', fig3),
+        createGraph('test-contour', fig4),
+        createGraph('test-table', tbl1)
+    ]
+
+    vs.addDisplay(createTabs(labels, tabs))
+    vs.addDisplay(createGraph('test-pie', fig5), add_break=False)
+    vs.addParameter(createLabel('test-label', 'Test Label...'))
+    vs.addParameter(createLiveLabel('test-live-label', 'Random Output: ', vs, liveLabelCallback))
 
     def set_val(value):
         pass
 
-    addSlider(vs, 'test-slider', "Test Slider", set_val)
+    vs.addParameter(createSlider('test-slider', "Test Slider", vs, set_val))
     vs.app.run_server(debug=True)

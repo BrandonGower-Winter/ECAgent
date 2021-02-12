@@ -68,7 +68,7 @@ class VisualInterface:
         )
 
         # Add parameter header
-        addLabel(self, 'parameter-heading', 'Parameters:')
+        self.addParameter(createLabel('parameter-heading', 'Parameters:'))
 
         # If framerate > 0, create the play, stop, and restart buttons and Timestep label
         if not self.isStatic():
@@ -91,7 +91,7 @@ class VisualInterface:
             )
 
             # Add Timestep label
-            self.parameters.append(addLabel(self, 'timestep-label', 'Timestep: 0'))
+            self.parameters.append(createLabel('timestep-label', 'Timestep: 0'))
 
             # Apply Play/Stop Callback
             self.app.callback(
@@ -133,6 +133,15 @@ class VisualInterface:
                 ),
             ]
         )
+
+    def addDisplay(self, content, add_break=True):
+        self.displays.append(content)
+
+        if add_break:
+            self.displays.append(html.Br())
+
+    def addParameter(self, content):
+        self.parameters.append(content)
 
 # #################################### Class Callbacks ###########################################
     def play_button_callback(self, n_clicks):
@@ -256,21 +265,18 @@ def createPieChart(title: str, labels: [str], values: [float], pie_kwargs: dict 
                      layout=go.Layout(title=title, **layout_kwargs))
 
 
-def addGraph(vs: VisualInterface, graphID: str, figure: go.Figure, classname: str = 'bg-white', addBreak: bool = True):
-    vs.displays.append(html.Div(
+def createGraph(graphID: str, figure: go.Figure, classname: str = 'bg-white'):
+    return html.Div(
         className=classname,
         children=[
             dcc.Graph(id=graphID, figure=figure)
         ],
         style={'height': figure.layout.height}
-    ))
-    if addBreak:
-        vs.displays.append(html.Br())
+    )
 
 
-def addLiveGraph(vs: VisualInterface, graphID: str, figure: go.Figure, callback, classname: str = 'bg-white',
-                 addBreak: bool = True):
-    addGraph(vs, graphID, figure, classname, addBreak)
+def createLiveGraph(graphID: str, figure: go.Figure, vs: VisualInterface, callback, classname: str = 'bg-white'):
+    graph = createGraph(graphID, figure, classname)
 
     def update_live_graph_callback(n_intervals, n_clicks, figure):
         context = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
@@ -287,20 +293,20 @@ def addLiveGraph(vs: VisualInterface, graphID: str, figure: go.Figure, callback,
          dash.dependencies.Input(graphID, 'figure')]
     )(update_live_graph_callback)
 
+    return graph
 
-def addLabel(vs: VisualInterface, label_id, content):
-    vs.parameters.append(
-        html.Div(
+
+def createLabel(label_id, content):
+    return html.Div(
             className="padding-top-bot",
             children=[
                 html.H6(content, id=label_id),
             ],
         )
-    )
 
 
-def addLiveLabel(vs: VisualInterface, label_id, initial_content, callback):
-    addLabel(vs, label_id, initial_content)
+def createLiveLabel(label_id, initial_content, vs: VisualInterface, callback):
+    label = createLabel(label_id, initial_content)
 
     def update_live_label_callback(n_intervals, n_clicks, children):
         context = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
@@ -317,15 +323,16 @@ def addLiveLabel(vs: VisualInterface, label_id, initial_content, callback):
          dash.dependencies.Input(label_id, 'children')]
     )(update_live_label_callback)
 
+    return label
 
-def addSlider(vs: VisualInterface, slider_id: str, slider_name: str, set_val, min_val: float = 0.0,
+
+def createSlider(slider_id: str, slider_name: str, vs: VisualInterface, set_val, min_val: float = 0.0,
               max_val: float = 1.0, step: float = 0.01):
     """This function will add a slider to the parameter window of the visual interface. It will also automatically add
     a callback function that will supply your custom function 'set_val' with the value of the slider"""
 
     # Add html
-    vs.parameters.append(
-        html.Div(
+    slider = html.Div(
             className="padding-top-bot",
             children=[
                 html.H6('{}: [{}]'.format(slider_name, max_val), id=slider_id + '-title'),
@@ -338,7 +345,6 @@ def addSlider(vs: VisualInterface, slider_id: str, slider_name: str, set_val, mi
                 )
             ],
         )
-    )
 
     # Add callback
 
@@ -348,6 +354,8 @@ def addSlider(vs: VisualInterface, slider_id: str, slider_name: str, set_val, mi
 
     vs.app.callback(dash.dependencies.Output(slider_id + '-title', 'children'),
                     [dash.dependencies.Input(slider_id, 'value')])(set_slider_val)
+
+    return slider
 
 
 def addRect(fig: go.Figure, x, y, width=1, height=1, **shape_kwargs):
@@ -379,3 +387,12 @@ def addCircle(fig: go.Figure, x, y, radius=0.5, **shape_kwargs):
         type='circle',
         **shape_kwargs
     )
+
+
+def createTabs(labels: [str], tabs: []):
+    return html.Div([
+        dcc.Tabs(
+        [
+            dcc.Tab(label=labels[x], children=tabs[x]) for x in range(len(labels))
+        ]
+    )])

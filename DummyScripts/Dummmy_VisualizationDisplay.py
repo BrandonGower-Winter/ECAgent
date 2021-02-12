@@ -50,25 +50,28 @@ if __name__ == '__main__':
                        header_kwargs=dict(line_color='darkslategray', fill_color='lightskyblue', align='left'),
                        cell_kwargs=dict(line_color='darkslategray', fill_color='lightcyan', align='left'))
 
-    def createScatter(n_intervals):
-        data = []
-        for x in range(model.systemManager.timestep):
-            data.append(x)
+    def createScatter(figure: go.Figure):
+        data = [x for x in range(model.systemManager.timestep + 1)]
 
         return createScatterPlot('Test Scatter Plot', [
         [data, data, {'name': 'Example'}]], layout_kwargs={'template': 'plotly_dark'})
+
+
+    def liveLabelCallback(children):
+        return "Random Output: {}".format(model.random.randrange(0, model.systemManager.timestep if model.systemManager.timestep != 0 else 1))
 
     fig5 = createPieChart('Pie Chart', ['Test 1', 'Test 2', 'Test 3'], [50, 10, 40],
                           pie_kwargs=dict(marker=dict(colors=['gold', 'darkorange', 'green'],
                                                       line=dict(color='#000000', width=2))))
 
     addGraph(vs, 'test-bar', fig1)
-    addLiveGraph(vs, 'test-scatter', 500, createScatter)
+    addLiveGraph(vs, 'test-scatter', createScatter(None), createScatter)
     addGraph(vs, 'test-heatmap', fig3)
     addGraph(vs, 'test-contour', fig4)
     addGraph(vs, 'test-pie', fig5)
     addGraph(vs, 'test-table', tbl1, addBreak=False)
     addLabel(vs, 'test-label', 'Test Label...')
+    addLiveLabel(vs, 'test-live-label', 'Random Output: ', liveLabelCallback)
 
     def set_val(value):
         pass

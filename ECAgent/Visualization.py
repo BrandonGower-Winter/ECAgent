@@ -268,23 +268,24 @@ def addGraph(vs: VisualInterface, graphID: str, figure: go.Figure, classname: st
         vs.displays.append(html.Br())
 
 
-def addLiveGraph(vs: VisualInterface, graphID: str, height, callback, classname: str = 'bg-white',
+def addLiveGraph(vs: VisualInterface, graphID: str, figure: go.Figure, callback, classname: str = 'bg-white',
                  addBreak: bool = True):
-    vs.displays.append(html.Div(
-        className=classname,
-        children=[
-            dcc.Graph(id=graphID)
-        ],
-        style={'height': height}
-    ))
+    addGraph(vs, graphID, figure, classname, addBreak)
+
+    def update_live_graph_callback(n_intervals, n_clicks, figure):
+        context = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+        if (context == 'step-button' and not vs.running) or vs.running:
+            return callback(figure)
+        else:
+            return figure
+
     # Add Callback
     vs.app.callback(
         dash.dependencies.Output(graphID, 'figure'),
-        [dash.dependencies.Input('interval-component', 'n_intervals')]
-    )(callback)
-
-    if addBreak:
-        vs.displays.append(html.Br())
+        [dash.dependencies.Input('interval-component', 'n_intervals'),
+         dash.dependencies.Input('step-button', 'n_clicks'),
+         dash.dependencies.Input(graphID, 'figure')]
+    )(update_live_graph_callback)
 
 
 def addLabel(vs: VisualInterface, label_id, content):
@@ -296,6 +297,25 @@ def addLabel(vs: VisualInterface, label_id, content):
             ],
         )
     )
+
+
+def addLiveLabel(vs: VisualInterface, label_id, initial_content, callback):
+    addLabel(vs, label_id, initial_content)
+
+    def update_live_label_callback(n_intervals, n_clicks, children):
+        context = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+        if (context == 'step-button' and not vs.running) or vs.running:
+            return callback(children)
+        else:
+            return children
+
+    # Add Callback
+    vs.app.callback(
+        dash.dependencies.Output(label_id, 'children'),
+        [dash.dependencies.Input('interval-component', 'n_intervals'),
+         dash.dependencies.Input('step-button', 'n_clicks'),
+         dash.dependencies.Input(label_id, 'children')]
+    )(update_live_label_callback)
 
 
 def addSlider(vs: VisualInterface, slider_id: str, slider_name: str, set_val, min_val: float = 0.0,

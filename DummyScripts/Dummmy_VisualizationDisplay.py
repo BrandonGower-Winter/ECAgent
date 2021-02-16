@@ -1,4 +1,5 @@
 import json
+import numpy as np
 
 from ECAgent.Visualization import *
 
@@ -64,6 +65,9 @@ if __name__ == '__main__':
                           pie_kwargs=dict(marker=dict(colors=['gold', 'darkorange', 'green'],
                                                       line=dict(color='#000000', width=2))))
 
+    fig6 = createScatterGLPlot('Scatter GL plot',
+                               [[np.random.rand(1000), np.random.randn(1000), {'name': 'Test Scatter'}]])
+
     labels = ['Bar Graph', 'Scatter Plot', 'Heatmap', 'Contour Graph', 'Test Table']
     tabs = [
         createGraph('test-bar', fig1),
@@ -74,6 +78,7 @@ if __name__ == '__main__':
     ]
 
     vs.addDisplay(createTabs(labels, tabs))
+    vs.addDisplay(createGraph('test-scattergl', fig6))
     vs.addDisplay(createGraph('test-pie', fig5), add_break=False)
     vs.addParameter(createLabel('test-label', 'Test Label...'))
     vs.addParameter(createLiveLabel('test-live-label', 'Random Output: ', vs, liveLabelCallback))

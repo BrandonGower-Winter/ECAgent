@@ -183,6 +183,26 @@ def createScatterPlot(title, data: [[[float], [float], dict]], layout_kwargs: di
     return go.Figure(data=traces, layout=go.Layout(title=title, **layout_kwargs))
 
 
+def createScatterGLPlot(title, data: [[[float], [float], dict]], layout_kwargs: dict = {}):
+    """Creates a Scatter plot Figure that will be rendered using WebGL.
+    This function supports multiple traces supplied to the 'data' parameter Data should be supplied in the
+    following format:
+    [[xdata_1,ydata_1, fig_layout_1], [xdata_2, ydata_2, fig_layout_2], ..., [xdata_n,ydata_n, fig_layout_n]]
+
+    The 'fig_layout' property is optional. If it is supplied, the trace in question will be updated to include all of
+    the properties specified..
+    """
+
+    traces = []
+    for data_packet in data:
+        scatter = go.Scattergl(x=data_packet[0], y=data_packet[1])
+        traces.append(scatter)
+        if len(data_packet) > 2:
+            scatter.update(data_packet[2])
+
+    return go.Figure(data=traces, layout=go.Layout(title=title, **layout_kwargs))
+
+
 def createBarGraph(title: str, data: [[[float], [float], dict]], layout_kwargs: dict = {}):
     """Creates a Bar Graph Figure. This function supports multiple traces supplied to the 'data' parameter
         Data should be supplied in the following format:
@@ -297,12 +317,7 @@ def createLiveGraph(graphID: str, figure: go.Figure, vs: VisualInterface, callba
 
 
 def createLabel(label_id, content):
-    return html.Div(
-            className="padding-top-bot",
-            children=[
-                html.H6(content, id=label_id),
-            ],
-        )
+    return html.Div(className="padding-top-bot", children=[html.H6(content, id=label_id)])
 
 
 def createLiveLabel(label_id, initial_content, vs: VisualInterface, callback):
@@ -327,24 +342,24 @@ def createLiveLabel(label_id, initial_content, vs: VisualInterface, callback):
 
 
 def createSlider(slider_id: str, slider_name: str, vs: VisualInterface, set_val, min_val: float = 0.0,
-              max_val: float = 1.0, step: float = 0.01):
+                 max_val: float = 1.0, step: float = 0.01):
     """This function will add a slider to the parameter window of the visual interface. It will also automatically add
     a callback function that will supply your custom function 'set_val' with the value of the slider"""
 
     # Add html
     slider = html.Div(
-            className="padding-top-bot",
-            children=[
-                html.H6('{}: [{}]'.format(slider_name, max_val), id=slider_id + '-title'),
-                dcc.Slider(
-                    id=slider_id,
-                    min=min_val,
-                    max=max_val,
-                    value=max_val,
-                    step=step
-                )
-            ],
-        )
+        className="padding-top-bot",
+        children=[
+            html.H6('{}: [{}]'.format(slider_name, max_val), id=slider_id + '-title'),
+            dcc.Slider(
+                id=slider_id,
+                min=min_val,
+                max=max_val,
+                value=max_val,
+                step=step
+            )
+        ]
+    )
 
     # Add callback
 
@@ -392,7 +407,7 @@ def addCircle(fig: go.Figure, x, y, radius=0.5, **shape_kwargs):
 def createTabs(labels: [str], tabs: []):
     return html.Div([
         dcc.Tabs(
-        [
-            dcc.Tab(label=labels[x], children=tabs[x]) for x in range(len(labels))
-        ]
-    )])
+            [
+                dcc.Tab(label=labels[x], children=tabs[x]) for x in range(len(labels))
+            ]
+        )])

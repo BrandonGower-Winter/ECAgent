@@ -1,4 +1,3 @@
-import numpy
 import pandas
 
 from ECAgent.Core import Agent, Environment, Component, Model

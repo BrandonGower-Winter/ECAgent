@@ -68,6 +68,11 @@ if __name__ == '__main__':
     fig6 = createScatterGLPlot('Scatter GL plot',
                                [[np.random.rand(1000), np.random.randn(1000), {'name': 'Test Scatter'}]])
 
+    fig7 = createHeatMapGL('Test HeatMapGL',
+                         data=heatmapData,
+                         heatmap_kwargs={'colorbar': {'title': 'Heat'}},
+                         layout_kwargs={'height': 1000})
+
     labels = ['Bar Graph', 'Scatter Plot', 'Heatmap', 'Contour Graph', 'Test Table']
     tabs = [
         createGraph('test-bar', fig1),
@@ -78,7 +83,8 @@ if __name__ == '__main__':
     ]
 
     vs.addDisplay(createTabs(labels, tabs))
-    vs.addDisplay(createGraph('test-scattergl', fig6))
+    vs.addDisplay(createTabs(['Scatter GL', 'Heatmap GL'],
+                              [createGraph('test-scattergl', fig6), createGraph('test-heatmapgl', fig7)]))
     vs.addDisplay(createGraph('test-pie', fig5), add_break=False)
     vs.addParameter(createLabel('test-label', 'Test Label...'))
     vs.addParameter(createLiveLabel('test-live-label', 'Random Output: ', vs, liveLabelCallback))

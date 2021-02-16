@@ -240,6 +240,26 @@ def createHeatMap(title: str, data: [[float]], heatmap_kwargs: dict = {}, layout
     ), layout=go.Layout(title=title, **layout_kwargs))
 
 
+def createHeatMapGL(title: str, data: [[float]], heatmap_kwargs: dict = {}, layout_kwargs: dict = {}):
+
+    """Creates a HeatMap Figure object using Plotly graph objects that will be rendered by WebGL.
+    The data object determines the dimensions of the heatmap. The len(data) will be the height.
+    The len(data[i]) will be the width of the heatmap.
+    The Heatmap is constructed in a bottom-up and left-to-right manner.
+
+    Discrete X and Y categories can be specified, this is done by supplying xData and yData with the X and Y category
+    name respectively. The len(xData) must be equal to the width of your Heatmap, while len(yData) must be equal to the
+    height of your Heatmap.
+
+    A custom color scale can be supplied, ensure that it follows the correct format and that the threshold values are
+    normalized and that the color scales are in rgb like so 'rgb(r_val, g_val, b_val)'"""
+
+    return go.Figure(data=go.Heatmapgl(
+        z=data,
+        **heatmap_kwargs
+    ), layout=go.Layout(title=title, **layout_kwargs))
+
+
 def createContourMap(title: str, data: [[float]], contour_kwargs: dict = {}, layout_kwargs: dict = {}):
 
     """Creates a Contour Figure object using Plotly graph objects. The data object determines the dimensions of the

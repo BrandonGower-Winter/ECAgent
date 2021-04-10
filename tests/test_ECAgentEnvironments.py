@@ -207,7 +207,7 @@ class TestGridWorld:
         # Test default case
         model.environment.addAgent(agent)
         assert len(model.environment.agents) == 1
-        assert model.environment[agent.id] is agent
+        assert model.environment.getAgent(agent.id) is agent
         assert agent[PositionComponent].x == 0
         assert agent[PositionComponent].y == 0
 
@@ -220,7 +220,7 @@ class TestGridWorld:
 
         model.environment.addAgent(agent, xPos=2, yPos=2)
         assert len(model.environment.agents) == 1
-        assert model.environment[agent.id] is agent
+        assert model.environment.getAgent(agent.id) is agent
         assert agent[PositionComponent].x == 2
         assert agent[PositionComponent].y == 2
 

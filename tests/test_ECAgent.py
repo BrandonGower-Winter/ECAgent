@@ -46,15 +46,6 @@ class TestEnvironment:
         model.environment.addAgent(agent)
         assert model.environment.getAgent(agent.id) == agent
 
-    def test__getitem__(self):
-        model = Model()
-        agent = Agent("a1", model)
-
-        assert model.environment[agent.id] is None
-
-        model.environment.addAgent(agent)
-        assert model.environment[agent.id] == agent
-
     def test_getRandomAgent(self):
 
         env = Environment(None)
@@ -133,20 +124,6 @@ class TestEnvironment:
         # Test once agent has been added
         env.addAgent(Agent("a1", None))
         assert len(env) == 1
-
-    def test__contains__(self):
-        env = Environment(None)
-        # Test Empty case
-        assert "a1" not in env
-
-        # Test once agent has been added
-        env.addAgent(Agent("a1", None))
-        assert "a1" in env
-
-    def test_getDimensions(self):
-        env = Environment(None)
-
-        assert env.getDimensions() is None
 
 
 class TestModel:

@@ -16,22 +16,30 @@ class DummyClass:
     int = 1
 
 
+def dummy_method():
+    pass
+
+
 class TestDecoder:
 
     def test_str_to_class(self):
-        print(sys.modules)
         assert Decoder.str_to_class('DummyClass', 'test_ECAgentDecoders') is DummyClass
         assert Decoder.str_to_class('NotARealClass', 'test_ECAgentDecoders') is None
 
-    def test__init__(self):
-        decoder = Decoder()
+    def test_str_to_func(self):
+        assert Decoder.str_to_func('dummy_method', 'test_ECAgentDecoders') is dummy_method
+        assert Decoder.str_to_func('NotARealFunction', 'test_ECAgentDecoders') is None
 
-        assert decoder.iterations == -1
-        assert decoder.epochs == -1
-        assert decoder.custom_params == {}
+    def test_get_module_name(self):
+        assert Decoder.get_module_name({}) == '__main__'
+        assert Decoder.get_module_name({'module': 'test'}) == 'test'
+        assert Decoder.get_module_name({}, 'failed') == 'failed'
+
+    def test_open_file(self):
+        with pytest.raises(NotImplementedError):
+            Decoder().open_file('filepath')
 
     def test_decode(self):
-
         with pytest.raises(NotImplementedError):
             decoder = Decoder()
             decoder.decode('filepath')
@@ -77,33 +85,35 @@ class DummyAgent(Agent, IDecodable):
 
     @staticmethod
     def decode(params: dict):
-        return DummyAgent(params['id_prefix'] + str(params['agent_index']), params['model'],
-                         params['components']['DummyComponent']['wealth'])
+        return DummyAgent(params['id_prefix'] + str(params['agent_index']), params['model'], 0)
+
+
+# Pre and post methods to be invoked by decoder
+testDict = {}
+
+
+def populate_key(params: dict):
+    testDict[params['key']] = True
 
 
 class TestJsonDecoder:
-
-    def test__init__(self):
-        decoder = JsonDecoder()
-
-        assert decoder.iterations == -1
-        assert decoder.epochs == -1
-        assert decoder.custom_params == {}
 
     def test_decode(self):
         decoder = JsonDecoder()
 
         model = decoder.decode('./DummyScripts/Data/PyTestDecoder.json')
 
-        assert decoder.iterations == 10
-        assert decoder.epochs == 0
-        assert decoder.custom_params == {}
+        # Test pre and post decode methods
+        assert 'pre_decode' in testDict
+        assert 'post_decode' in testDict
 
         # Test System
         assert len(model.systemManager.systems) == 1
         assert 'testsys' in model.systemManager.systems
         assert model.systemManager.systems['testsys'].priority == 0
         assert model.systemManager.systems['testsys'].model is model
+        assert 'pre_testsys' in testDict
+        assert 'post_testsys' in testDict
 
         # Test Agents
         assert len(model.environment.agents) == 10
@@ -111,3 +121,5 @@ class TestJsonDecoder:
             assert model.environment.agents[agent].hasComponent(DummyComponent)
             assert model.environment.agents[agent].id.startswith('ta')
             assert model.environment.agents[agent].model is model
+        assert 'pre_agent' in testDict
+        assert 'post_agent' in testDict

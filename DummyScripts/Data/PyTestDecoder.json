@@ -1,8 +1,4 @@
 {
-  "iterations" : 10,
-  "epochs" : 0,
-  "custom_params" : {},
-
   "model" : {
     "name" : "DummyModel",
     "module" : "test_ECAgentDecoders",
@@ -19,23 +15,59 @@
         {
           "id" : "testsys",
           "priority" : 0
+        },
+        "pre_system_init": {
+          "func": "populate_key",
+          "module": "test_ECAgentDecoders",
+          "params": {
+            "key": "pre_testsys"
+          }
+        },
+        "post_system_init": {
+          "func": "populate_key",
+          "module": "test_ECAgentDecoders",
+          "params": {
+            "key": "post_testsys"
+          }
         }
       }
     ],
-
   "agents" : [
     {
       "name" : "DummyAgent",
       "module" : "test_ECAgentDecoders",
-      "id_prefix" : "ta",
       "number" : 10,
-      "components" :
-        {
-          "DummyComponent" :
-          {
-            "wealth" : 0
+      "params" : {
+        "id_prefix" : "ta"
+      },
+      "pre_agent_init": {
+          "func": "populate_key",
+          "module": "test_ECAgentDecoders",
+          "params": {
+            "key": "pre_agent"
+          }
+        },
+      "post_agent_init": {
+          "func": "populate_key",
+          "module": "test_ECAgentDecoders",
+          "params": {
+            "key": "post_agent"
           }
         }
     }
-  ]
+  ],
+  "pre_model_decode": {
+    "func": "populate_key",
+    "module": "test_ECAgentDecoders",
+    "params": {
+      "key": "pre_decode"
+    }
+  },
+  "post_model_decode": {
+    "func": "populate_key",
+    "module": "test_ECAgentDecoders",
+    "params": {
+      "key": "post_decode"
+    }
+  }
 }

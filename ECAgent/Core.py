@@ -1,3 +1,4 @@
+import logging
 import random
 from sys import maxsize
 
@@ -6,9 +7,9 @@ class Model:
     """ This is the base class for the ABM model.
     You inherit this class to again access to all of the ECS functionality """
 
-    __slots__ = ['environment', 'systemManager', 'random']
+    __slots__ = ['environment', 'systemManager', 'random', 'logger']
 
-    def __init__(self, seed: int = None):
+    def __init__(self, seed: int = None, logger=None):
 
         self.environment = Environment(self)
         self.systemManager = SystemManager(self)
@@ -18,6 +19,13 @@ class Model:
         # is added.
 
         self.random = random.Random(seed)
+
+        # Add logger if custom logger isn't specified
+        if logger is None:
+            self.logger = logging.getLogger('MODEL')
+            self.logger.setLevel(logging.INFO)
+        else:
+            self.logger = logger
 
 
 class Component:

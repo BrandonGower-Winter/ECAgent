@@ -1,3 +1,4 @@
+import logging
 import pytest
 
 from ECAgent.Core import *
@@ -133,11 +134,18 @@ class TestModel:
         assert model.environment is not None
         assert model.systemManager is not None
         assert model.random is not None
+        assert model.logger is not None
+        assert model.logger.level == logging.INFO
 
-        model = Model(seed=30)
+        logger = logging.getLogger('TEST')
+        logger.setLevel(logging.DEBUG)
+
+        model = Model(seed=30, logger=logger)
         assert model.environment is not None
         assert model.systemManager is not None
         assert model.random.randint(25, 50) == 42
+        assert model.logger is logger
+        assert model.logger.level == logging.DEBUG
 
 
 class TestComponent:
@@ -177,7 +185,6 @@ class TestSystemManager:
         assert len(sys_man.executionQueue) == 0
         assert len(sys_man.componentPools) == 0
 
-    # TO REST OF THE LOGIC
     def test_executeSystems(self):
         model = Model()
         s1 = System("s1", model)
@@ -187,7 +194,6 @@ class TestSystemManager:
 
         model.systemManager.executeSystems()
         assert model.systemManager.timestep == 1
-
 
     def test_registerComponent(self):
         model = Model()

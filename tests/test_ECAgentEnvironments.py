@@ -116,14 +116,19 @@ class TestLineWorld:
         model = Model()
         model.environment = LineWorld(5, model)
         agent = Agent("a1", model)
+        agent2 = Agent("a2", model)
 
         model.environment.addAgent(agent, 0)
+        model.environment.addAgent(agent2, 2)
 
         # Test empty case
         assert model.environment.getAgentsAt(4) == []
 
         # Test non empty case
         assert model.environment.getAgentsAt(0) == [agent]
+
+        # Test Leeway case
+        assert model.environment.getAgentsAt(0, leeway=2) == [agent, agent2]
 
     def test_getDimensions(self):
         env = LineWorld(5, Model())
@@ -252,14 +257,19 @@ class TestGridWorld:
         model = Model()
         model.environment = GridWorld(5, 5, model)
         agent = Agent("a1", model)
+        agent2 = Agent("a2", model)
 
         model.environment.addAgent(agent, 0, 0)
+        model.environment.addAgent(agent2, 2, 2)
 
         # Test empty case
-        assert model.environment.getAgentsAt(5,5) == []
+        assert model.environment.getAgentsAt(5, 5) == []
 
         # Test non empty case
-        assert model.environment.getAgentsAt(0,0) == [agent]
+        assert model.environment.getAgentsAt(0, 0) == [agent]
+
+        # Test Leeway case
+        assert model.environment.getAgentsAt(0, 0, 2, 2) == [agent, agent2]
 
     def test_setModel(self):
         model = Model()
@@ -440,14 +450,19 @@ class TestCubeWorld:
         model = Model()
         model.environment = CubeWorld(5, 5, 5, model)
         agent = Agent("a1", model)
+        agent2 = Agent("a2", model)
 
         model.environment.addAgent(agent, 0, 0, 0)
+        model.environment.addAgent(agent2, 2, 2, 2)
 
         # Test empty case
         assert model.environment.getAgentsAt(5, 5, 5) == []
 
         # Test non empty case
         assert model.environment.getAgentsAt(0, 0, 0) == [agent]
+
+        # Test Leeway case
+        assert model.environment.getAgentsAt(0, 0, 0, 2, 2, 2) == [agent, agent2]
 
     def test_getDimensions(self):
         env = CubeWorld(1, 2, 3, Model())

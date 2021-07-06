@@ -76,9 +76,11 @@ class LineWorld(Environment):
     def setModel(self, model: Model):
         super().setModel(model)
 
-    def getAgentsAt(self, xPos: int):
-        """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell"""
-        return [self.agents[agentKey] for agentKey in self.agents if self.agents[agentKey][PositionComponent].x == xPos]
+    def getAgentsAt(self, xPos: int, leeway: int = 0):
+        """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell.
+        If leeway > 0 all agents within the range xPos +/- leeway will be returned as well."""
+        return [self.agents[agentKey] for agentKey in self.agents
+                if xPos - leeway <= self.agents[agentKey][PositionComponent].x <= xPos + leeway]
 
     def getDimensions(self):
         return self.width
@@ -154,10 +156,13 @@ class GridWorld(Environment):
     def setModel(self, model: Model):
         super().setModel(model)
 
-    def getAgentsAt(self, xPos: int, yPos: int):
-        """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell"""
+    def getAgentsAt(self, xPos: int, yPos: int, xLeeway: int = 0, yLeeway: int = 0):
+        """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell.
+        If x or y leeway specified, agents withing range xPos +/- xLeeway and yPos +/- yLeeway will be
+        returned as well """
         return [self.agents[agentKey] for agentKey in self.agents
-                if self.agents[agentKey][PositionComponent].x == xPos and self.agents[agentKey][PositionComponent].y == yPos]
+                if xPos - xLeeway <= self.agents[agentKey][PositionComponent].x <= xPos + xLeeway
+                and yPos - yLeeway <= self.agents[agentKey][PositionComponent].y <= yPos + yLeeway]
 
     def getDimensions(self):
         return self.width, self.height
@@ -243,10 +248,14 @@ class CubeWorld(Environment):
     def setModel(self, model: Model):
         super().setModel(model)
 
-    def getAgentsAt(self, xPos: int, yPos: int, zPos: int):
-        """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell"""
+    def getAgentsAt(self, xPos: int, yPos: int, zPos: int, xLeeway: int = 0, yLeeway: int = 0, zLeeway: int = 0):
+        """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell
+        If x,y or z leeway specified, function will return all agents within the range xPos +/- xLeeway,
+        yPos +/- yLeeway and zPos +/- zLeeway."""
         return [self.agents[agentKey] for agentKey in self.agents
-                if self.agents[agentKey][PositionComponent].x == xPos and self.agents[agentKey][PositionComponent].y == yPos and self.agents[agentKey][PositionComponent].z == zPos]
+                if xPos - xLeeway <= self.agents[agentKey][PositionComponent].x <= xPos + xLeeway
+                and yPos - yLeeway <= self.agents[agentKey][PositionComponent].y <= yPos + yLeeway
+                and zPos - zLeeway <= self.agents[agentKey][PositionComponent].z <= zPos + zLeeway]
 
     def getDimensions(self):
         return self.width, self.height, self.depth

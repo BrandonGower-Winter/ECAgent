@@ -18,10 +18,10 @@ test-coverage: venv
 	$(ACTIVATE) python -m pytest --cov=ECAgent tests/
 
 check: venv
-	. venv/bin/activate; flake8 ./ECAgent/ --ignore=E501
+	. venv/bin/activate; flake8 ./ECAgent/ --ignore=E501,W503
 
 check-verbose: venv
-	$(ACTIVATE) flake8 --show-source ./ECAgent/ --ignore=E501
+	$(ACTIVATE) flake8 --show-source ./ECAgent/ --ignore=E501,W503
 
 dist: package
 

@@ -91,3 +91,42 @@ class AgentCollector(Collector):
         # Add record if tmpDict is not empty
         if len(tmpDict) > 0:
             self.records.append(tmpDict)
+
+
+class FileCollector(Collector):
+    """This is the base class for Collectors that want to write to files. The base implementation simply writes the
+    records of the collector to the specified file name.
+    When implementing your own FileCollector, you may need to override two methods:
+    - The collect() method (As you would if you were writing your own non file-based collector).
+    - The write_records() method which describes how your collector writes content to a file."""
+
+    def __init__(self, id: str, model: Model, filename: str, priority=-1, frequency=1, start=0, end=maxsize,
+                 filemode: str = 'a', write_count: int = 0, clear_records_on_write: bool = True):
+        super().__init__(id, model, priority, frequency, start, end)
+
+        self.filename = filename
+        self.filemode = filemode
+        self.write_count = write_count
+        self.last_write = 0
+        self.clear_records_on_write = clear_records_on_write
+
+    def execute(self):
+        super().execute()
+        self.last_write += 1  # Increase counter since we collected data
+
+        if self.write_count < self.last_write:
+            self.write_records()
+            self.last_write = 0
+
+            if self.clear_records_on_write:
+                self.records.clear()
+
+    def write_records(self):
+        """Loops through all of the self.records and writes their contents to a file specified by the self.filename
+        property."""
+        file = open(self.filename, self.filemode)
+
+        for record in self.records:
+            file.write(record)
+
+        file.close()

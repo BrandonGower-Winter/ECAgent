@@ -1,7 +1,7 @@
-import pytest
-
 from ECAgent.Core import Agent
 from ECAgent.Collectors import *
+
+from unittest.mock import patch, mock_open
 
 
 class TestCollector:
@@ -29,6 +29,7 @@ class TestCollector:
         assert col.frequency == 1
         assert col.priority == 100
         assert len(col.records) == 0
+
 
 class TestAgentCollector:
 
@@ -139,3 +140,110 @@ class TestAgentCollector:
 
         assert len(collector.records) == 1
         assert collector.records[0] == {'value': 1}
+
+
+class TestFileCollector:
+
+    def test__init__(self):
+        model = Model()
+        col = FileCollector("Collector", model, 'test.txt')
+
+        # Test default values
+        assert col.id == "Collector"
+        assert col.model is model
+        assert col.start == 0
+        assert col.end == maxsize
+        assert col.frequency == 1
+        assert col.priority == -1
+        assert len(col.records) == 0
+
+        assert col.filemode == 'a'
+        assert col.filename == 'test.txt'
+        assert col.clear_records_on_write
+        assert col.write_count == 0
+        assert col.last_write == 0
+
+        # Test explicit values
+        col = FileCollector("Collector", model, 'test.txt', priority=100, start=0, end=maxsize, frequency=1,
+                            filemode='w', write_count=1, clear_records_on_write=False)
+
+        assert col.id == "Collector"
+        assert col.model is model
+        assert col.start == 0
+        assert col.end == maxsize
+        assert col.frequency == 1
+        assert col.priority == 100
+        assert len(col.records) == 0
+
+        assert col.filemode == 'w'
+        assert col.filename == 'test.txt'
+        assert not col.clear_records_on_write
+        assert col.write_count == 1
+        assert col.last_write == 0
+
+    def test__write_records(self):
+        model = Model()
+        col = FileCollector("Collector", model, 'test.txt')
+
+        m = mock_open()
+        with patch("builtins.open", m, create=True):
+
+            col.records.append(4)
+            col.records.append(6)
+
+            col.write_records()
+
+        m.assert_called_once_with(col.filename, col.filemode)
+        handle = m()
+
+        handle.write.assert_any_call(4)
+        handle.write.assert_any_call(6)
+
+    def test__execute(self):
+
+        model = Model()
+        col = FileCollector("Collector", model, 'test.txt', write_count=1, clear_records_on_write=False)
+
+        m = mock_open()
+
+        col.records.append(4)
+        col.records.append(6)
+
+        with patch("builtins.open", m, create=True):
+            col.execute()
+
+            # By default, writing to a file should not be called
+            assert not m.called
+            assert col.last_write == 1
+
+        # Change it to write every execution cycle
+        col.write_count = 0
+
+        # Test write to file but keep records
+        m = mock_open()
+        with patch("builtins.open", m, create=True):
+            col.execute()
+
+            m.assert_called_once_with(col.filename, col.filemode)
+            handle = m()
+            handle.write.assert_any_call(4)
+            handle.write.assert_any_call(6)
+
+            assert col.last_write == 0
+            assert col.records == [4, 6]
+
+        # Test write to file and clear records
+        col.clear_records_on_write = True
+        m = mock_open()
+        with patch("builtins.open", m, create=True):
+            col.execute()
+
+            m.assert_called_once_with(col.filename, col.filemode)
+            handle = m()
+            handle.write.assert_any_call(4)
+            handle.write.assert_any_call(6)
+
+            assert col.last_write == 0
+            assert col.records == []
+
+

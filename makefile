@@ -6,7 +6,7 @@ install: venv
 	$(ACTIVATE) pip3 install -Ur requirements_dev.txt
 
 venv :
-	test -d venv || python3 -m venv venv --system-site-packages
+	test -d venv || python3 -m venv venv
 
 package: venv
 	$(ACTIVATE) python setup.py sdist bdist_wheel

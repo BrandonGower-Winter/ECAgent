@@ -9,7 +9,7 @@ git_tag_command = ['git', 'tag', '-a', '-m']
 git_stage_command = ['git', 'add', 'package.json', 'CHANGELOG.md']
 git_commit_command = ['git', 'commit', '-m']
 
-repo_url = 'https://github.com/BrandonGower-Winter/ABMECS/commit/'
+repo_url = 'https://github.com/BrandonGower-Winter/ECAgent/commit/'
 
 
 def generate_changelog(version_type=2):

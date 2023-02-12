@@ -1,29 +1,10 @@
-ECAgent package
-===============
-
-Submodules
-----------
-
-ECAgent.Collectors module
--------------------------
-
-.. automodule:: ECAgent.Collectors
-   :members:
-   :undoc-members:
-   :show-inheritance:
+Documentation
+=============
 
 ECAgent.Core module
 -------------------
 
 .. automodule:: ECAgent.Core
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ECAgent.Decode module
----------------------
-
-.. automodule:: ECAgent.Decode
    :members:
    :undoc-members:
    :show-inheritance:
@@ -36,10 +17,34 @@ ECAgent.Environments module
    :undoc-members:
    :show-inheritance:
 
+ECAgent.Collectors module
+-------------------------
+
+.. automodule:: ECAgent.Collectors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ECAgent.Decode module
+---------------------
+
+.. automodule:: ECAgent.Decode
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ECAgent.Visualization module
 ----------------------------
 
 .. automodule:: ECAgent.Visualization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Exceptions
+----------
+
+.. autoclass:: ECAgent.Core.ComponentNotFoundError
    :members:
    :undoc-members:
    :show-inheritance:

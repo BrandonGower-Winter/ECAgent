@@ -68,7 +68,7 @@ class Agent:
             self.components[type(component)] = component
             self.model.systemManager.registerComponent(component)
 
-    def removeComponent(self, component_type : type):
+    def removeComponent(self, component_type: type):
         """
         Removes component of type ```component_type`` from the agent.
 
@@ -87,7 +87,7 @@ class Agent:
             self.model.systemManager.deregisterComponent(self.components[component_type])
             del self.components[component_type]
 
-    def getComponent(self, component_type: type, throw_error : bool = False):
+    def getComponent(self, component_type: type, throw_error: bool = False):
         """Gets a component that is the same type as ``component_type``.
 
         Parameters
@@ -112,7 +112,7 @@ class Agent:
         if component_type in self.components.keys():
             return self.components[component_type]
         elif throw_error:
-            raise(ComponentNotFoundError(self, component_type))
+            raise ComponentNotFoundError(self, component_type)
         else:
             return None
 
@@ -320,9 +320,9 @@ class Environment(Agent):
         return None
 
 
-########################################################################################################################
-############################################### Exceptions #############################################################
-########################################################################################################################
+##############
+# Exceptions #
+##############
 
 class ComponentNotFoundError(Exception):
     """Exception raised for errors when components are accessed on agents that do not have them.
@@ -337,7 +337,7 @@ class ComponentNotFoundError(Exception):
         Explanation of error.
     """
 
-    def __init__(self, agent : Agent, component_type : type):
+    def __init__(self, agent: Agent, component_type: type):
         """
         Parameters
         ----------

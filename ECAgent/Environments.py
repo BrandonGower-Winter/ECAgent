@@ -106,7 +106,7 @@ class LineWorld(Environment):
 
         return neighbours
 
-    def move(self, agent : Agent, x : int):
+    def move(self, agent: Agent, x: int):
         """Moves an agent x units along the environment.
 
         The function automatically clamps agent movement to the range ``0 <= x < self.width``.
@@ -128,6 +128,31 @@ class LineWorld(Environment):
 
         component = agent[PositionComponent]
         component.x = max(min(component.x + x, self.width - 1), 0)
+
+    def move_to(self, agent: Agent, x: int):
+        """Moves an agent to position x in the environment.
+
+        Parameters
+        ----------
+        agent : Agent
+            The agent object to be moved.
+        x : int
+            The new x-coordinate of the agent.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If ``agent`` does not have a ``PositionComponent``.
+        IndexError
+            If x-coordinate are out of bounds.
+        """
+        if PositionComponent not in agent:
+            raise ComponentNotFoundError(agent, PositionComponent)
+        elif 0 <= x < self.width:
+            component = agent[PositionComponent]
+            component.x = x
+        else:
+            raise IndexError(f'Position ({x}) is out of the environment\'s range')
 
 
 class GridWorld(Environment):
@@ -219,7 +244,7 @@ class GridWorld(Environment):
 
         return neighbours
 
-    def move(self, agent : Agent, x : int = 0, y : int = 0):
+    def move(self, agent: Agent, x: int = 0, y: int = 0):
         """Moves an agent (x,y) units in the environment.
 
         The function automatically clamps agent movement to the range ``(0,0) <= x < (self.width,self.height)``.
@@ -244,6 +269,34 @@ class GridWorld(Environment):
         component = agent[PositionComponent]
         component.x = max(min(component.x + x, self.width - 1), 0)
         component.y = max(min(component.y + y, self.height - 1), 0)
+
+    def move_to(self, agent: Agent, x: int = 0, y: int = 0):
+        """Moves an agent to position (x,y) in the environment.
+
+        Parameters
+        ----------
+        agent : Agent
+            The agent object to be moved.
+        x : int, Optional
+            The new x-coordinate of the agent. Defaults to 0.
+        y : int, Optional
+            The new y-coordinate of the agent. Defaults to 0.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If ``agent`` does not have a ``PositionComponent``.
+        IndexError
+            If coordinates are out of bounds.
+        """
+        if PositionComponent not in agent:
+            raise ComponentNotFoundError(agent, PositionComponent)
+        elif 0 <= x < self.width and 0 <= y < self.height:
+            component = agent[PositionComponent]
+            component.x = x
+            component.y = y
+        else:
+            raise IndexError(f'Position ({x},{y}) is out of the environment\'s range')
 
 
 class CubeWorld(Environment):
@@ -343,7 +396,7 @@ class CubeWorld(Environment):
 
         return neighbours
 
-    def move(self, agent : Agent, x : int = 0, y : int = 0, z : int  = 0):
+    def move(self, agent: Agent, x: int = 0, y: int = 0, z: int = 0):
         """Moves an agent (x,y,z) units in the environment.
 
         The function automatically clamps agent movement to the range
@@ -372,3 +425,34 @@ class CubeWorld(Environment):
         component.x = max(min(component.x + x, self.width - 1), 0)
         component.y = max(min(component.y + y, self.height - 1), 0)
         component.z = max(min(component.z + z, self.depth - 1), 0)
+
+    def move_to(self, agent: Agent, x: int = 0, y: int = 0, z: int = 0):
+        """Moves an agent to position (x,y,z) in the environment.
+
+        Parameters
+        ----------
+        agent : Agent
+            The agent object to be moved.
+        x : int, Optional
+            The new x-coordinate of the agent. Defaults to 0.
+        y : int, Optional
+            The new y-coordinate of the agent. Defaults to 0.
+        z : int, Optional
+            The new z-coordinate of the agent. Defaults to 0.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If ``agent`` does not have a ``PositionComponent``.
+        IndexError
+            If coordinates are out of bounds.
+        """
+        if PositionComponent not in agent:
+            raise ComponentNotFoundError(agent, PositionComponent)
+        elif 0 <= x < self.width and 0 <= y < self.height and 0 <= z < self.depth:
+            component = agent[PositionComponent]
+            component.x = x
+            component.y = y
+            component.z = z
+        else:
+            raise IndexError(f'Position ({x},{y},{z}) is out of the environment\'s range')

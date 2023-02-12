@@ -197,6 +197,26 @@ class TestLineWorld:
         with pytest.raises(ComponentNotFoundError):
             model.environment.move(agent3, 1)
 
+    def test_move_to(self):
+        model = Model()
+        model.environment = LineWorld(5, model)
+        agent = Agent("a1", model)
+
+        model.environment.addAgent(agent, 0)
+
+        # Test out of bounds
+        with pytest.raises(IndexError):
+            model.environment.move_to(agent, -1)
+
+        # Test valid move
+        model.environment.move_to(agent, 2)
+        assert agent[PositionComponent].x == 2
+
+        # Test without component
+        agent2 = Agent('a2', model)
+        with pytest.raises(ComponentNotFoundError):
+            model.environment.move_to(agent2, 1)
+
 
 class TestGridWorld:
 
@@ -414,6 +434,32 @@ class TestGridWorld:
         agent3 = Agent('a3', model)
         with pytest.raises(ComponentNotFoundError):
             model.environment.move(agent3)
+
+    def test_move_to(self):
+        model = Model()
+        model.environment = GridWorld(5, 5, model)
+        agent = Agent("a1", model)
+
+        model.environment.addAgent(agent, 0, 0)
+
+        # Test Default case
+        model.environment.move_to(agent)
+        assert agent[PositionComponent].x == 0
+        assert agent[PositionComponent].y == 0
+
+        # Test out of bounds
+        with pytest.raises(IndexError):
+            model.environment.move_to(agent, -1, -1)
+
+        # Test valid move
+        model.environment.move_to(agent, 2, 2)
+        assert agent[PositionComponent].x == 2
+        assert agent[PositionComponent].y == 2
+
+        # Test without component
+        agent2 = Agent('a2', model)
+        with pytest.raises(ComponentNotFoundError):
+            model.environment.move_to(agent2)
 
 
 class TestCubeWorld:
@@ -637,3 +683,31 @@ class TestCubeWorld:
         agent3 = Agent('a3', model)
         with pytest.raises(ComponentNotFoundError):
             model.environment.move(agent3)
+
+    def test_move_to(self):
+        model = Model()
+        model.environment = CubeWorld(5, 5, 5, model)
+        agent = Agent("a1", model)
+
+        model.environment.addAgent(agent, 0, 0, 0)
+
+        # Test Default case
+        model.environment.move_to(agent)
+        assert agent[PositionComponent].x == 0
+        assert agent[PositionComponent].y == 0
+        assert agent[PositionComponent].z == 0
+
+        # Test out of bounds
+        with pytest.raises(IndexError):
+            model.environment.move_to(agent, -1, -1, -1)
+
+        # Test valid move
+        model.environment.move_to(agent, 2, 2, 2)
+        assert agent[PositionComponent].x == 2
+        assert agent[PositionComponent].y == 2
+        assert agent[PositionComponent].z == 2
+
+        # Test without component
+        agent2 = Agent('a2', model)
+        with pytest.raises(ComponentNotFoundError):
+            model.environment.move_to(agent2)

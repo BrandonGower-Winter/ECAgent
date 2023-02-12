@@ -4,7 +4,6 @@ import pytest
 from ECAgent.Core import *
 # Unit testing for src framework
 
-
 class TestEnvironment:
 
     def test__init__(self):
@@ -326,7 +325,7 @@ class TestAgent:
         agent.removeComponent(Component)
         assert len(agent.components) == 0
 
-        with pytest.raises(Exception):
+        with pytest.raises(ComponentNotFoundError):
             agent.removeComponent(Component)
 
     def test_getComponent(self):
@@ -335,6 +334,10 @@ class TestAgent:
 
         # Checks  to see if getting a component that doesn't exist returns None
         assert agent.getComponent(Component) is None
+
+        # Checks the same argument but it should throw an error instead.
+        with pytest.raises(ComponentNotFoundError):
+            agent.getComponent(Component, True)
 
         component = Component(agent, model)
         agent.addComponent(component)
@@ -404,3 +407,16 @@ class TestAgent:
         agent.addComponent(component)
         # True check
         assert Component in agent
+
+
+class TestComponentNotFoundError:
+
+    def test__init__(self):
+        model = Model()
+        agent = Agent('a', model)
+
+        error = ComponentNotFoundError(agent, Component)
+
+        assert error.agent is agent
+        assert error.component_type == Component
+        assert error.message == 'Agent a does not have a component of type <class \'ECAgent.Core.Component\'>.'

@@ -68,18 +68,51 @@ class Agent:
             self.components[type(component)] = component
             self.model.systemManager.registerComponent(component)
 
-    def removeComponent(self, component: type):
-        if component not in self.components.keys():
-            raise Exception("Agent does not have component")
-        else:
-            self.model.systemManager.deregisterComponent(self.components[component])
-            del self.components[component]
+    def removeComponent(self, component_type : type):
+        """
+        Removes component of type ```component_type`` from the agent.
 
-    def getComponent(self, component_type: type):
-        """ Gets a component that is the same type as component type.
-        Returns None if component doesn't exist."""
+        Parameters:
+        component_type : type
+            Class of component to be removed from agent.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If agent does not have a component of class ``component_type``.
+        """
+        if component_type not in self.components.keys():
+            raise ComponentNotFoundError(self, component_type)
+        else:
+            self.model.systemManager.deregisterComponent(self.components[component_type])
+            del self.components[component_type]
+
+    def getComponent(self, component_type: type, throw_error : bool = False):
+        """Gets a component that is the same type as ``component_type``.
+
+        Parameters
+        ----------
+        component_type : type
+            The type of component to search for.
+        throw_error : bool, Optional
+            Boolean that specifies whether a ``ComponentNotFoundError`` should be raised upon failing to find a
+            component of type ``component_type``. Defaults to ``False``.
+        Returns
+        -------
+        Component
+            A component object matching the class specified by ``component_type``.
+        None
+            Returns None if agent does not have a component of class ``component_type``.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If ``throw_error`` is ``True`` and no component matching ``component_type`` is found.
+        """
         if component_type in self.components.keys():
             return self.components[component_type]
+        elif throw_error:
+            raise(ComponentNotFoundError(self, component_type))
         else:
             return None
 
@@ -285,3 +318,35 @@ class Environment(Agent):
     def getDimensions(self):
         """Returns the dimensions of the environment. For the base environment class it returns None."""
         return None
+
+
+########################################################################################################################
+############################################### Exceptions #############################################################
+########################################################################################################################
+
+class ComponentNotFoundError(Exception):
+    """Exception raised for errors when components are accessed on agents that do not have them.
+
+    Attributes:
+    ----------
+    agent : Agent
+        Agent whose components list was accessed.
+    component_type : type
+        Class of Component that was searched for.
+    message : str
+        Explanation of error.
+    """
+
+    def __init__(self, agent : Agent, component_type : type):
+        """
+        Parameters
+        ----------
+        agent : Agent
+            Agent whose components list was accessed.
+        component_type : type
+            Class of Component that was searched for.
+        """
+        self.agent = agent
+        self.component_type = component_type
+        self.message = f'Agent {agent.id} does not have a component of type {str(component_type)}.'
+        super(ComponentNotFoundError, self).__init__(self.message)

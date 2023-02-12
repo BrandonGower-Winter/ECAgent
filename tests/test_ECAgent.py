@@ -143,6 +143,21 @@ class TestEnvironment:
 
         assert i == 1
 
+    def test_shuffle(self):
+
+        model = Model()
+
+        a1 = Agent("a1", model)
+        a1.addComponent(Component(self, model))
+        model.environment.addAgent(a1)
+        model.environment.addAgent(Agent("a2", model))
+
+        # Test with no template
+        assert len(model.environment.shuffle()) == 2
+
+        # Test with template
+        assert len(model.environment.shuffle(Component)) == 1
+
 
 class TestModel:
 

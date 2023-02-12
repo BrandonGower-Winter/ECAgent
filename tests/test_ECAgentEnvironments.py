@@ -34,10 +34,12 @@ class TestPositionComponent:
         assert pos.yz() == (2, 3)
         assert pos.xyz() == (1, 2, 3)
 
+
 def test_distance():
     a = PositionComponent(None, None, 2, 5, 3)
     b = PositionComponent(None, None, 0, 7, 4)
     assert -0.0005 < distance(a , b) - 3 < 0.0005
+
 
 def test_distance_sqr():
     a = PositionComponent(None, None, 2, 5, 3)

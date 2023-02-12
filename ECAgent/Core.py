@@ -319,6 +319,30 @@ class Environment(Agent):
         """Returns the dimensions of the environment. For the base environment class it returns None."""
         return None
 
+    def shuffle(self, *args):
+        """Returns a list of agents with matching components in a random order.
+
+        This method is just a wrapper for calling ``self.model.random.shuffle(self.getAgents(*args))``. The method
+        finds a list of agents with components matching those included in ``*args`` and returns them in random order.
+
+        The order is random each time the function is called. This is useful if you want to mitigate benefits agents get
+        when executing their behaviour earlier than others.
+
+        Parameters
+        ----------
+        args
+            A list of ``Component`` classes that describe a template the agents need to match in order to be included in
+            the list of shuffled agents.
+
+        Returns
+        -------
+        list
+            Of agents with components matching ``*args``. The order of the agents is random.
+        """
+        matching_agents = self.getAgents(*args)
+        self.model.random.shuffle(matching_agents)
+        return matching_agents
+
 
 ##############
 # Exceptions #

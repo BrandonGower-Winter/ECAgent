@@ -126,6 +126,24 @@ class TestEnvironment:
         env.addAgent(Agent("a1", None))
         assert len(env) == 1
 
+    def test__iter__(self):
+        env = Environment(None)
+
+        # Test Empty case
+        i = 0
+        for _ in env:
+            i+=1
+
+        assert i == 0
+
+        # Test once agent has been added
+        env.addAgent(Agent("a1", None))
+        i = 0
+        for _ in env:
+            i+=1
+
+        assert i == 1
+
 
 class TestModel:
 

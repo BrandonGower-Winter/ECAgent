@@ -189,8 +189,10 @@ class SystemManager:
 
 
 class Environment(Agent):
-    """This is the base environment class.
-    It is a void environment which means that is has no spacial properties"""
+    """Base environment class.
+
+    It is a void environment which means that is has no spacial properties.
+    """
 
     __slots__ = ['agents']
 
@@ -216,7 +218,14 @@ class Environment(Agent):
 
     def getAgent(self, id: str):
         """Gets agent obj based on its id.
-        Returns None if agent does not exist"""
+
+        Returns None if agent does not exist.
+
+        Parameters
+        ----------
+        id : str
+            The id of the agent object to search for.
+        """
         if id in self.agents.keys():
             return self.agents[id]
         else:
@@ -266,9 +275,13 @@ class Environment(Agent):
         return matching_agents
 
     def __len__(self):
-        """ Returns the number of agents currently in the environment """
+        """Returns the number of agents currently in the environment."""
         return len(self.agents)
 
+    def __iter__(self):
+        """Returns a list all of all agents in the environment."""
+        return (self.agents[a] for a in self.agents)
+
     def getDimensions(self):
-        """ Returns the dimensions of the environment. For the base environment class it returns None """
+        """Returns the dimensions of the environment. For the base environment class it returns None."""
         return None

@@ -27,6 +27,22 @@ class TestPositionComponent:
         pos = PositionComponent(None, None, 1, 2, 3)
         assert pos.getPosition() == (1, 2, 3)
 
+    def test_shorthands(self):
+        pos = PositionComponent(None, None, 1, 2, 3)
+        assert pos.xy() == (1, 2)
+        assert pos.xz() == (1, 3)
+        assert pos.yz() == (2, 3)
+        assert pos.xyz() == (1, 2, 3)
+
+def test_distance():
+    a = PositionComponent(None, None, 2, 5, 3)
+    b = PositionComponent(None, None, 0, 7, 4)
+    assert -0.0005 < distance(a , b) - 3 < 0.0005
+
+def test_distance_sqr():
+    a = PositionComponent(None, None, 2, 5, 3)
+    b = PositionComponent(None, None, 0, 7, 4)
+    assert -0.0005 < distance_sqr(a , b) - 9 < 0.0005
 
 class TestLineWorld:
 

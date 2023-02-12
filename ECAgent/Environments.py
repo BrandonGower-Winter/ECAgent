@@ -1,3 +1,5 @@
+import math
+
 import pandas
 
 from ECAgent.Core import Agent, Environment, Component, Model, ComponentNotFoundError
@@ -5,14 +7,36 @@ from ECAgent.Core import Agent, Environment, Component, Model, ComponentNotFound
 
 def discreteGridPosToID(x: int, y: int = 0, width: int = 0, z: int = 0, height: int = 0):
     """Returns a unique number of based on the x, y and z coordinates entered.
-    Uniqueness is dimension dependent"""
+
+    Uniqueness is dimension dependent. The equation for calculating uniqueness is defined as:
+     ```(z * width * height) + (y * width) + x`
+
+    Parameters
+    ----------
+    x : int
+        The x-coordinate.
+    y : int, Optional
+        The y-coordinate. Defaults to 0.
+    width : int, Optional
+        The width of the environment. Defaults to 0.
+    z : int, Optional
+        The z-coordinate. Defaults to 0.
+    height : int, Optional
+        The height of the environment. Defaults to 0.
+
+    Returns
+    -------
+    int
+        The unique ID.
+    """
     return (z * width * height) + (y * width) + x
 
 
 class PositionComponent(Component):
-    """ A position component. It contains three float properties: x, y, z.
+    """A position component. It contains three float properties: x, y, z.
     This component can be used to store the position of an Agent in a 1-3D world.
-    It is used by the LineWorld, GridWorld and CubeWorld classes to do exactly that."""
+    It is used by the LineWorld, GridWorld and CubeWorld classes to do exactly that.
+    """
 
     __slots__ = ['x', 'y', 'z']
 
@@ -25,6 +49,67 @@ class PositionComponent(Component):
     def getPosition(self) -> (float, float, float):
         """Returns the x,y and z values of the component as a tuple"""
         return self.x, self.y, self.z
+
+    def xy(self):
+        """Returns the x and y values of the component as a 2-tuple.
+        """
+        return self.x, self.y
+
+    def xz(self):
+        """Returns the x and z values of the component as a 2-tuple.
+        """
+        return self.x, self.z
+
+    def yz(self):
+        """Returns the y and z values of the component as a 2-tuple.
+        """
+        return self.y, self.z
+
+    def xyz(self):
+        """Returns the x, y and z values of the component as a 3-tuple.
+
+        Equivalent to ``PositionComponent.getPosition()``
+        """
+        return self.getPosition()
+
+
+def distance(a : PositionComponent, b : PositionComponent) -> float:
+    """Calculates the distance from ``PositionComponent`` a to ``PositionComponent`` b.
+
+    Parameters
+    ----------
+    a : PositionComponent
+        The first set of coordinates.
+    b : PositionComponent
+        The second set of coordinates.
+
+    Returns
+    -------
+    float
+        The distance from a to b.
+    """
+    return math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2)
+
+
+def distance_sqr(a : PositionComponent, b : PositionComponent) -> float:
+    """Calculates the squared distance from ``PositionComponent`` a to ``PositionComponent`` b.
+
+    This function does not call ``math.sqrt()`` so it is more performant than calling ``distance(a,b)``.
+    This can be useful in situations where you don't need the exact distance (e.g. when comparing distances).
+
+    Parameters
+    ----------
+    a : PositionComponent
+        The first set of coordinates.
+    b : PositionComponent
+        The second set of coordinates.
+
+    Returns
+    -------
+    float
+        The squared distance from a to b.
+    """
+    return (a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2
 
 
 class LineWorld(Environment):

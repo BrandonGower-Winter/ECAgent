@@ -164,6 +164,39 @@ class TestLineWorld:
         assert neighbours[1] == 2
         assert neighbours[2] == 3
 
+    def test_move(self):
+        model = Model()
+        model.environment = LineWorld(5, model)
+        agent = Agent("a1", model)
+        agent2 = Agent("a2", model)
+
+        model.environment.addAgent(agent, 0)
+        model.environment.addAgent(agent2, 4)
+
+        # Test out of bounds on the left
+        model.environment.move(agent, -1)
+        assert agent[PositionComponent].x == 0
+
+        # Test valid move to the right
+        model.environment.move(agent, 2)
+        assert agent[PositionComponent].x == 2
+
+        # Test outs of bounds on the right
+        model.environment.move(agent2, 1)
+        assert agent2[PositionComponent].x == 4
+
+        # Test valid move to the left
+        model.environment.move(agent2, -2)
+        assert agent2[PositionComponent].x == 2
+
+        # Test if updates reflect in environment
+        assert len(model.environment.getAgentsAt(2)) == 2
+
+        # Test without component
+        agent3 = Agent('a3', model)
+        with pytest.raises(ComponentNotFoundError):
+            model.environment.move(agent3, 1)
+
 
 class TestGridWorld:
 
@@ -340,6 +373,48 @@ class TestGridWorld:
         assert neighbours[7] == 7
         assert neighbours[8] == 8
 
+    def test_move(self):
+        model = Model()
+        model.environment = GridWorld(5, 5, model)
+        agent = Agent("a1", model)
+        agent2 = Agent("a2", model)
+
+        model.environment.addAgent(agent, 0, 0)
+        model.environment.addAgent(agent2, 4, 4)
+
+        # Test Default case
+        model.environment.move(agent)
+        assert agent[PositionComponent].x == 0
+        assert agent[PositionComponent].y == 0
+
+        # Test out of bounds on the left
+        model.environment.move(agent, -1, -1)
+        assert agent[PositionComponent].x == 0
+        assert agent[PositionComponent].y == 0
+
+        # Test valid move to the right
+        model.environment.move(agent, 2, 2)
+        assert agent[PositionComponent].x == 2
+        assert agent[PositionComponent].y == 2
+
+        # Test outs of bounds on the right
+        model.environment.move(agent2, 1, 1)
+        assert agent2[PositionComponent].x == 4
+        assert agent2[PositionComponent].y == 4
+
+        # Test valid move to the left
+        model.environment.move(agent2, -2, -2)
+        assert agent2[PositionComponent].x == 2
+        assert agent2[PositionComponent].y == 2
+
+        # Test if updates reflect in environment
+        assert len(model.environment.getAgentsAt(2,2)) == 2
+
+        # Test without component
+        agent3 = Agent('a3', model)
+        with pytest.raises(ComponentNotFoundError):
+            model.environment.move(agent3)
+
 
 class TestCubeWorld:
 
@@ -515,3 +590,50 @@ class TestCubeWorld:
         assert neighbours[5] == discreteGridPosToID(1, 0, cubeworld.width, 1, cubeworld.height)
         assert neighbours[6] == discreteGridPosToID(0, 1, cubeworld.width, 1, cubeworld.height)
         assert neighbours[7] == discreteGridPosToID(1, 1, cubeworld.width, 1, cubeworld.height)
+
+    def test_move(self):
+        model = Model()
+        model.environment = CubeWorld(5, 5, 5, model)
+        agent = Agent("a1", model)
+        agent2 = Agent("a2", model)
+
+        model.environment.addAgent(agent, 0, 0, 0)
+        model.environment.addAgent(agent2, 4, 4, 4)
+
+        # Test Default case
+        model.environment.move(agent)
+        assert agent[PositionComponent].x == 0
+        assert agent[PositionComponent].y == 0
+        assert agent[PositionComponent].z == 0
+
+        # Test out of bounds on the left
+        model.environment.move(agent, -1, -1, -1)
+        assert agent[PositionComponent].x == 0
+        assert agent[PositionComponent].y == 0
+        assert agent[PositionComponent].z == 0
+
+        # Test valid move to the right
+        model.environment.move(agent, 2, 2, 2)
+        assert agent[PositionComponent].x == 2
+        assert agent[PositionComponent].y == 2
+        assert agent[PositionComponent].z == 2
+
+        # Test outs of bounds on the right
+        model.environment.move(agent2, 1, 1, 1)
+        assert agent2[PositionComponent].x == 4
+        assert agent2[PositionComponent].y == 4
+        assert agent2[PositionComponent].z == 4
+
+        # Test valid move to the left
+        model.environment.move(agent2, -2, -2, -2)
+        assert agent2[PositionComponent].x == 2
+        assert agent2[PositionComponent].y == 2
+        assert agent2[PositionComponent].z == 2
+
+        # Test if updates reflect in environment
+        assert len(model.environment.getAgentsAt(2,2,2)) == 2
+
+        # Test without component
+        agent3 = Agent('a3', model)
+        with pytest.raises(ComponentNotFoundError):
+            model.environment.move(agent3)

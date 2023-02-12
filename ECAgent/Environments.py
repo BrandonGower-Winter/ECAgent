@@ -1,6 +1,6 @@
 import pandas
 
-from ECAgent.Core import Agent, Environment, Component, Model
+from ECAgent.Core import Agent, Environment, Component, Model, ComponentNotFoundError
 
 
 def discreteGridPosToID(x: int, y: int = 0, width: int = 0, z: int = 0, height: int = 0):
@@ -106,6 +106,29 @@ class LineWorld(Environment):
 
         return neighbours
 
+    def move(self, agent : Agent, x : int):
+        """Moves an agent x units along the environment.
+
+        The function automatically clamps agent movement to the range ``0 <= x < self.width``.
+
+        Parameters
+        ----------
+        agent : Agent
+            The agent object to be moved.
+        x : int
+            The number of discrete units to move the agent.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If ``agent`` does not have a ``PositionComponent``.
+        """
+        if PositionComponent not in agent:
+            raise ComponentNotFoundError(agent, PositionComponent)
+
+        component = agent[PositionComponent]
+        component.x = max(min(component.x + x, self.width - 1), 0)
+
 
 class GridWorld(Environment):
     """ GridWorld is a discrete environment with 2 axes (x,y-axes). It can be used in place of the base Environment
@@ -195,6 +218,32 @@ class GridWorld(Environment):
                     neighbours.append(id)
 
         return neighbours
+
+    def move(self, agent : Agent, x : int = 0, y : int = 0):
+        """Moves an agent (x,y) units in the environment.
+
+        The function automatically clamps agent movement to the range ``(0,0) <= x < (self.width,self.height)``.
+
+        Parameters
+        ----------
+        agent : Agent
+            The agent object to be moved.
+        x : int, Optional
+            The number of discrete units to move the agent. Defaults to 0.
+        y : int, Optional
+            The number of discrete units to move the agent. Defaults to 0.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If ``agent`` does not have a ``PositionComponent``.
+        """
+        if PositionComponent not in agent:
+            raise ComponentNotFoundError(agent, PositionComponent)
+
+        component = agent[PositionComponent]
+        component.x = max(min(component.x + x, self.width - 1), 0)
+        component.y = max(min(component.y + y, self.height - 1), 0)
 
 
 class CubeWorld(Environment):
@@ -293,3 +342,33 @@ class CubeWorld(Environment):
                         neighbours.append(id)
 
         return neighbours
+
+    def move(self, agent : Agent, x : int = 0, y : int = 0, z : int  = 0):
+        """Moves an agent (x,y,z) units in the environment.
+
+        The function automatically clamps agent movement to the range
+        ``(0,0,0) <= x < (self.width,self.height,self.depth)``.
+
+        Parameters
+        ----------
+        agent : Agent
+            The agent object to be moved.
+        x : int, Optional
+            The number of discrete units to move the agent. Defaults to 0.
+        y : int, Optional
+            The number of discrete units to move the agent. Defaults to 0.
+        z : int, Optional
+            The number of discrete units to move the agent. Defaults to 0.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If ``agent`` does not have a ``PositionComponent``.
+        """
+        if PositionComponent not in agent:
+            raise ComponentNotFoundError(agent, PositionComponent)
+
+        component = agent[PositionComponent]
+        component.x = max(min(component.x + x, self.width - 1), 0)
+        component.y = max(min(component.y + y, self.height - 1), 0)
+        component.z = max(min(component.z + z, self.depth - 1), 0)

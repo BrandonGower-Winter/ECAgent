@@ -73,7 +73,7 @@ class PositionComponent(Component):
         return self.getPosition()
 
 
-def distance(a : PositionComponent, b : PositionComponent) -> float:
+def distance(a: PositionComponent, b: PositionComponent) -> float:
     """Calculates the distance from ``PositionComponent`` a to ``PositionComponent`` b.
 
     Parameters
@@ -91,7 +91,7 @@ def distance(a : PositionComponent, b : PositionComponent) -> float:
     return math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2)
 
 
-def distance_sqr(a : PositionComponent, b : PositionComponent) -> float:
+def distance_sqr(a: PositionComponent, b: PositionComponent) -> float:
     """Calculates the squared distance from ``PositionComponent`` a to ``PositionComponent`` b.
 
     This function does not call ``math.sqrt()`` so it is more performant than calling ``distance(a,b)``.
@@ -110,6 +110,26 @@ def distance_sqr(a : PositionComponent, b : PositionComponent) -> float:
         The squared distance from a to b.
     """
     return (a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2
+
+
+class ConstantGenerator:
+    """A functor used to create CellComponents with a constant value.
+
+    The idea behind this class is to create a ``ConstantGenerator(val)`` object and supply it as the generator when
+    calling ``addCellComponent`` to a DiscreteWorld (e.g. ``GridWorld``). The component will then be created with all
+    cells having ``value == val``.
+
+    Attributes
+    ----------
+    value : Any
+        The value you want to set your cell component's values to.
+    """
+    def __init__(self, value):
+        self.value = value
+
+    def __call__(self, pos: tuple, cells: pandas.DataFrame):
+        """Used by the ``addCellComponent`` methods to population a cell component with the value of ``self.value``."""
+        return self.value
 
 
 class LineWorld(Environment):

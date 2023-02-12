@@ -44,6 +44,18 @@ def test_distance_sqr():
     b = PositionComponent(None, None, 0, 7, 4)
     assert -0.0005 < distance_sqr(a , b) - 9 < 0.0005
 
+
+class TestConstantGenerator:
+
+    def test__init__(self):
+        generator = ConstantGenerator(5)
+        assert generator.value == 5
+
+    def test__call__(self):
+        generator = ConstantGenerator(5)
+        assert generator(None, None) == 5
+
+
 class TestLineWorld:
 
     def test__init__(self):

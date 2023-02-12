@@ -56,6 +56,41 @@ class TestConstantGenerator:
         assert generator(None, None) == 5
 
 
+class TestLookupGenerator:
+
+    def test__init__(self):
+        table = [5, 5, 5]
+        generator = LookupGenerator(table)
+        assert generator.table == table
+
+    def test__call__(self):
+
+        one_d = [1, 2, 3]
+
+        two_d = [[1, 2, 3],
+                 [4, 5, 6]]
+
+        three_d = [
+            [
+                [1,2,3],
+                [4, 5, 6]
+            ],
+            [
+                [7, 8, 9],
+                [10, 11, 12]
+            ]
+        ]
+
+        generator = LookupGenerator(one_d)
+        assert generator(1, None) == 2
+
+        generator = LookupGenerator(two_d)
+        assert generator((1,1), None) == 5
+
+        generator = LookupGenerator(three_d)
+        assert generator((1,1,1), None) == 11
+
+
 class TestLineWorld:
 
     def test__init__(self):

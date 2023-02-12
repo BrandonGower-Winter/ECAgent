@@ -128,8 +128,39 @@ class ConstantGenerator:
         self.value = value
 
     def __call__(self, pos: tuple, cells: pandas.DataFrame):
-        """Used by the ``addCellComponent`` methods to population a cell component with the value of ``self.value``."""
+        """Used by the ``addCellComponent`` methods to populate a cell component with the value of ``self.value``.
+        """
         return self.value
+
+
+class LookupGenerator:
+    """A functor used to create CellComponents based on a Lookup table.
+
+    The intention behind this class is to add a convenient way for users to create Cell Components with different
+    values. This is done by creating a lookup table (of the same dimensions as the environment) and supplying it to the
+    generator ``LookupGenerator(lookup_table)``.
+
+    Note that coordinates are filled in a [x, y, z] fashion. This means you may need to transform your data
+    (e.g. an image) so that x-coordinates can be referenced first.
+
+    Attributes
+    ----------
+    table : Any
+        The lookup table.
+    """
+    def __init__(self, table):
+        self.table = table
+
+    def __call__(self, pos, cells: pandas.DataFrame):
+        """Used by the ``addCellComponent`` methods to populate a cell component with the value of ``self.table``.
+        at coordinate ``pos``.
+        """
+        if type(pos) == int:  # LineWorld
+            return self.table[pos]
+        elif len(pos) == 2:  # GridWorld
+            return self.table[pos[0]][pos[1]]
+        else:  # CubeWorld
+            return self.table[pos[0]][pos[1]][pos[2]]
 
 
 class LineWorld(Environment):

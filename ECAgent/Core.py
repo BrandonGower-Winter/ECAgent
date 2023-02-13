@@ -242,15 +242,26 @@ class Environment(Agent):
         else:
             self.agents[agent.id] = agent
 
-    def removeAgent(self, agentID: str):
-        if agentID not in self.agents.keys():
-            raise Exception("Cannot remove agent that is "
-                            "not in the environment")
-        else:
-            del self.agents[agentID]
+    def removeAgent(self, a_id: str):
+        """Removes an agent with ``agent.id == a_id`` from the environment.
 
-    def getAgent(self, id: str):
-        """Gets agent obj based on its id.
+        Parameters
+        ----------
+        a_id : str
+            The ``id`` of the agent to remove.
+
+        Raises
+        ------
+        AgentNotFoundError
+            If no agent with an ``agent.id == a_id`` can be found.
+        """
+        if a_id not in self.agents.keys():
+            raise AgentNotFoundError(a_id, self)
+        else:
+            del self.agents[a_id]
+
+    def getAgent(self, id: str, throw_error: bool = False):
+        """Gets agent obj based on its ``id``.
 
         Returns None if agent does not exist.
 
@@ -258,9 +269,24 @@ class Environment(Agent):
         ----------
         id : str
             The id of the agent object to search for.
+        throw_error : bool, Optional
+            Determines if the function should raise an AgentNotFoundError when it cannot find an agent object with a
+            matching id.
+
+        Returns
+        -------
+        Agent
+            The agent with ``agent.id == id``
+
+        Raises
+        ------
+        AgentNotFoundError
+            If ``throw_error == True`` and agent with ``agent.id == id`` could not be found.
         """
         if id in self.agents.keys():
             return self.agents[id]
+        elif throw_error:
+            raise AgentNotFoundError(id, self)
         else:
             return None
 
@@ -348,11 +374,38 @@ class Environment(Agent):
 # Exceptions #
 ##############
 
+class AgentNotFoundError(Exception):
+    """Exception raised for errors when an agent object cannot be found.
+
+    Attributes:
+    -----------
+    a_id : str
+        ``id`` of Agent to search for.
+    environment : Environment
+        Environment that was searched.
+    message : str
+        Explanation of error.
+    """
+    def __init__(self, a_id: str, environment: Environment):
+        """
+        Parameters
+        ----------
+        a_id : str
+            ``id`` of Agent to search for.
+        environment : Environment
+            Environment that was searched.
+        """
+        self.a_id = a_id
+        self.environment = environment
+        self.message = f'Agent "{a_id}" could not be found in Environment "{environment.id}"'
+        super(AgentNotFoundError, self).__init__(self.message)
+
+
 class ComponentNotFoundError(Exception):
     """Exception raised for errors when components are accessed on agents that do not have them.
 
     Attributes:
-    ----------
+    -----------
     agent : Agent
         Agent whose components list was accessed.
     component_type : type

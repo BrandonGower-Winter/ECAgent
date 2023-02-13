@@ -34,15 +34,21 @@ class TestEnvironment:
 
         assert len(model.environment.agents) == 0
 
-        with pytest.raises(Exception):
+        with pytest.raises(AgentNotFoundError):
             model.environment.removeAgent(agent.id)
 
     def test_getAgent(self):
         model = Model()
         agent = Agent("a1", model)
 
+        # Not found with no error
         assert model.environment.getAgent(agent.id) is None
 
+        # Not found with error
+        with pytest.raises(AgentNotFoundError):
+            model.environment.getAgent(agent.id, True)
+
+        # Found
         model.environment.addAgent(agent)
         assert model.environment.getAgent(agent.id) == agent
 
@@ -423,6 +429,17 @@ class TestAgent:
         # True check
         assert Component in agent
 
+
+class TestAgentNotFoundError:
+
+    def test__init__(self):
+        model = Model()
+
+        error = AgentNotFoundError('a', model.environment)
+
+        assert error.a_id == 'a'
+        assert error.environment == model.environment
+        assert error.message == 'Agent "a" could not be found in Environment "ENVIRONMENT"'
 
 class TestComponentNotFoundError:
 

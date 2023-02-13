@@ -452,3 +452,13 @@ class TestComponentNotFoundError:
         assert error.agent is agent
         assert error.component_type == Component
         assert error.message == 'Agent a does not have a component of type <class \'ECAgent.Core.Component\'>.'
+
+
+class TestSystemNotFoundError:
+
+    def test__init__(self):
+
+        error = SystemNotFoundError('s1')
+
+        assert error.s_id == 's1'
+        assert error.message == 'System with id "s1" does not exist.'

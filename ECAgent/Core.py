@@ -160,8 +160,13 @@ class SystemManager:
         self.model = model
 
     def addSystem(self, s: System):
-        """Adds System s to the systems dict and registers
-        it in the execution queue"""
+        """Adds System s to the ``System`` manager and registers it with execution queue.
+
+        Parameters
+        ----------
+        s : System
+            The ``System`` being added to the ``SystemManager``
+        """
 
         if s.id in self.systems.keys():
             raise Exception("System already registered.")
@@ -176,15 +181,24 @@ class SystemManager:
             if s not in self.executionQueue:
                 self.executionQueue.append(s)
 
-    def removeSystem(self, id: str):
-        """Removes System s from the systems dict and
-        deregisters it within the execution queue"""
+    def removeSystem(self, s_id: str):
+        """Removes ``System`` with ``System.id == s_id`` from the ``SystemManager``.
+
+        Parameters
+        ----------
+        s_id : str
+            The id of the system to be removed.
+
+        Raises
+        ------
+        SystemNotFoundError
+            If the no System with ``System.id == s_id`` can be found.
+        """
         if id not in self.systems.keys():
-            raise Exception("System cannot be deregistered because "
-                            "it was never registered to begin with")
+            raise SystemNotFoundError(s_id)
         else:
-            self.executionQueue.remove(self.systems[id])
-            del self.systems[id]
+            self.executionQueue.remove(self.systems[s_id])
+            del self.systems[s_id]
 
     def executeSystems(self):  # Simple execute cycle
         for sys in self.executionQueue:
@@ -427,3 +441,26 @@ class ComponentNotFoundError(Exception):
         self.component_type = component_type
         self.message = f'Agent {agent.id} does not have a component of type {str(component_type)}.'
         super(ComponentNotFoundError, self).__init__(self.message)
+
+
+class SystemNotFoundError(Exception):
+    """Exception raised for errors when systems that don't exist are accessed.
+
+    Attributes:
+    -----------
+    s_id : str
+        ``id`` of system that was searched for.
+    message : str
+        Explanation of error.
+    """
+
+    def __init__(self, s_id: str):
+        """
+        Parameters
+        ----------
+        s_id : str
+        ``id`` of system that was searched for.
+        """
+        self.s_id = s_id
+        self.message = f'System with id "{s_id}" does not exist.'
+        super(SystemNotFoundError, self).__init__(self.message)

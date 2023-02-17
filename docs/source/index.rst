@@ -11,7 +11,6 @@ Welcome to ECAgent's documentation!
    :caption: Contents:
 
    modules
-   ECAgent
 
 
 Indices and tables

@@ -33,18 +33,18 @@ ECAgent.Decode module
    :undoc-members:
    :show-inheritance:
 
+ECAgent.Tags module
+-------------------
+
+.. automodule:: ECAgent.Tags
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ECAgent.Visualization module
 ----------------------------
 
 .. automodule:: ECAgent.Visualization
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Exceptions
-----------
-
-.. autoclass:: ECAgent.Core.ComponentNotFoundError
    :members:
    :undoc-members:
    :show-inheritance:

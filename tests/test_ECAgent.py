@@ -52,25 +52,25 @@ class TestEnvironment:
         model.environment.addAgent(agent)
         assert model.environment.getAgent(agent.id) == agent
 
-    def test_getRandomAgent(self):
+    def test_get_random_agent(self):
 
         env = Environment(None)
 
-        assert env.getRandomAgent() is None
+        assert env.get_random_agent() is None
 
         model = Model()
         agent1 = Agent("a1", model)
         agent2 = Agent("a2", model)
 
-        assert model.environment.getRandomAgent() is None
+        assert model.environment.get_random_agent() is None
 
         model.environment.addAgent(agent1)
 
-        assert model.environment.getRandomAgent() is agent1
+        assert model.environment.get_random_agent() is agent1
 
         model.environment.addAgent(agent2)
 
-        random_agent = model.environment.getRandomAgent()
+        random_agent = model.environment.get_random_agent()
         assert random_agent is agent1 or random_agent is agent2
 
         # Test Component filter
@@ -81,18 +81,21 @@ class TestEnvironment:
 
         # Test for case in which no agents meet filter requirements
 
-        assert model.environment.getRandomAgent(CustomComponent) is None
+        assert model.environment.get_random_agent(CustomComponent) is None
 
         # Test case where agent does meet requirement
         agent1.addComponent(CustomComponent(agent1, model))
+        assert model.environment.get_random_agent(CustomComponent) is agent1
 
-        assert model.environment.getRandomAgent(CustomComponent) is agent1
+        # Test case with Tag
+        agent1.tag = 1
+        assert model.environment.get_random_agent(tag=1) is agent1
 
-    def test_getAgents(self):
+    def test_get_agents(self):
         model = Model()
 
         # Test empty list is returned when non agents occupy the environment
-        assert model.environment.getAgents() == []
+        assert model.environment.get_agents() == []
 
         # Test list when no filter is supplied but agents do occupy the environment
 
@@ -102,14 +105,18 @@ class TestEnvironment:
         model.environment.addAgent(agent1)
         model.environment.addAgent(agent2)
 
-        assert model.environment.getAgents() == [agent1, agent2]
+        assert model.environment.get_agents() == [agent1, agent2]
 
         # Test component filter when no agents meet the filter
-        assert model.environment.getAgents(Component) == []
+        assert model.environment.get_agents(Component) == []
 
         # Test component filter when some agents meet the filter
         agent1.addComponent(Component(agent1, model))
-        assert model.environment.getAgents(Component) == [agent1]
+        assert model.environment.get_agents(Component) == [agent1]
+
+        # Test tag filter
+        agent1.tag = 1
+        assert model.environment.get_agents(tag=1) == [agent1]
 
     def test_setModel(self):
         model = Model()
@@ -314,11 +321,22 @@ class TestAgent:
 
     def test__init__(self):
         model = Model()
+
+        # Without tag
         agent = Agent("a1", model)
 
         assert agent.model == model
         assert agent.id == "a1"
         assert len(agent.components) == 0
+        assert agent.tag == 0
+
+        # With tag
+        agent = Agent("a2", model, tag=1)
+
+        assert agent.model == model
+        assert agent.id == "a2"
+        assert len(agent.components) == 0
+        assert agent.tag == 1
 
     def test_addComponent(self):
         model = Model()
@@ -440,6 +458,7 @@ class TestAgentNotFoundError:
         assert error.a_id == 'a'
         assert error.environment == model.environment
         assert error.message == 'Agent "a" could not be found in Environment "ENVIRONMENT"'
+
 
 class TestComponentNotFoundError:
 

@@ -1,6 +1,10 @@
 import logging
 import random
+
+import ECAgent.Tags as Tags
+
 from sys import maxsize
+from deprecated import deprecated
 
 
 class Model:
@@ -42,12 +46,13 @@ class Agent:
     """This is the base class for Agent objects.
     Agents can be thought of as Entities"""
 
-    __slots__ = ['id', 'model', 'components']
+    __slots__ = ['id', 'model', 'components', 'tag']
 
-    def __init__(self, id: str, model: Model):
+    def __init__(self, id: str, model: Model, tag: int = Tags.NONE):
         self.id = id
         self.model = model
         self.components = {}
+        self.tag = tag
 
     def __getitem__(self, item: type):
         """ [] Override that called the getComponent() function. """
@@ -304,46 +309,95 @@ class Environment(Agent):
         else:
             return None
 
-    def getRandomAgent(self, *args):
-        """Gets a random agent in the environment.
-        Return None if there are no agents in the environment.
-        By supplying a tuple of Components, this function will return an
-        agent that contains all of those components"""
+    @deprecated(reason='For not meeting standard python naming conventions. Use "get_random_agent" instead')
+    def getRandomAgent(self, *args):  # pragma: no cover
+        """Deprecated. Use ``Agent.get_random_agent`` instead."""
+        return self.get_random_agent(*args)
 
-        if len(self.agents) == 0 or self.model is None:
-            return None
+    def get_random_agent(self, *args, tag: int = None):
+        """Returns a random agent in the environment.
 
-        valid_agents = []
+        See ``Agent.get_agents`` for a guide on how component template and tag searches work. This function uses
+        ``Agent.get_agents(*args, tag)`` to get a list of valid agents to randomly select from.
 
-        if len(args) == 0:
-            valid_agents = [self.agents[agent] for agent in self.agents]
-        else:
-            for agentKey in self.agents:
-                # Unpack args to pass into hasComponent()
-                if self.agents[agentKey].hasComponent(*args):
-                    valid_agents.append(self.agents[agentKey])
+        Parameters
+        ----------
+        *args:
+        tag:
 
+        Returns
+        -------
+        Agent
+            A randomly selected agent from a list of agents matching the Component template or tag specified.
+        None
+            If no agents exist that match the Component template or tag specified.
+        """
+        valid_agents = self.get_agents(*args, tag=tag)
         # Return none if no agent matches filter
         if len(valid_agents) == 0:
             return None
 
-        rand = self.model.random.randrange(0, len(valid_agents))
-        return valid_agents[rand]
+        return self.model.random.choice(valid_agents)
 
-    def getAgents(self, *args):
-        """ Returns a list of all agents that contain the components specified in args.
-        If args is None, getAgents() will return a list of all agents in the environment.
-        If there are no agents that match the filter supplied by args, getAgents() returns an empty list."""
+    @deprecated(reason='For not meeting standard python naming conventions. Use "get_agent" instead')
+    def getAgents(self, *args):  # pragma: no cover
+        """Deprecated. Use ``Agent.get_agents`` instead."""
+        return self.get_agents(*args)
+
+    def get_agents(self, *args, tag: int = None) -> list:
+        """Returns a list of agents within the environment.
+
+        This method is very flexible. There are three (four technically) ways it can be used:
+
+        1. The default case::
+
+            all_agents = environment.get_agents()
+
+        2. Using a component template::
+
+            # This will return a list of agents with Components of type 'Component1' and 'Component2'
+            template_search = environments.get_agents(Component1, Component2)
+
+        3. Using an agent's tag:::
+
+            # This code assumes the tag 'PREY' already exists
+            import ECAgent.Tags as Tags
+
+            tag_search = environment.get_agents(tag = Tags.PREY)
+
+        Additionally, you can specify a component template and tag to search for (although this is a niche case)::
+
+            # This code assumes the tag 'PREY' already exists
+            import ECAgent.Tags as Tags
+
+            # This will return a list of agents with Components of type 'Component1' and tag == PREY
+            template_tag_search = environments.get_agents(Component1, tag = Tags.PREY)
+
+        Parameters
+        ----------
+        *args : Optional
+            A template (list of Components) the returned agents must have.
+        tag : int, Optional
+
+        Returns
+        -------
+        list
+            Of Agents
+        """
+        matching_agents = []
 
         # If no component filter is supplied, return all agents
         if len(args) == 0:
-            return [self.agents[agentKey] for agentKey in self.agents]
+            matching_agents = [self.agents[agentKey] for agentKey in self.agents]
+        else:
+            # If a component filter is supplied, filter for agents that meet the condition
+            for agentKey in self.agents:
+                if self.agents[agentKey].hasComponent(*args):
+                    matching_agents.append(self.agents[agentKey])
 
-        # If a component filter is supplied, filter for agents that meet the condition
-        matching_agents = []
-        for agentKey in self.agents:
-            if self.agents[agentKey].hasComponent(*args):
-                matching_agents.append(self.agents[agentKey])
+        # Filter by tag if tag was supplied
+        if tag is not None:
+            matching_agents = [a for a in matching_agents if a.tag == tag]
 
         return matching_agents
 
@@ -359,11 +413,12 @@ class Environment(Agent):
         """Returns the dimensions of the environment. For the base environment class it returns None."""
         return None
 
-    def shuffle(self, *args):
+    def shuffle(self, *args, tag: int = None):
         """Returns a list of agents with matching components in a random order.
 
-        This method is just a wrapper for calling ``self.model.random.shuffle(self.getAgents(*args))``. The method
-        finds a list of agents with components matching those included in ``*args`` and returns them in random order.
+        This method is just a wrapper for calling ``self.model.random.shuffle(self.get_agents(*args, tag=tag))``. The
+        method finds a list of agents with components and/or tag matching those included in ``*args`` and ``tag``
+        respectively. This method returns them in random order.
 
         The order is random each time the function is called. This is useful if you want to mitigate benefits agents get
         when executing their behaviour earlier than others.
@@ -373,13 +428,16 @@ class Environment(Agent):
         args
             A list of ``Component`` classes that describe a template the agents need to match in order to be included in
             the list of shuffled agents.
+        tag : int, Optional
+            The tag the returned agents need to have in order to be included in
+            the list of shuffled agents. Default to None which disables tag filtering.
 
         Returns
         -------
         list
             Of agents with components matching ``*args``. The order of the agents is random.
         """
-        matching_agents = self.getAgents(*args)
+        matching_agents = self.get_agents(*args, tag=tag)
         self.model.random.shuffle(matching_agents)
         return matching_agents
 

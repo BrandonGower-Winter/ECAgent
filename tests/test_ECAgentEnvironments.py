@@ -4,8 +4,8 @@ from ECAgent.Core import *
 from ECAgent.Environments import *
 
 
-def test_discreteGridPostoID():
-    assert (4 * 3 * 5) + (2 * 3) + 1 == discreteGridPosToID(1, 2, 3, 4, 5)
+def test_discrete_grid_pos_to_id():
+    assert (4 * 3 * 5) + (2 * 3) + 1 == discrete_grid_pos_to_id(1, 2, 3, 4, 5)
 
 
 class TestPositionComponent:

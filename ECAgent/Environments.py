@@ -1,10 +1,12 @@
 import math
+import numpy as np
 import pandas
 
+from deprecated import deprecated
 from ECAgent.Core import Agent, Environment, Component, Model, ComponentNotFoundError
 
 
-def discreteGridPosToID(x: int, y: int = 0, width: int = 0, z: int = 0, height: int = 0):
+def discrete_grid_pos_to_id(x: int, y: int = 0, width: int = 0, z: int = 0, height: int = 0):
     """Returns a unique number of based on the x, y and z coordinates entered.
 
     Uniqueness is dimension dependent. The equation for calculating uniqueness is defined as:
@@ -29,6 +31,11 @@ def discreteGridPosToID(x: int, y: int = 0, width: int = 0, z: int = 0, height: 
         The unique ID.
     """
     return (z * width * height) + (y * width) + x
+
+
+@deprecated(reason='For not meeting standard python naming conventions. Use "discrete_grid_pos_to_id" instead.')
+def discreteGridPosToID(x: int, y: int = 0, width: int = 0, z: int = 0, height: int = 0):  # pragma: no cover
+    return discrete_grid_pos_to_id(x, y, width, z, height)
 
 
 class PositionComponent(Component):
@@ -115,8 +122,23 @@ class ConstantGenerator:
     """A functor used to create CellComponents with a constant value.
 
     The idea behind this class is to create a ``ConstantGenerator(val)`` object and supply it as the generator when
-    calling ``addCellComponent`` to a DiscreteWorld (e.g. ``GridWorld``). The component will then be created with all
-    cells having ``value == val``.
+    calling ``add_cell_component`` to a DiscreteWorld (e.g. ``GridWorld``). The component will then be created with all
+    cells having ``value == val``
+
+    Assuming a ``3x3 DiscreteWorld``::
+
+        env.add_cell_component('constant', ConstantGenerator(1))
+
+    will create a cell component called ``'constant'`` which will have values stored in a
+    contiguous array: ``[1,1,1,1,1,1,1,1,1]`` which when viewed in 2D looks like:
+
+    +---------+---------+-----------+
+    | 1       |  1      |  1        |
+    +---------+---------+-----------+
+    | 1       |  1      |  1        |
+    +---------+---------+-----------+
+    | 1       |  1      |  1        |
+    +---------+---------+-----------+
 
     Attributes
     ----------
@@ -127,7 +149,7 @@ class ConstantGenerator:
         self.value = value
 
     def __call__(self, pos: tuple, cells: pandas.DataFrame):
-        """Used by the ``addCellComponent`` methods to populate a cell component with the value of ``self.value``.
+        """Used by the ``add_cell_component`` methods to populate a cell component with the value of ``self.value``.
         """
         return self.value
 
@@ -141,6 +163,24 @@ class LookupGenerator:
 
     Note that coordinates are filled in a [x, y, z] fashion. This means you may need to transform your data
     (e.g. an image) so that x-coordinates can be referenced first.
+
+    Assuming a ``3x3 DiscreteWorld``::
+
+        table = [[0, 1, 2],
+                 [3, 4, 5],
+                 [6, 7, 8]]
+        env.add_cell_component('lookup', LookupGenerator(table))
+
+    will create a cell component called ``'lookup'`` which will have values stored in a
+    contiguous array: ``[0,1,2,3,4,5,6,7,8]`` which when viewed in 2D looks like:
+
+    +---------+---------+-----------+
+    | 6       |  7      |  8        |
+    +---------+---------+-----------+
+    | 3       |  4      |  5        |
+    +---------+---------+-----------+
+    | 0       |  1      |  2        |
+    +---------+---------+-----------+
 
     Attributes
     ----------
@@ -163,19 +203,19 @@ class LookupGenerator:
 
 
 class SpaceWorld(Environment):
-    """Base Class for all Spatial Environments. It inherits from the Environment base class and contains properties
-    related to the spatial extents of the environment. Currently, the environment can, at most, be three dimensional.
+    """Base Class for all Spacial Environments. It inherits from the Environment base class and contains properties
+    related to the spacial extents of the environment. Currently, the environment can, at most, be three dimensional.
 
     Note that the origin is (0,0,0) and is assumed to be located in the bottom left corner of the environment.
 
     Attributes
     ----------
     width : int
-        The width of the environment. This attribute can be thought of as the spatial extent of the x-axis.
+        The width of the environment. This attribute can be thought of as the spacial extent of the x-axis.
     height : int
-        The height of the environment. This attribute can be thought of as the spatial extent of the y-axis.
+        The height of the environment. This attribute can be thought of as the spacial extent of the y-axis.
     depth : int
-        The depth of the environment. This attribute can be thought of as the spatial extent of the z-axis.
+        The depth of the environment. This attribute can be thought of as the spacial extent of the z-axis.
     """
     __slots__ = ['width', 'height', 'depth', 'cells']
 
@@ -184,11 +224,6 @@ class SpaceWorld(Environment):
         self.width = width
         self.height = height
         self.depth = depth
-
-        # Create cells
-        self.cells = pandas.DataFrame({
-            'pos': [(x, y, z) for z in range(depth) for y in range(height) for x in range(width)]
-        })
 
     def add_agent(self, agent: Agent, x_pos: int = 0, y_pos: int = 0, z_pos: int = 0):
         """Adds an agent to the environment. Overrides the base ``Environment.add_agent`` class function.
@@ -212,9 +247,9 @@ class SpaceWorld(Environment):
         DuplicateAgentError
             If the agent already exists in the environment.
         Exception
-            If the agent's initial position is outside the environment's spatial extents.
+            If the agent's initial position is outside the environment's spacial extents.
         """
-        # TODO create proper for being outside spatial extents.
+        # TODO create proper for being outside spacial extents.
         if x_pos >= self.width or x_pos < 0 or y_pos >= self.height or y_pos < 0 or z_pos >= self.depth or z_pos < 0:
             raise Exception("Cannot add the Agent to position not on the map.")
 
@@ -292,7 +327,7 @@ class SpaceWorld(Environment):
         ``(width, height, depth)``."""
         return self.width, self.height, self.depth
 
-    def move(self, agent: Agent, x: int = 0, y: int = 0, z: int = 0):
+    def move(self, agent: Agent, x: float = 0, y: float = 0, z: float = 0):
         """Moves an agent (x,y,z) units in the environment.
 
         The function automatically clamps agent movement to the range
@@ -322,7 +357,7 @@ class SpaceWorld(Environment):
         component.y = max(min(component.y + y, self.height - 1), 0)
         component.z = max(min(component.z + z, self.depth - 1), 0)
 
-    def move_to(self, agent: Agent, x: int = 0, y: int = 0, z: int = 0):
+    def move_to(self, agent: Agent, x: float = 0, y: float = 0, z: float = 0):
         """Moves an agent to position (x,y,z) in the environment.
 
         Parameters
@@ -352,6 +387,176 @@ class SpaceWorld(Environment):
             component.z = z
         else:
             raise IndexError(f'Position ({x},{y},{z}) is out of the environment\'s range')
+
+
+class DiscreteWorld(SpaceWorld):
+    """Base Class for all Discrete Spacial Environments. It inherits from ``SpaceWorld``class and contains properties
+    and methods related to grid-based environments.
+
+    This class also adds functionality to add cell components. This is a special type of component that stores a single
+    value for every cell in the DiscreteWorld.
+
+    Assuming a ``3x3 DiscreteWorld``::
+
+        env = DiscreteWorld(model, 3, 3)
+
+    You can add a cell component to the environment by calling::
+
+        env.add_cell_component('example', generator)
+
+    Where ``'example'`` will be the name of cell component. The second argument is known as a generator and is a function
+    object (functor) that populates the gridworld with the value of the cell component.
+
+    A custom generator can be written as follows::
+
+        def custom_generator(pos, cells):
+            # add logic here
+            return value_of_cell
+
+    When writing a generator, your function must accept two arguments: the ``cells`` which is the pandas dataframe of
+    of the environment and ``pos`` which is a 3-tuple which contains the coordinates ``(x,y,z)`` of the grid cell
+    you are generating for. So using the example::
+
+        def sum_generator(pos, cells):
+            return sum(*pos)
+
+        env.add_cell_component('sum', sum_generator)
+
+    Our original ``3x3 DiscreteWorld`` will get a cell component called ``'sum'`` which will have values stored in a
+    contiguous array: ``[0,1,2,1,2,3,2,3,4]`` which when viewed in 2D looks like:
+
+    +---------+---------+-----------+
+    | 2       |  3      |  4        |
+    +---------+---------+-----------+
+    | 1       |  2      |  3        |
+    +---------+---------+-----------+
+    | 0       |  1      |  2        |
+    +---------+---------+-----------+
+
+    **Note** that all cell components are stored as 1D arrays which you can access using ``env.cells[cell_name]''. To
+    translate a 3d coordinate (or PositionComponent) into a unique integer to get the value of a specific cell in a
+    ``DiscreteWorld``, use the ``discrete_grid_pos_to_id`` method. Additionally, all ``DiscreteWorld`` environments
+    are initialized with a ``'pos'`` cell component which contains the 3d coordinate representation of the cell.
+
+    Attributes
+    ----------
+    cells : Pandas.DataFrame
+        A table containing all of the cell components in the environment.
+    """
+    def __init__(self, model, width: int, height: int = 0, depth: int = 0, id: str = 'ENVIRONMENT'):
+        super().__init__(model, width, height, depth, id)
+
+        # Create cells
+        self.cells = pandas.DataFrame({
+            'pos': [(x, y, z) for z in range(depth) for y in range(height) for x in range(width)]
+        })
+
+    def add_cell_component(self, name: str, generator):
+        """Adds the component supplied by the generator functor to each of the cells.
+        The functor is supplied with the cell's position ``(x,y,z)`` and the environment pandas dataframe as input.
+
+        A custom generator can be written as follows::
+
+            def custom_generator(pos, cells):
+                # add logic here
+                return value_of_cell
+
+        You can also use the one of the included generators: ``ConstantGenerator`` or ``LookupGenerator``. Alternatively,
+        you can populate the cells by directly supplying their data as a 1D contiguous array that is the same size
+        as the environment. Assuming a ``3x3 GridWorld``::
+
+            data = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+            env.add_cell_component('data', data)
+
+        will create a cell component called ``'data'`` which will have values stored in a
+        contiguous array: ``[0,1,2,3,4,5,6,7,8]`` which when viewed in 2D looks like:
+
+        +---------+---------+-----------+
+        | 6       |  7      |  8        |
+        +---------+---------+-----------+
+        | 3       |  4      |  5        |
+        +---------+---------+-----------+
+        | 0       |  1      |  2        |
+        +---------+---------+-----------+
+
+        Parameters
+        ----------
+        name : str
+            The name of the cell component.
+        generator : obj | numpy.ndarray | list
+            The generator used to populate the cell component. If a obj is supplied, it must have the ``__call__``
+            method implemented. If a ``numpy.ndarray`` or ``list`` is used, it must be 1-dimensional and of size
+            ``width * height * depth``.
+        """
+        if isinstance(generator, np.ndarray):
+            self.cells[name] = np.copy(generator)
+        elif isinstance(generator, list):
+            self.cells = np.array(generator)
+        else:
+            self.cells[name] = [generator(pos, self.cells) for pos in self.cells['pos']]
+
+    @deprecated(reason='For not meeting standard python naming conventions. Use "add_cell_component" instead.')
+    def addCellComponent(self, name: str, generator):  # pragma: no cover
+        """Deprecated. Use ``add_cell_component`` instead."""
+        self.add_cell_component(name, generator)
+
+    def remove_cell_component(self, name: str):
+        """Removes a cell component from the environment.
+
+        Parameters
+        ----------
+        name : str
+            The name of the cell component.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If no cell component with the specified name can be found.
+        """
+        if name not in self.cells:
+            raise ComponentNotFoundError(self, name)
+        else:
+            self.cells.drop(columns=[name])
+
+    def get_cell(self, x, y: int = 0, z: int = 0) -> pandas.Series:
+        """Returns a ``Pandas.Series`` containing the values of cell components at the specified grid cell.
+
+        Assuming a ``3x1 DiscreteWorld`` with two cell components called ``'rainfall'`` and ``'slope'``::
+
+            # The cell DataFrame will look something like:
+            [{'pos': (0,0,0), 'rainfall': 10.0, 'slope': 4.0},
+             {'pos': (1,0,0), 'rainfall': 22.0, 'slope': 21.0},
+             {'pos': (2,0,0), 'rainfall': 15.0, 'slope': 32.0}]
+
+            cell = env.get_cell(1)
+            print(cell)
+
+            # Will print something like:
+            {'pos': (1,0,0), 'rainfall': 22.0, 'slope': 21.0}
+
+        Parameters
+        ----------
+        x : int
+            The x-coordinate.
+        y : int, Optional
+            The y-coordinate. Defaults to 0.
+        z : int, Optional
+            The z-coordinate. Defaults to 0.
+
+        Returns
+        -------
+        Pandas.Series
+            Containing all of the values for the cell components at the indexed grid cell.
+
+        Raises
+        ------
+        IndexError
+            If the specified coordinates are our outside the bound of the environment.
+        """
+        if x < 0 or x >= self.width or y < 0 or y >= self.height or z < 0 or z >= self.depth:
+            raise IndexError(f'Coordinate ({x},{y},{z}) is not within the bounds of the environment.')
+        else:
+            return self.cells.iloc[discrete_grid_pos_to_id(x, y, self.width, z, self.height)]
 
 
 class LineWorld(Environment):

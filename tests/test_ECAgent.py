@@ -13,29 +13,29 @@ class TestEnvironment:
         assert model.environment.model is model
         assert model.environment.id == "ENVIRONMENT"
 
-    def test_addAgent(self):
+    def test_add_agent(self):
         model = Model()
         agent = Agent("a1", model)
 
-        model.environment.addAgent(agent)
+        model.environment.add_agent(agent)
 
         assert len(model.environment.agents) == 1
         assert model.environment.getAgent(agent.id) == agent
 
-        with pytest.raises(Exception):
-            model.environment.addAgent(agent)
+        with pytest.raises(DuplicateAgentError):
+            model.environment.add_agent(agent)
 
-    def test_removeAgent(self):
+    def test_remove_agent(self):
         model = Model()
         agent = Agent("a1", model)
 
-        model.environment.addAgent(agent)
-        model.environment.removeAgent(agent.id)
+        model.environment.add_agent(agent)
+        model.environment.remove_agent(agent.id)
 
         assert len(model.environment.agents) == 0
 
         with pytest.raises(AgentNotFoundError):
-            model.environment.removeAgent(agent.id)
+            model.environment.remove_agent(agent.id)
 
     def test_getAgent(self):
         model = Model()
@@ -49,7 +49,7 @@ class TestEnvironment:
             model.environment.getAgent(agent.id, True)
 
         # Found
-        model.environment.addAgent(agent)
+        model.environment.add_agent(agent)
         assert model.environment.getAgent(agent.id) == agent
 
     def test_get_random_agent(self):
@@ -64,11 +64,11 @@ class TestEnvironment:
 
         assert model.environment.get_random_agent() is None
 
-        model.environment.addAgent(agent1)
+        model.environment.add_agent(agent1)
 
         assert model.environment.get_random_agent() is agent1
 
-        model.environment.addAgent(agent2)
+        model.environment.add_agent(agent2)
 
         random_agent = model.environment.get_random_agent()
         assert random_agent is agent1 or random_agent is agent2
@@ -102,8 +102,8 @@ class TestEnvironment:
         agent1 = Agent("a1", model)
         agent2 = Agent("a2", model)
 
-        model.environment.addAgent(agent1)
-        model.environment.addAgent(agent2)
+        model.environment.add_agent(agent1)
+        model.environment.add_agent(agent2)
 
         assert model.environment.get_agents() == [agent1, agent2]
 
@@ -135,7 +135,7 @@ class TestEnvironment:
         assert len(env) == 0
 
         # Test once agent has been added
-        env.addAgent(Agent("a1", None))
+        env.add_agent(Agent("a1", None))
         assert len(env) == 1
 
     def test__iter__(self):
@@ -149,7 +149,7 @@ class TestEnvironment:
         assert i == 0
 
         # Test once agent has been added
-        env.addAgent(Agent("a1", None))
+        env.add_agent(Agent("a1", None))
         i = 0
         for _ in env:
             i+=1
@@ -162,8 +162,8 @@ class TestEnvironment:
 
         a1 = Agent("a1", model)
         a1.addComponent(Component(self, model))
-        model.environment.addAgent(a1)
-        model.environment.addAgent(Agent("a2", model))
+        model.environment.add_agent(a1)
+        model.environment.add_agent(Agent("a2", model))
 
         # Test with no template
         assert len(model.environment.shuffle()) == 2
@@ -458,6 +458,18 @@ class TestAgentNotFoundError:
         assert error.a_id == 'a'
         assert error.environment == model.environment
         assert error.message == 'Agent "a" could not be found in Environment "ENVIRONMENT"'
+
+
+class TestDuplicateAgentError:
+
+    def test__init__(self):
+        model = Model()
+
+        error = DuplicateAgentError('a', model.environment)
+
+        assert error.a_id == 'a'
+        assert error.environment == model.environment
+        assert error.message == 'Agent "a" already exists in Environment "ENVIRONMENT"'
 
 
 class TestComponentNotFoundError:

@@ -1,5 +1,4 @@
 import math
-
 import pandas
 
 from ECAgent.Core import Agent, Environment, Component, Model, ComponentNotFoundError
@@ -161,6 +160,198 @@ class LookupGenerator:
             return self.table[pos[0]][pos[1]]
         else:  # CubeWorld
             return self.table[pos[0]][pos[1]][pos[2]]
+
+
+class SpaceWorld(Environment):
+    """Base Class for all Spatial Environments. It inherits from the Environment base class and contains properties
+    related to the spatial extents of the environment. Currently, the environment can, at most, be three dimensional.
+
+    Note that the origin is (0,0,0) and is assumed to be located in the bottom left corner of the environment.
+
+    Attributes
+    ----------
+    width : int
+        The width of the environment. This attribute can be thought of as the spatial extent of the x-axis.
+    height : int
+        The height of the environment. This attribute can be thought of as the spatial extent of the y-axis.
+    depth : int
+        The depth of the environment. This attribute can be thought of as the spatial extent of the z-axis.
+    """
+    __slots__ = ['width', 'height', 'depth', 'cells']
+
+    def __init__(self, model, width: int, height: int = 0, depth: int = 0, id: str = 'ENVIRONMENT'):
+        super().__init__(model, id=id)
+        self.width = width
+        self.height = height
+        self.depth = depth
+
+        # Create cells
+        self.cells = pandas.DataFrame({
+            'pos': [(x, y, z) for z in range(depth) for y in range(height) for x in range(width)]
+        })
+
+    def add_agent(self, agent: Agent, x_pos: int = 0, y_pos: int = 0, z_pos: int = 0):
+        """Adds an agent to the environment. Overrides the base ``Environment.add_agent`` class function.
+        This function will also add a ``PositionComponent`` to the agent object.
+        If the x, y or z positions are greater than or equal to the width, height and depth of the world
+        (or less than zero), an error will be thrown.
+
+        Parameters
+        ----------
+        agent : Agent
+            The agent being added to the environment.
+        x_pos : int, Optional
+            The starting x-position of the agent. Defaults to 0.
+        y_pos : int, Optional
+            The starting y-position of the agent. Defaults to 0.
+        z_pos : int, Optional
+            The starting z-position of the agent. Defaults to 0.
+
+        Raises
+        ------
+        DuplicateAgentError
+            If the agent already exists in the environment.
+        Exception
+            If the agent's initial position is outside the environment's spatial extents.
+        """
+        # TODO create proper for being outside spatial extents.
+        if x_pos >= self.width or x_pos < 0 or y_pos >= self.height or y_pos < 0 or z_pos >= self.depth or z_pos < 0:
+            raise Exception("Cannot add the Agent to position not on the map.")
+
+        agent.addComponent(PositionComponent(agent, agent.model, x=x_pos, y=y_pos, z=z_pos))
+        super().add_agent(agent)
+
+    def remove_agent(self, a_id: str):
+        """Removes the agent from the environment. Overrides the base ``Environment.remove_agent`` method.
+        This method will also remove the ``PositionComponent`` from the agent.
+
+        Parameters
+        ----------
+        a_id : str
+            The ``id`` of the agent to remove.
+
+        Raises
+        ------
+        AgentNotFoundError
+            If no agent with an ``agent.id == a_id`` can be found.
+        """
+        if a_id in self.agents:
+            self.agents[a_id].removeComponent(PositionComponent)
+
+        super().remove_agent(a_id)
+
+    def get_agents_at(self, x_pos: float = 0.0, y_pos: float = 0.0, z_pos: float = 0.0, leeway: float = 0.0,
+                      x_leeway: float = 0, y_leeway: float = 0, z_leeway: float = 0) -> [Agent]:
+        """Returns a list of agents at position (x_pos, y_pos, z_pos) +/- any leeway.
+
+        The function will return ``[]`` empty if no agents are within the specified region.
+
+        The function also uses the maximum possible leeway for a given axis. So if the following is executed::
+
+            env.get_agents_at(10.0, 10.0, 10.0, leeway = 3.0, y_leeway = 5.0)
+
+        The function will return a list of agents within ``3.0`` units of the coordinates ``(10.0, 10.0, 10.0)`` on the
+        x and z axes and within ``5.0`` units of the coordinates ``(10.0, 10.0, 10.0)`` on the y-axis.
+
+        Parameters
+        ----------
+        x_pos : float, Optional
+            The x-coordinate of the search origin point. Defaults to ``0.0``.
+        y_pos : float, Optional
+            The y-coordinate of the search origin point. Defaults to ``0.0``.
+        z_pos : float, Optional
+            The z-coordinate of the search origin point. Defaults to ``0.0``.
+        leeway : float, Optional
+            The general leeway value (i.e. leeway applied to all axes). Defaults to ``0.0``.
+        x_leeway : float, Optional
+            The x-axis leeway (i.e. leeway applied to x-axis). Defaults to ``0.0``.
+        y_leeway : float, Optional
+            The y-axis leeway (i.e. leeway applied to y-axis). Defaults to ``0.0``.
+        z_leeway : float, Optional
+            The z-axis leeway (i.e. leeway applied to z-axis). Defaults to ``0.0``.
+
+        Returns
+        -------
+        [Agent]
+            A list of agents within the specified coordinates. An empty list ``[]`` is returned if no agents are found.
+        """
+
+        # TODO Account for clamp mode
+
+        xmin, xmax = min(x_pos - x_leeway, x_pos - leeway), max(x_pos + x_leeway, x_pos + leeway)
+        ymin, ymax = min(y_pos - y_leeway, y_pos - leeway), max(y_pos + y_leeway, y_pos + leeway)
+        zmin, zmax = min(z_pos - z_leeway, z_pos - leeway), max(z_pos + z_leeway, z_pos + leeway)
+
+        return [self.agents[agentKey] for agentKey in self.agents
+                if xmin <= self.agents[agentKey][PositionComponent].x <= xmax
+                and ymin <= self.agents[agentKey][PositionComponent].y <= ymax
+                and zmin <= self.agents[agentKey][PositionComponent].z <= zmax]
+
+    def get_dimensions(self) -> (int, int, int):
+        """Returns a 3-tuple containing the extents of the environment:
+        ``(width, height, depth)``."""
+        return self.width, self.height, self.depth
+
+    def move(self, agent: Agent, x: int = 0, y: int = 0, z: int = 0):
+        """Moves an agent (x,y,z) units in the environment.
+
+        The function automatically clamps agent movement to the range
+        ``(0,0,0) <= x < (self.width,self.height,self.depth)``.
+
+        Parameters
+        ----------
+        agent : Agent
+            The agent object to be moved.
+        x : int, Optional
+            The number of discrete units to move the agent. Defaults to 0.
+        y : int, Optional
+            The number of discrete units to move the agent. Defaults to 0.
+        z : int, Optional
+            The number of discrete units to move the agent. Defaults to 0.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If ``agent`` does not have a ``PositionComponent``.
+        """
+        if PositionComponent not in agent:
+            raise ComponentNotFoundError(agent, PositionComponent)
+
+        component = agent[PositionComponent]
+        component.x = max(min(component.x + x, self.width - 1), 0)
+        component.y = max(min(component.y + y, self.height - 1), 0)
+        component.z = max(min(component.z + z, self.depth - 1), 0)
+
+    def move_to(self, agent: Agent, x: int = 0, y: int = 0, z: int = 0):
+        """Moves an agent to position (x,y,z) in the environment.
+
+        Parameters
+        ----------
+        agent : Agent
+            The agent object to be moved.
+        x : int, Optional
+            The new x-coordinate of the agent. Defaults to 0.
+        y : int, Optional
+            The new y-coordinate of the agent. Defaults to 0.
+        z : int, Optional
+            The new z-coordinate of the agent. Defaults to 0.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If ``agent`` does not have a ``PositionComponent``.
+        IndexError
+            If coordinates are out of bounds.
+        """
+        if PositionComponent not in agent:
+            raise ComponentNotFoundError(agent, PositionComponent)
+        elif 0 <= x < self.width and 0 <= y < self.height and 0 <= z < self.depth:
+            component = agent[PositionComponent]
+            component.x = x
+            component.y = y
+            component.z = z
+        else:
+            raise IndexError(f'Position ({x},{y},{z}) is out of the environment\'s range')
 
 
 class LineWorld(Environment):

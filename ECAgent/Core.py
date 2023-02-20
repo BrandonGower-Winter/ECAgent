@@ -255,13 +255,31 @@ class Environment(Agent):
     def setModel(self, model: Model):
         self.model = model
 
-    def addAgent(self, agent: Agent):
+    def add_agent(self, agent: Agent):
+        """
+        Adds an agent to the environment. Agents cannot have duplicate ``id`` values.
+
+        Parameters
+        ----------
+        agent : Agent
+            The agent being added to the environment.
+
+        Raises
+        ------
+        DuplicateAgentError
+            If the agent already exists in the environment.
+        """
         if agent.id in self.agents.keys():
-            raise Exception("Agent has already been added to the environment")
+            raise DuplicateAgentError(agent.id, self.model.environment)
         else:
             self.agents[agent.id] = agent
 
-    def removeAgent(self, a_id: str):
+    @deprecated(reason='For not meeting standard python naming conventions. Use "add_agent" instead.')
+    def addAgent(self, agent: Agent):  # pragma: no cover
+        """Deprecated. Use ``Environment.add_agent`` instead."""
+        self.add_agent(agent)
+
+    def remove_agent(self, a_id: str):
         """Removes an agent with ``agent.id == a_id`` from the environment.
 
         Parameters
@@ -278,6 +296,11 @@ class Environment(Agent):
             raise AgentNotFoundError(a_id, self)
         else:
             del self.agents[a_id]
+
+    @deprecated(reason='For not meeting standard python naming conventions. Use "remove_agent" instead.')
+    def removeAgent(self, a_id: str):  # pragma: no cover
+        """Deprecated. Use ``Environment.remove_agent`` instead."""
+        self.remove_agent(a_id)
 
     def getAgent(self, id: str, throw_error: bool = False):
         """Gets agent obj based on its ``id``.
@@ -311,7 +334,7 @@ class Environment(Agent):
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "get_random_agent" instead')
     def getRandomAgent(self, *args):  # pragma: no cover
-        """Deprecated. Use ``Agent.get_random_agent`` instead."""
+        """Deprecated. Use ``Environment.get_random_agent`` instead."""
         return self.get_random_agent(*args)
 
     def get_random_agent(self, *args, tag: int = None):
@@ -322,8 +345,10 @@ class Environment(Agent):
 
         Parameters
         ----------
-        *args:
-        tag:
+        *args : Optional
+            A template (list of Components) the returned agent must have.
+        tag : int, Optional
+            Tag that the returned agent must have.
 
         Returns
         -------
@@ -341,7 +366,7 @@ class Environment(Agent):
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "get_agent" instead')
     def getAgents(self, *args):  # pragma: no cover
-        """Deprecated. Use ``Agent.get_agents`` instead."""
+        """Deprecated. Use ``Environment.get_agents`` instead."""
         return self.get_agents(*args)
 
     def get_agents(self, *args, tag: int = None) -> list:
@@ -378,11 +403,11 @@ class Environment(Agent):
         *args : Optional
             A template (list of Components) the returned agents must have.
         tag : int, Optional
-
+            Tag that the returned agents must have.
         Returns
         -------
         list
-            Of Agents
+            list of Agents
         """
         matching_agents = []
 
@@ -471,6 +496,33 @@ class AgentNotFoundError(Exception):
         self.environment = environment
         self.message = f'Agent "{a_id}" could not be found in Environment "{environment.id}"'
         super(AgentNotFoundError, self).__init__(self.message)
+
+
+class DuplicateAgentError(Exception):
+    """Exception raised for errors when an agent object already exists in an environment.
+
+    Attributes:
+    -----------
+    a_id : str
+        ``id`` of the Agent.
+    environment : Environment
+        The ``Environment`` the agents exists in.
+    message : str
+        Explanation of error.
+    """
+    def __init__(self, a_id: str, environment: Environment):
+        """
+        Parameters
+        ----------
+        a_id : str
+            ``id`` of Agent.
+        environment : Environment
+            The ``Environment`` the agents exists in.
+        """
+        self.a_id = a_id
+        self.environment = environment
+        self.message = f'Agent "{a_id}" already exists in Environment "{environment.id}"'
+        super(DuplicateAgentError, self).__init__(self.message)
 
 
 class ComponentNotFoundError(Exception):

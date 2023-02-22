@@ -35,13 +35,14 @@ def discrete_grid_pos_to_id(x: int, y: int = 0, width: int = 0, z: int = 0, heig
 
 @deprecated(reason='For not meeting standard python naming conventions. Use "discrete_grid_pos_to_id" instead.')
 def discreteGridPosToID(x: int, y: int = 0, width: int = 0, z: int = 0, height: int = 0):  # pragma: no cover
+    """Deprecated. Use ``discrete_grid_pos_to_id`` instead."""
     return discrete_grid_pos_to_id(x, y, width, z, height)
 
 
 class PositionComponent(Component):
     """A position component. It contains three float properties: x, y, z.
     This component can be used to store the position of an Agent in a 1-3D world.
-    It is used by the LineWorld, GridWorld and CubeWorld classes to do exactly that.
+    It is used by ``DiscreteWorld`` classes to do exactly that.
     """
 
     __slots__ = ['x', 'y', 'z']
@@ -217,7 +218,7 @@ class SpaceWorld(Environment):
     depth : int
         The depth of the environment. This attribute can be thought of as the spacial extent of the z-axis.
     """
-    __slots__ = ['width', 'height', 'depth', 'cells']
+    __slots__ = ['width', 'height', 'depth']
 
     def __init__(self, model, width: int, height: int = 0, depth: int = 0, id: str = 'ENVIRONMENT'):
         super().__init__(model, id=id)
@@ -253,8 +254,9 @@ class SpaceWorld(Environment):
         if x_pos >= self.width or x_pos < 0 or y_pos >= self.height or y_pos < 0 or z_pos >= self.depth or z_pos < 0:
             raise Exception("Cannot add the Agent to position not on the map.")
 
-        agent.addComponent(PositionComponent(agent, agent.model, x=x_pos, y=y_pos, z=z_pos))
         super().add_agent(agent)
+        agent.addComponent(PositionComponent(agent, agent.model, x=x_pos, y=y_pos, z=z_pos))
+
 
     def remove_agent(self, a_id: str):
         """Removes the agent from the environment. Overrides the base ``Environment.remove_agent`` method.
@@ -425,13 +427,13 @@ class DiscreteWorld(SpaceWorld):
     Our original ``3x3 DiscreteWorld`` will get a cell component called ``'sum'`` which will have values stored in a
     contiguous array: ``[0,1,2,1,2,3,2,3,4]`` which when viewed in 2D looks like:
 
-    +---------+---------+-----------+
-    | 2       |  3      |  4        |
-    +---------+---------+-----------+
-    | 1       |  2      |  3        |
-    +---------+---------+-----------+
-    | 0       |  1      |  2        |
-    +---------+---------+-----------+
+    +---------+---------+---------+
+    | 2       |  3      |  4      |
+    +---------+---------+---------+
+    | 1       |  2      |  3      |
+    +---------+---------+---------+
+    | 0       |  1      |  2      |
+    +---------+---------+---------+
 
     **Note** that all cell components are stored as 1D arrays which you can access using ``env.cells[cell_name]''. To
     translate a 3d coordinate (or PositionComponent) into a unique integer to get the value of a specific cell in a
@@ -448,7 +450,7 @@ class DiscreteWorld(SpaceWorld):
 
         # Create cells
         self.cells = pandas.DataFrame({
-            'pos': [(x, y, z) for z in range(depth) for y in range(height) for x in range(width)]
+            'pos': [(x, y, z) for z in range(max(depth, 1)) for y in range(max(height, 1)) for x in range(max(width, 1))]
         })
 
     def add_cell_component(self, name: str, generator):
@@ -471,13 +473,13 @@ class DiscreteWorld(SpaceWorld):
         will create a cell component called ``'data'`` which will have values stored in a
         contiguous array: ``[0,1,2,3,4,5,6,7,8]`` which when viewed in 2D looks like:
 
-        +---------+---------+-----------+
-        | 6       |  7      |  8        |
-        +---------+---------+-----------+
-        | 3       |  4      |  5        |
-        +---------+---------+-----------+
-        | 0       |  1      |  2        |
-        +---------+---------+-----------+
+        +---------+---------+---------+
+        | 6       |  7      |  8      |
+        +---------+---------+---------+
+        | 3       |  4      |  5      |
+        +---------+---------+---------+
+        | 0       |  1      |  2      |
+        +---------+---------+---------+
 
         Parameters
         ----------
@@ -491,7 +493,7 @@ class DiscreteWorld(SpaceWorld):
         if isinstance(generator, np.ndarray):
             self.cells[name] = np.copy(generator)
         elif isinstance(generator, list):
-            self.cells = np.array(generator)
+            self.cells[name] = generator
         else:
             self.cells[name] = [generator(pos, self.cells) for pos in self.cells['pos']]
 
@@ -516,7 +518,7 @@ class DiscreteWorld(SpaceWorld):
         if name not in self.cells:
             raise ComponentNotFoundError(self, name)
         else:
-            self.cells.drop(columns=[name])
+            self.cells.drop(columns=[name], inplace=True)
 
     def get_cell(self, x, y: int = 0, z: int = 0) -> pandas.Series:
         """Returns a ``Pandas.Series`` containing the values of cell components at the specified grid cell.
@@ -558,433 +560,169 @@ class DiscreteWorld(SpaceWorld):
         else:
             return self.cells.iloc[discrete_grid_pos_to_id(x, y, self.width, z, self.height)]
 
+    @deprecated(reason='For not meeting standard python naming conventions. Use "get_cell" instead.')
+    def getCell(self, x, y: int = 0, z: int = 0) -> pandas.Series:  # pragma: no cover
+        """Deprecated. Use ``get_cell`` instead."""
+        return self.get_cell(x, y, z)
 
-class LineWorld(Environment):
-    """ LineWorld is a discrete environment with only 1 axis (x-axis). It can be used in place of the base Environment
-    class. All agents added to a LineWorld class are given a PositionComponent to denote their place in the world.
+    def get_moore_neighbours(self, cell_pos, radius: int = 1, incl_center: bool = False, ret_type: type = int) -> list:
+        """Returns a list of all cells within the specified moore neighbourhood.
+        If incl_center = true the supplied cell will also be included in that list
 
-    A LineWorld's dimensions are defined by a width property.
+        The function accepts three types: ``int``, ``tuple`` or ``PositionComponent``.
+        If ``int`` is supplied, it will be assumed to be the *unique identifier* of the cell (i.e. the value returned
+        by ``discrete_grid_pos_to_id()``. If a ``tuple`` is supplied, it is assumed that it will be the coordinates of
+        the cell (e.g. ``(2,5,3)``). If a ``PositionComponent`` is supplied, it's values will be truncated and turned
+        into a 3d integer coordinate (i.e. A ``PositionComponent`` with value ``x = 2.5, y = 5.9, z = 3.1``) will be
+        converted into coordinates ``(2,5,3)``.
 
-    LineWorld.addCellComponent(comp) adds component comp to each of the cells in the environment."""
+        The same functionality applied to the ``ret_type`` parameters. By default a list of integers containing the
+        *unique identifiers* of the neighbouring cells are returned. If ``tuple`` is supplied, the function will return
+        the 3d coordinates of the neighbouring will be returned.
 
-    __slots__ = ['width', 'cells']
+        Parameters
+        ----------
+        cell_pos : int, tuple, PositionComponent
+            The cell whose neighbours you want to get.
+        radius : int, Optional
+            The size of the Moore neighbourhood. Defaults to ``1``.
+        incl_center : bool, Optional
+            Flags whether you want the supplied ``cell_pos`` to be included in the returned ``list``
+        ret_type : type, Optional
+            The representation of the neighbouring cells, Defaults to ``int`` but may also be ``tuple``.
 
-    def __init__(self, width, model, id: str = 'ENVIRONMENT'):
+        Returns
+        -------
+        list
+            A list of neighbouring cells in the representation specified by ``ret_type``. Defaults to a list of ``int``.
 
-        if width < 1:
-            raise Exception("Cannot create a LineWorld with a negative width.")
+        Raises
+        ------
+        TypeError
+            If the type of cell_pos is not ``int``, ``tuple`` or ``PositionComponent`` or if the type of ``ret_type`` is
+            not ``int`` or ``tuple``.
+        """
 
-        super().__init__(model, id=id)
-        self.width = width
-
-        # Create cells
-        self.cells = pandas.DataFrame({'pos': [x for x in range(width)]})
-
-    def addAgent(self, agent: Agent, xPos: int = 0):
-        """Adds an agent to the environment. Overrides the base class function.
-        This function will also add a PositionComponent to the agent object.
-        If the xPos is greater than the width of the world, an error will be thrown."""
-
-        if xPos >= self.width or xPos < 0:
-            raise Exception("Cannot add the Agent to position not on the map.")
-
-        agent.addComponent(PositionComponent(agent, agent.model, x=xPos))
-        super().addAgent(agent)
-
-    def addCellComponent(self, name: str, generator):
-        """ Adds the component supplied by the generator functor to each of the cells.
-        The functor is supplied with the index of the cell and dataframe as input"""
-
-        new_components = [generator(i, self.cells) for i in range(self.width)]
-        self.cells[name] = new_components
-
-    def removeAgent(self, agentID: str):
-        """ Removes the agent from the environment. Will also remove the PositionComponent from the agent"""
-        if agentID in self.agents:
-            self.agents[agentID].removeComponent(PositionComponent)
-
-        super().removeAgent(agentID)
-
-    def setModel(self, model: Model):
-        super().setModel(model)
-
-    def getAgentsAt(self, xPos: int, leeway: int = 0):
-        """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell.
-        If leeway > 0 all agents within the range xPos +/- leeway will be returned as well."""
-        return [self.agents[agentKey] for agentKey in self.agents
-                if xPos - leeway <= self.agents[agentKey][PositionComponent].x <= xPos + leeway]
-
-    def getDimensions(self):
-        return self.width
-
-    def getCell(self, x: int):
-        if x < 0 or x >= len(self.cells):
-            return None
+        if isinstance(cell_pos, int):
+            center = self.cells['pos'][cell_pos]
+        elif isinstance(cell_pos, tuple):
+            center = cell_pos
+        elif isinstance(cell_pos, PositionComponent):
+            center = cell_pos.xyz()
+            # Convert to int
+            center = int(center[0]), int(center[1]), int(center[2])
         else:
-            return self.cells.iloc[x]
+            raise TypeError(f'cell_pos of type {type(cell_pos)} is not supported. Use an int, tuple or '
+                            f'PositionComponent instead')
 
-    def getNeighbours(self, cellID: int, radius: int = 1, moore: bool = False) -> [Agent]:
-        """Returns a list of all the neighbouring cells within the specified radius. If moore = true the supplied cell
-        will also be included in that list"""
+        # Get search bounds
+        if self.width > 0:
+            xlower_bound = max(0, center[0] - radius)
+            xupper_bound = min(self.width, center[0] + radius + 1)
+        else:
+            xlower_bound, xupper_bound = 0, 1
+
+        if self.height > 0:
+            ylower_bound = max(0, center[1] - radius)
+            yupper_bound = min(self.height, center[1] + radius + 1)
+        else:
+            ylower_bound, yupper_bound = 0, 1
+
+        if self.depth > 0:
+            zlower_bound = max(0, center[2] - radius)
+            zupper_bound = min(self.depth, center[2] + radius + 1)
+        else:
+            zlower_bound, zupper_bound = 0, 1
+
         neighbours = []
-        lower_bound = max(0, self.cells['pos'][cellID] - radius)
-        upper_bound = min(self.width, self.cells['pos'][cellID] + radius + 1)  # +1 to account for range() exclusion
-
-        for x in range(lower_bound, upper_bound):
-            if moore:
-                neighbours.append(x)
-            elif self.cells['pos'][cellID] != x:
-                neighbours.append(x)
-
-        return neighbours
-
-    def move(self, agent: Agent, x: int):
-        """Moves an agent x units along the environment.
-
-        The function automatically clamps agent movement to the range ``0 <= x < self.width``.
-
-        Parameters
-        ----------
-        agent : Agent
-            The agent object to be moved.
-        x : int
-            The number of discrete units to move the agent.
-
-        Raises
-        ------
-        ComponentNotFoundError
-            If ``agent`` does not have a ``PositionComponent``.
-        """
-        if PositionComponent not in agent:
-            raise ComponentNotFoundError(agent, PositionComponent)
-
-        component = agent[PositionComponent]
-        component.x = max(min(component.x + x, self.width - 1), 0)
-
-    def move_to(self, agent: Agent, x: int):
-        """Moves an agent to position x in the environment.
-
-        Parameters
-        ----------
-        agent : Agent
-            The agent object to be moved.
-        x : int
-            The new x-coordinate of the agent.
-
-        Raises
-        ------
-        ComponentNotFoundError
-            If ``agent`` does not have a ``PositionComponent``.
-        IndexError
-            If x-coordinate are out of bounds.
-        """
-        if PositionComponent not in agent:
-            raise ComponentNotFoundError(agent, PositionComponent)
-        elif 0 <= x < self.width:
-            component = agent[PositionComponent]
-            component.x = x
-        else:
-            raise IndexError(f'Position ({x}) is out of the environment\'s range')
-
-
-class GridWorld(Environment):
-    """ GridWorld is a discrete environment with 2 axes (x,y-axes). It can be used in place of the base Environment
-    class. All agents added to a GridWorld class are given a PositionComponent to denote their place in the world.
-
-    A GridWorld's dimensions are defined by a width and height properties.
-
-    GridWorld.addCellComponent(comp) adds component comp to each of the cells in the environment."""
-
-    __slots__ = ['width', 'height', 'cells']
-
-    def __init__(self, width, height, model, id: str = 'ENVIRONMENT'):
-
-        if width < 1 or height < 1:
-            raise Exception("Cannot create a GridWorld with a negative width or height.")
-
-        super().__init__(model, id=id)
-        self.width = width
-        self.height = height
-
-        # Create cells
-        self.cells = pandas.DataFrame({'pos': [(x, y) for y in range(height) for x in range(width)]})
-
-    def addAgent(self, agent: Agent, xPos: int = 0, yPos: int = 0):
-        """Adds an agent to the environment. Overrides the base class function.
-        This function will also add a PositionComponent to the agent object.
-        If the xPos or yPos is greater than the width of the world, an error will be thrown."""
-
-        if xPos >= self.width or xPos < 0 or yPos >= self.height or yPos < 0:
-            raise Exception("Cannot add the Agent to position not on the map.")
-
-        agent.addComponent(PositionComponent(agent, agent.model, x=xPos, y=yPos))
-        super().addAgent(agent)
-
-    def addCellComponent(self, name: str, generator):
-        """ Adds the component supplied by the generator functor to each of the cells.
-        The functor is supplied with the cell as input"""
-
-        self.cells[name] = [generator(pos, self.cells) for pos in self.cells['pos']]
-
-    def removeAgent(self, agentID: str):
-        """ Removes the agent from the environment. Will also remove the PositionComponent from the agent"""
-        if agentID in self.agents:
-            self.agents[agentID].removeComponent(PositionComponent)
-
-        super().removeAgent(agentID)
-
-    def setModel(self, model: Model):
-        super().setModel(model)
-
-    def getAgentsAt(self, xPos: int, yPos: int, xLeeway: int = 0, yLeeway: int = 0):
-        """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell.
-        If x or y leeway specified, agents withing range xPos +/- xLeeway and yPos +/- yLeeway will be
-        returned as well """
-        return [self.agents[agentKey] for agentKey in self.agents
-                if xPos - xLeeway <= self.agents[agentKey][PositionComponent].x <= xPos + xLeeway
-                and yPos - yLeeway <= self.agents[agentKey][PositionComponent].y <= yPos + yLeeway]
-
-    def getDimensions(self):
-        return self.width, self.height
-
-    def getCell(self, x, y):
-        if x < 0 or x >= self.width or y < 0 or y >= self.height:
-            return None
-        else:
-            return self.cells.iloc[x + (y * self.width)]
-
-    def getNeighbours(self, cell_pos: (int, int), radius: int = 1, moore: bool = False) -> [int]:
-        """Returns a list of all the neighbouring cells within the specified radius. If moore = true the supplied cell
-        will also be included in that list"""
-        neighbours = []
-
-        xlower_bound = max(0, cell_pos[0] - radius)
-        xupper_bound = min(self.width, cell_pos[0] + radius + 1)  # +1 to account for range() exclusion
-
-        ylower_bound = max(0, cell_pos[1] - radius)
-        yupper_bound = min(self.height, cell_pos[1] + radius + 1)  # +1 to account for range() exclusion
-        cellID = discreteGridPosToID(cell_pos[0], cell_pos[1], self.width)
-
-        for y in range(ylower_bound, yupper_bound):
-            for x in range(xlower_bound, xupper_bound):
-                id = discreteGridPosToID(x, y, self.width)
-                if self.cells['pos'][cellID][0] == x and self.cells['pos'][cellID][1] == y:
-                    if moore:
-                        neighbours.append(id)
-                else:
-                    neighbours.append(id)
-
-        return neighbours
-
-    def move(self, agent: Agent, x: int = 0, y: int = 0):
-        """Moves an agent (x,y) units in the environment.
-
-        The function automatically clamps agent movement to the range ``(0,0) <= x < (self.width,self.height)``.
-
-        Parameters
-        ----------
-        agent : Agent
-            The agent object to be moved.
-        x : int, Optional
-            The number of discrete units to move the agent. Defaults to 0.
-        y : int, Optional
-            The number of discrete units to move the agent. Defaults to 0.
-
-        Raises
-        ------
-        ComponentNotFoundError
-            If ``agent`` does not have a ``PositionComponent``.
-        """
-        if PositionComponent not in agent:
-            raise ComponentNotFoundError(agent, PositionComponent)
-
-        component = agent[PositionComponent]
-        component.x = max(min(component.x + x, self.width - 1), 0)
-        component.y = max(min(component.y + y, self.height - 1), 0)
-
-    def move_to(self, agent: Agent, x: int = 0, y: int = 0):
-        """Moves an agent to position (x,y) in the environment.
-
-        Parameters
-        ----------
-        agent : Agent
-            The agent object to be moved.
-        x : int, Optional
-            The new x-coordinate of the agent. Defaults to 0.
-        y : int, Optional
-            The new y-coordinate of the agent. Defaults to 0.
-
-        Raises
-        ------
-        ComponentNotFoundError
-            If ``agent`` does not have a ``PositionComponent``.
-        IndexError
-            If coordinates are out of bounds.
-        """
-        if PositionComponent not in agent:
-            raise ComponentNotFoundError(agent, PositionComponent)
-        elif 0 <= x < self.width and 0 <= y < self.height:
-            component = agent[PositionComponent]
-            component.x = x
-            component.y = y
-        else:
-            raise IndexError(f'Position ({x},{y}) is out of the environment\'s range')
-
-
-class CubeWorld(Environment):
-    """ CubeWorld is a discrete environment with 3 axes (x,y,z-axes). It can be used in place of the base Environment
-    class. All agents added to a GridWorld class are given a PositionComponent to denote their place in the world.
-
-    A CubeWorld's dimensions are defined by a width, height and depth properties.
-
-    CubeWorld.addCellComponent(comp) adds component comp to each of the cells in the environment."""
-
-    __slots__ = ['width', 'height', 'depth', 'cells']
-
-    def __init__(self, width, height, depth, model, id: str = 'ENVIRONMENT'):
-
-        if width < 1 or height < 1 or depth < 1:
-            raise Exception("Cannot create a CubeWorld with a negative width or height.")
-
-        super().__init__(model, id=id)
-        self.width = width
-        self.height = height
-        self.depth = depth
-
-        # Create cells
-        self.cells = pandas.DataFrame({
-            'pos': [(x, y, z) for z in range(depth) for y in range(height) for x in range(width)]
-        })
-
-    def addAgent(self, agent: Agent, xPos: int = 0, yPos: int = 0, zPos: int = 0.0):
-        """Adds an agent to the environment. Overrides the base class function.
-        This function will also add a PositionComponent to the agent object.
-        If the xPos, yPos or zPos is greater than the width of the world, an error will be thrown."""
-
-        if xPos >= self.width or xPos < 0 or yPos >= self.height or yPos < 0 or zPos >= self.depth or zPos < 0:
-            raise Exception("Cannot add the Agent to position not on the map.")
-
-        agent.addComponent(PositionComponent(agent, agent.model, x=xPos, y=yPos, z=zPos))
-        super().addAgent(agent)
-
-    def addCellComponent(self, name: str, generator):
-        """ Adds the component supplied by the generator functor to each of the cells.
-        The functor is supplied with the cell as input"""
-        self.cells[name] = [generator(pos, self.cells) for pos in self.cells['pos']]
-
-    def removeAgent(self, agentID: str):
-        """ Removes the agent from the environment. Will also remove the PositionComponent from the agent"""
-        if agentID in self.agents:
-            self.agents[agentID].removeComponent(PositionComponent)
-
-        super().removeAgent(agentID)
-
-    def setModel(self, model: Model):
-        super().setModel(model)
-
-    def getAgentsAt(self, xPos: int, yPos: int, zPos: int, xLeeway: int = 0, yLeeway: int = 0, zLeeway: int = 0):
-        """Returns a list of agents at position xPos. Will return [] empty if no agents are in that cell
-        If x,y or z leeway specified, function will return all agents within the range xPos +/- xLeeway,
-        yPos +/- yLeeway and zPos +/- zLeeway."""
-        return [self.agents[agentKey] for agentKey in self.agents
-                if xPos - xLeeway <= self.agents[agentKey][PositionComponent].x <= xPos + xLeeway
-                and yPos - yLeeway <= self.agents[agentKey][PositionComponent].y <= yPos + yLeeway
-                and zPos - zLeeway <= self.agents[agentKey][PositionComponent].z <= zPos + zLeeway]
-
-    def getDimensions(self):
-        return self.width, self.height, self.depth
-
-    def getCell(self, x, y, z):
-        if x < 0 or x >= self.width or y < 0 or y >= self.height or z < 0 or z >= self.depth:
-            return None
-        else:
-            return self.cells['pos'][discreteGridPosToID(x, y, self.width, z, self.height)]
-
-    def getNeighbours(self, cell_pos: (int, int, int), radius: int = 1, moore: bool = False) -> [int]:
-        """Returns a list of all the neighbouring cells within the specified radius. If moore = true the supplied cell
-        will also be included in that list"""
-        neighbours = []
-        cellID = discreteGridPosToID(cell_pos[0], cell_pos[0], self.width, cell_pos[2], self.height)
-
-        xlower_bound = max(0, self.cells['pos'][cellID][0] - radius)
-        xupper_bound = min(self.width, self.cells['pos'][cellID][0] + radius + 1)
-
-        ylower_bound = max(0, self.cells['pos'][cellID][1] - radius)
-        yupper_bound = min(self.height, self.cells['pos'][cellID][1] + radius + 1)
-
-        zlower_bound = max(0, self.cells['pos'][cellID][2] - radius)
-        zupper_bound = min(self.depth, self.cells['pos'][cellID][2] + radius + 1)
-
         for z in range(zlower_bound, zupper_bound):
             for y in range(ylower_bound, yupper_bound):
                 for x in range(xlower_bound, xupper_bound):
-                    id = discreteGridPosToID(x, y, self.width, z, self.height)
-                    if self.cells['pos'][cellID][0] == x and self.cells['pos'][cellID][1] == y and \
-                            self.cells['pos'][cellID][2] == z:
-                        if moore:
-                            neighbours.append(id)
+                    if ret_type == int:
+                        repr = discrete_grid_pos_to_id(x, y, self.width, z, self.height)
+                    elif ret_type == tuple:
+                        repr = (x, y, z)
                     else:
-                        neighbours.append(id)
+                        raise TypeError(f'ret_type of type {ret_type} is not supported. Use an int or tuple instead.')
+
+                    if center[0] == x and center[1] == y and center[2] == z:
+                        if incl_center:
+                            neighbours.append(repr)
+                    else:
+                        neighbours.append(repr)
 
         return neighbours
 
-    def move(self, agent: Agent, x: int = 0, y: int = 0, z: int = 0):
-        """Moves an agent (x,y,z) units in the environment.
 
-        The function automatically clamps agent movement to the range
-        ``(0,0,0) <= x < (self.width,self.height,self.depth)``.
+class LineWorld(DiscreteWorld):
+    """LineWorld is a discrete environment with only 1 axis (x-axis). It is a simplified version of its parent
+    ``DiscreteWorld``.
 
-        Parameters
-        ----------
-        agent : Agent
-            The agent object to be moved.
-        x : int, Optional
-            The number of discrete units to move the agent. Defaults to 0.
-        y : int, Optional
-            The number of discrete units to move the agent. Defaults to 0.
-        z : int, Optional
-            The number of discrete units to move the agent. Defaults to 0.
+    A LineWorld's dimensions are defined by a ``width`` property.
 
-        Raises
-        ------
-        ComponentNotFoundError
-            If ``agent`` does not have a ``PositionComponent``.
-        """
-        if PositionComponent not in agent:
-            raise ComponentNotFoundError(agent, PositionComponent)
+    Attributes
+    ----------
+    width : int
+        The width of the environment. This attribute can be thought of as the spacial extent of the x-axis.
+    """
 
-        component = agent[PositionComponent]
-        component.x = max(min(component.x + x, self.width - 1), 0)
-        component.y = max(min(component.y + y, self.height - 1), 0)
-        component.z = max(min(component.z + z, self.depth - 1), 0)
-
-    def move_to(self, agent: Agent, x: int = 0, y: int = 0, z: int = 0):
-        """Moves an agent to position (x,y,z) in the environment.
+    def __init__(self, model: Model, width: int, id: str = 'ENVIRONMENT'):
+        """Initializes a ``LineWorld`` object.
 
         Parameters
         ----------
-        agent : Agent
-            The agent object to be moved.
-        x : int, Optional
-            The new x-coordinate of the agent. Defaults to 0.
-        y : int, Optional
-            The new y-coordinate of the agent. Defaults to 0.
-        z : int, Optional
-            The new z-coordinate of the agent. Defaults to 0.
+        model : Model
+            The model the environment belongs to.
+        width : int
+            The width of the ``LineWorld``.
+        id : str, Optional
+            id of the ``LineWorld``.
 
         Raises
         ------
-        ComponentNotFoundError
-            If ``agent`` does not have a ``PositionComponent``.
         IndexError
-            If coordinates are out of bounds.
+            If the ``width`` of the environment is negative.
         """
-        if PositionComponent not in agent:
-            raise ComponentNotFoundError(agent, PositionComponent)
-        elif 0 <= x < self.width and 0 <= y < self.height and 0 <= z < self.depth:
-            component = agent[PositionComponent]
-            component.x = x
-            component.y = y
-            component.z = z
-        else:
-            raise IndexError(f'Position ({x},{y},{z}) is out of the environment\'s range')
+
+        if width < 1:
+            raise IndexError("Cannot create a LineWorld with a negative width.")
+
+        super().__init__(model, width, 0, 0, id)
+
+    def get_dimensions(self) -> int:
+        """Gets the dimension of the ``LineWorld``.
+        Returns:
+        int
+            The ``width`` of the ``LineWorld``.
+        """
+        return self.width
+
+
+class GridWorld(DiscreteWorld):
+    """GridWorld is a discrete environment with 2 axes (x and y). It is a simplified version of its parent
+    ``DiscreteWorld``.
+
+    A GridWorld's dimensions are defined by a ``width`` and ``height`` properties.
+
+    Attributes
+    ----------
+    width : int
+        The width of the environment. This attribute can be thought of as the spacial extent of the x-axis.
+    height : int
+        The height of the environment. This attribute can be thought of as the spacial extent of the y-axis.
+    """
+
+    def __init__(self, model: Model, width: int, height: int, id: str = 'ENVIRONMENT'):
+
+        if width < 1 or height < 1:
+            raise IndexError("Cannot create a GridWorld with a negative width or height.")
+
+        super().__init__(model, width, height, 0, id=id)
+
+    def get_dimensions(self) -> (int, int):
+        """Gets the dimension of the ``GridWorld``.
+        Returns:
+        (int, int)
+            The ``width`` and ``height`` of the ``GridWorld``.
+        """
+        return self.width, self.height

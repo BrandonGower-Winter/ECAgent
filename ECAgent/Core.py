@@ -302,7 +302,7 @@ class Environment(Agent):
         """Deprecated. Use ``Environment.remove_agent`` instead."""
         self.remove_agent(a_id)
 
-    def getAgent(self, id: str, throw_error: bool = False):
+    def get_agent(self, id: str, throw_error: bool = False):
         """Gets agent obj based on its ``id``.
 
         Returns None if agent does not exist.
@@ -331,6 +331,11 @@ class Environment(Agent):
             raise AgentNotFoundError(id, self)
         else:
             return None
+
+    @deprecated(reason='For not meeting standard python naming conventions. Use "remove_agent" instead.')
+    def getAgent(self, id: str, throw_error: bool = False):  # pragma no cover
+        """Deprecated. Use ``Environment.remove_agent`` instead."""
+        self.get_agent(id, throw_error)
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "get_random_agent" instead')
     def getRandomAgent(self, *args):  # pragma: no cover
@@ -433,10 +438,6 @@ class Environment(Agent):
     def __iter__(self):
         """Returns a list all of all agents in the environment."""
         return (self.agents[a] for a in self.agents)
-
-    def getDimensions(self):
-        """Returns the dimensions of the environment. For the base environment class it returns None."""
-        return None
 
     def shuffle(self, *args, tag: int = None):
         """Returns a list of agents with matching components in a random order.

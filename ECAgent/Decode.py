@@ -153,7 +153,7 @@ class Decoder:
             for i in range(0, agentDict['number']):
                 # Add the index of the agent to the agentDict
                 agentDict['params']['agent_index'] = i
-                generatedModel.environment.addAgent(
+                generatedModel.environment.add_agent(
                     Decoder.str_to_class(agentDict['name'], Decoder.get_module_name(agentDict)).decode(
                         agentDict['params']
                     )

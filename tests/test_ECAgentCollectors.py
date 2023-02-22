@@ -98,8 +98,8 @@ class TestAgentCollector:
         assert len(collector.records) == 0
 
         # test empty agentFunc returned
-        model.environment.addAgent(Agent("a1",model))
-        model.environment.addAgent(Agent("a2", model))
+        model.environment.add_agent(Agent("a1",model))
+        model.environment.add_agent(Agent("a2", model))
 
         collector.execute()
 

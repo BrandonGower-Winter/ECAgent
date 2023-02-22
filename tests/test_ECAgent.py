@@ -20,7 +20,7 @@ class TestEnvironment:
         model.environment.add_agent(agent)
 
         assert len(model.environment.agents) == 1
-        assert model.environment.getAgent(agent.id) == agent
+        assert model.environment.get_agent(agent.id) == agent
 
         with pytest.raises(DuplicateAgentError):
             model.environment.add_agent(agent)
@@ -37,20 +37,20 @@ class TestEnvironment:
         with pytest.raises(AgentNotFoundError):
             model.environment.remove_agent(agent.id)
 
-    def test_getAgent(self):
+    def test_get_agent(self):
         model = Model()
         agent = Agent("a1", model)
 
         # Not found with no error
-        assert model.environment.getAgent(agent.id) is None
+        assert model.environment.get_agent(agent.id) is None
 
         # Not found with error
         with pytest.raises(AgentNotFoundError):
-            model.environment.getAgent(agent.id, True)
+            model.environment.get_agent(agent.id, True)
 
         # Found
         model.environment.add_agent(agent)
-        assert model.environment.getAgent(agent.id) == agent
+        assert model.environment.get_agent(agent.id) == agent
 
     def test_get_random_agent(self):
 

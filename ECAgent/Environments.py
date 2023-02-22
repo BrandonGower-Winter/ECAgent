@@ -257,7 +257,6 @@ class SpaceWorld(Environment):
         super().add_agent(agent)
         agent.addComponent(PositionComponent(agent, agent.model, x=x_pos, y=y_pos, z=z_pos))
 
-
     def remove_agent(self, a_id: str):
         """Removes the agent from the environment. Overrides the base ``Environment.remove_agent`` method.
         This method will also remove the ``PositionComponent`` from the agent.

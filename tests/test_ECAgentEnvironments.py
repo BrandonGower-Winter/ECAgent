@@ -397,7 +397,24 @@ class TestDiscreteWorld:
         # Test non error case
         assert env.get_cell(1, 1, 1).equals(env.cells.iloc[31])
 
-    def test_get_neighbours(self):
+    def test_get_cell_as_tuple(self):
+
+        model = Model()
+        env = DiscreteWorld(model, 3, 3, 3)
+        # Test int case
+        assert env._get_cell_pos_as_tuple(discrete_grid_pos_to_id(1, 1, 3, 1, 3)) == (1,1,1)
+
+        # Test tuple case
+        assert env._get_cell_pos_as_tuple((1, 1, 1)) == (1, 1, 1)
+
+        # Test PositionComponent case
+        assert  env._get_cell_pos_as_tuple(PositionComponent(None, None, 1, 1, 1)) == (1, 1, 1)
+
+        # Test wrong type case
+        with pytest.raises(TypeError):
+            env.get_moore_neighbours('(1, 1, 1)')
+
+    def test_get_moore_neighbours(self):
         model = Model()
         env = DiscreteWorld(model, 3, 3, 3)
 
@@ -533,6 +550,121 @@ class TestDiscreteWorld:
         assert len(neighbours) == 2
         assert neighbours[0] == (0, 0, 0)
         assert neighbours[1] == (0, 0, 2)
+
+        # Test boundary
+        env = DiscreteWorld(model, 3, 3, 0)
+        neighbours = env.get_moore_neighbours(0, ret_type=tuple)
+        assert len(neighbours) == 3
+        assert neighbours[0] == (1, 0, 0)
+        assert neighbours[1] == (0, 1, 0)
+        assert neighbours[2] == (1, 1, 0)
+
+    def test_get_neumann_neighbours(self):
+        model = Model()
+        env = DiscreteWorld(model, 3, 3, 3)
+
+        def test_111(neighbours):
+            assert len(neighbours) == 6
+            assert neighbours[0] == discrete_grid_pos_to_id(1, 1, env.width, 0, env.height)
+            assert neighbours[1] == discrete_grid_pos_to_id(1, 0, env.width, 1, env.height)
+            assert neighbours[2] == discrete_grid_pos_to_id(0, 1, env.width, 1, env.height)
+            assert neighbours[3] == discrete_grid_pos_to_id(2, 1, env.width, 1, env.height)
+            assert neighbours[4] == discrete_grid_pos_to_id(1, 2, env.width, 1, env.height)
+            assert neighbours[5] == discrete_grid_pos_to_id(1, 1, env.width, 2, env.height)
+
+        def test_111_tuple(neighbours):
+            assert len(neighbours) == 6
+            assert neighbours[0] == (1, 1, 0)
+            assert neighbours[1] == (1, 0, 1)
+            assert neighbours[2] == (0, 1, 1)
+            assert neighbours[3] == (2, 1, 1)
+            assert neighbours[4] == (1, 2, 1)
+            assert neighbours[5] == (1, 1, 2)
+
+        def test_111_with_center(neighbours):
+            assert len(neighbours) == 7
+            assert neighbours[0] == discrete_grid_pos_to_id(1, 1, env.width, 0, env.height)
+            assert neighbours[1] == discrete_grid_pos_to_id(1, 0, env.width, 1, env.height)
+            assert neighbours[2] == discrete_grid_pos_to_id(0, 1, env.width, 1, env.height)
+            assert neighbours[3] == discrete_grid_pos_to_id(1, 1, env.width, 1, env.height)
+            assert neighbours[4] == discrete_grid_pos_to_id(2, 1, env.width, 1, env.height)
+            assert neighbours[5] == discrete_grid_pos_to_id(1, 2, env.width, 1, env.height)
+            assert neighbours[6] == discrete_grid_pos_to_id(1, 1, env.width, 2, env.height)
+
+        # Test int case
+        test_111(env.get_neumann_neighbours(discrete_grid_pos_to_id(1, 1, 3, 1, 3)))
+
+        # Test tuple case
+        test_111(env.get_neumann_neighbours((1, 1, 1)))
+
+        # Test PositionComponent case
+        test_111(env.get_neumann_neighbours(PositionComponent(None, None, 1, 1, 1)))
+
+        # Test wrong type case
+        with pytest.raises(TypeError):
+            env.get_neumann_neighbours('(1, 1, 1)')
+
+        # With tuples returned
+        test_111_tuple(env.get_neumann_neighbours((1,1,1), ret_type=tuple))
+
+        # With incompatible return type
+        with pytest.raises(TypeError):
+            env.get_neumann_neighbours((1,1,1), ret_type=str)
+
+        # Test with center
+        test_111_with_center(env.get_neumann_neighbours((1, 1, 1), incl_center=True))
+
+        # Test no y z dimension
+        env = DiscreteWorld(model, 3, 0, 0)
+        neighbours = env.get_neumann_neighbours(1, ret_type=tuple)
+        assert len(neighbours) == 2
+        assert neighbours[0] == (0, 0, 0)
+        assert neighbours[1] == (2, 0, 0)
+
+        # Test no x dimension
+        env = DiscreteWorld(model, 0, 0, 3)
+        neighbours = env.get_neumann_neighbours(1, ret_type=tuple)
+        assert len(neighbours) == 2
+        assert neighbours[0] == (0, 0, 0)
+        assert neighbours[1] == (0, 0, 2)
+
+        # Test boundary
+        env = DiscreteWorld(model, 3, 3, 0)
+        neighbours = env.get_neumann_neighbours(0, ret_type=tuple)
+        assert len(neighbours) == 2
+        assert neighbours[0] == (1, 0, 0)
+        assert neighbours[1] == (0, 1, 0)
+
+        # With r = 2
+        env = DiscreteWorld(model, 3, 3, 0)
+        neighbours = env.get_neumann_neighbours(0, radius=2, ret_type=tuple)
+        assert len(neighbours) == 5
+        assert neighbours[0] == (1, 0, 0)
+        assert neighbours[1] == (2, 0, 0)
+        assert neighbours[2] == (0, 1, 0)
+        assert neighbours[3] == (1, 1, 0)
+        assert neighbours[4] == (0, 2, 0)
+
+    def test_neighbours(self):
+        model = Model()
+        env = DiscreteWorld(model, 3, 3, 0)
+
+        # Test Moore
+        neighbours = env.get_neighbours(0, ret_type=tuple)
+        assert len(neighbours) == 3
+        assert neighbours[0] == (1, 0, 0)
+        assert neighbours[1] == (0, 1, 0)
+        assert neighbours[2] == (1, 1, 0)
+
+        # Test Neumann
+        neighbours = env.get_neighbours(0, ret_type=tuple, mode='neumann')
+        assert len(neighbours) == 2
+        assert neighbours[0] == (1, 0, 0)
+        assert neighbours[1] == (0, 1, 0)
+
+        # Test error
+        with pytest.raises(KeyError):
+            env.get_neighbours(0, mode='fail')
 
 
 class TestLineWorld:

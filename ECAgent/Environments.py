@@ -250,7 +250,7 @@ class SpaceWorld(Environment):
         Exception
             If the agent's initial position is outside the environment's spacial extents.
         """
-        # TODO create proper for being outside spacial extents.
+        # TODO create logic for being outside spacial extents.
         if x_pos >= self.width or x_pos < 0 or y_pos >= self.height or y_pos < 0 or z_pos >= self.depth or z_pos < 0:
             raise Exception("Cannot add the Agent to position not on the map.")
 
@@ -564,9 +564,46 @@ class DiscreteWorld(SpaceWorld):
         """Deprecated. Use ``get_cell`` instead."""
         return self.get_cell(x, y, z)
 
+    def _get_cell_pos_as_tuple(self, cell_pos) -> (int, int, int):
+        """Returns the coordinates of a ``DiscreteWorld`` cell based in the type supplied by ``cell_pos``.
+
+        The function accepts three types: ``int``, ``tuple`` or ``PositionComponent``.
+        If ``int`` is supplied, it will be assumed to be the *unique identifier* of the cell (i.e. the value returned
+        by ``discrete_grid_pos_to_id()``. If a ``tuple`` is supplied, it is assumed that it will be the coordinates of
+        the cell (e.g. ``(2,5,3)``). If a ``PositionComponent`` is supplied, it's values will be truncated and turned
+        into a 3d integer coordinate (i.e. A ``PositionComponent`` with value ``x = 2.5, y = 5.9, z = 3.1``) will be
+        converted into coordinates ``(2,5,3)``.
+
+        Parameters
+        ----------
+        cell_pos : int, tuple, PositionComponent
+            The cell whose neighbours you want to get.
+
+        Returns
+        -------
+        (int, int, int)
+            The coordinates of the cell represented as a 3-tuple.
+
+        Raises
+        ------
+        TypeError
+            If the type of cell_pos is not ``int``, ``tuple`` or ``PositionComponent``.
+        """
+        if isinstance(cell_pos, int):
+            return self.cells['pos'][cell_pos]
+        elif isinstance(cell_pos, tuple):
+            return cell_pos
+        elif isinstance(cell_pos, PositionComponent):
+            center = cell_pos.xyz()
+            # Convert to int
+            return int(center[0]), int(center[1]), int(center[2])
+        else:
+            raise TypeError(f'cell_pos of type {type(cell_pos)} is not supported. Use an int, tuple or '
+                            f'PositionComponent instead')
+
     def get_moore_neighbours(self, cell_pos, radius: int = 1, incl_center: bool = False, ret_type: type = int) -> list:
         """Returns a list of all cells within the specified moore neighbourhood.
-        If incl_center = true the supplied cell will also be included in that list
+        If incl_center = true the supplied cell will also be included in that list.
 
         The function accepts three types: ``int``, ``tuple`` or ``PositionComponent``.
         If ``int`` is supplied, it will be assumed to be the *unique identifier* of the cell (i.e. the value returned
@@ -601,19 +638,7 @@ class DiscreteWorld(SpaceWorld):
             If the type of cell_pos is not ``int``, ``tuple`` or ``PositionComponent`` or if the type of ``ret_type`` is
             not ``int`` or ``tuple``.
         """
-
-        if isinstance(cell_pos, int):
-            center = self.cells['pos'][cell_pos]
-        elif isinstance(cell_pos, tuple):
-            center = cell_pos
-        elif isinstance(cell_pos, PositionComponent):
-            center = cell_pos.xyz()
-            # Convert to int
-            center = int(center[0]), int(center[1]), int(center[2])
-        else:
-            raise TypeError(f'cell_pos of type {type(cell_pos)} is not supported. Use an int, tuple or '
-                            f'PositionComponent instead')
-
+        center = self._get_cell_pos_as_tuple(cell_pos)
         # Get search bounds
         if self.width > 0:
             xlower_bound = max(0, center[0] - radius)
@@ -633,24 +658,164 @@ class DiscreteWorld(SpaceWorld):
         else:
             zlower_bound, zupper_bound = 0, 1
 
+        def if_int(env, x, y, z):
+            return discrete_grid_pos_to_id(x, y, env.width, z, env.height)
+
+        def if_tuple(env, x, y, z):
+            return x, y, z
+
+        if ret_type == int:
+            ret_func = if_int
+        elif ret_type == tuple:
+            ret_func = if_tuple
+        else:
+            raise TypeError(f'ret_type of type {ret_type} is not supported. Use an int or tuple instead.')
+
         neighbours = []
         for z in range(zlower_bound, zupper_bound):
             for y in range(ylower_bound, yupper_bound):
                 for x in range(xlower_bound, xupper_bound):
-                    if ret_type == int:
-                        repr = discrete_grid_pos_to_id(x, y, self.width, z, self.height)
-                    elif ret_type == tuple:
-                        repr = (x, y, z)
-                    else:
-                        raise TypeError(f'ret_type of type {ret_type} is not supported. Use an int or tuple instead.')
-
+                    val = ret_func(self, x, y, z)
                     if center[0] == x and center[1] == y and center[2] == z:
                         if incl_center:
-                            neighbours.append(repr)
+                            neighbours.append(val)
                     else:
-                        neighbours.append(repr)
+                        neighbours.append(val)
 
         return neighbours
+
+    def get_neumann_neighbours(self, cell_pos, radius: int = 1, incl_center: bool = False, ret_type: type = int) -> list:
+        """Returns a list of all cells within the specified von Neumann neighbourhood.
+        If incl_center = true the supplied cell will also be included in that list.
+
+        The function accepts three types: ``int``, ``tuple`` or ``PositionComponent``.
+        If ``int`` is supplied, it will be assumed to be the *unique identifier* of the cell (i.e. the value returned
+        by ``discrete_grid_pos_to_id()``. If a ``tuple`` is supplied, it is assumed that it will be the coordinates of
+        the cell (e.g. ``(2,5,3)``). If a ``PositionComponent`` is supplied, it's values will be truncated and turned
+        into a 3d integer coordinate (i.e. A ``PositionComponent`` with value ``x = 2.5, y = 5.9, z = 3.1``) will be
+        converted into coordinates ``(2,5,3)``.
+
+        The same functionality applied to the ``ret_type`` parameters. By default a list of integers containing the
+        *unique identifiers* of the neighbouring cells are returned. If ``tuple`` is supplied, the function will return
+        the 3d coordinates of the neighbouring will be returned.
+
+        Parameters
+        ----------
+        cell_pos : int, tuple, PositionComponent
+            The cell whose neighbours you want to get.
+        radius : int, Optional
+            The size of the Moore neighbourhood. Defaults to ``1``.
+        incl_center : bool, Optional
+            Flags whether you want the supplied ``cell_pos`` to be included in the returned ``list``
+        ret_type : type, Optional
+            The representation of the neighbouring cells, Defaults to ``int`` but may also be ``tuple``.
+
+        Returns
+        -------
+        list
+            A list of neighbouring cells in the representation specified by ``ret_type``. Defaults to a list of ``int``.
+
+        Raises
+        ------
+        TypeError
+            If the type of cell_pos is not ``int``, ``tuple`` or ``PositionComponent`` or if the type of ``ret_type`` is
+            not ``int`` or ``tuple``.
+        """
+        center = self._get_cell_pos_as_tuple(cell_pos)
+        # Get search bounds
+        if self.width > 0:
+            xlower_bound = max(0, center[0] - radius)
+            xupper_bound = min(self.width, center[0] + radius + 1)
+        else:
+            xlower_bound, xupper_bound = 0, 1
+
+        if self.height > 0:
+            ylower_bound = max(0, center[1] - radius)
+            yupper_bound = min(self.height, center[1] + radius + 1)
+        else:
+            ylower_bound, yupper_bound = 0, 1
+
+        if self.depth > 0:
+            zlower_bound = max(0, center[2] - radius)
+            zupper_bound = min(self.depth, center[2] + radius + 1)
+        else:
+            zlower_bound, zupper_bound = 0, 1
+
+        def if_int(env, x, y, z):
+            return discrete_grid_pos_to_id(x, y, env.width, z, env.height)
+
+        def if_tuple(env, x, y, z):
+            return x, y, z
+
+        if ret_type == int:
+            ret_func = if_int
+        elif ret_type == tuple:
+            ret_func = if_tuple
+        else:
+            raise TypeError(f'ret_type of type {ret_type} is not supported. Use an int or tuple instead.')
+
+        neighbours = []
+        for z in range(zlower_bound, zupper_bound):
+            for y in range(ylower_bound, yupper_bound):
+                for x in range(xlower_bound, xupper_bound):
+                    if abs(x - center[0]) + abs(y - center[1]) + abs(z - center[2]) < radius + 1:  # Calc Manhattan
+                        val = ret_func(self, x, y, z)
+                        if center[0] == x and center[1] == y and center[2] == z:
+                            if incl_center:
+                                neighbours.append(val)
+                        else:
+                            neighbours.append(val)
+        return neighbours
+
+    def get_neighbours(self, cell_pos, radius: int = 1, incl_center: bool = False, ret_type: type = int,
+                       mode: str = 'moore') -> list:
+        """Returns a list of all cells within the specified neighbourhood.
+        If incl_center = true the supplied cell will also be included in that list. Both Moore and Von Neumann
+        neighbourhoods are supported.
+
+        The function accepts three types: ``int``, ``tuple`` or ``PositionComponent``.
+        If ``int`` is supplied, it will be assumed to be the *unique identifier* of the cell (i.e. the value returned
+        by ``discrete_grid_pos_to_id()``. If a ``tuple`` is supplied, it is assumed that it will be the coordinates of
+        the cell (e.g. ``(2,5,3)``). If a ``PositionComponent`` is supplied, it's values will be truncated and turned
+        into a 3d integer coordinate (i.e. A ``PositionComponent`` with value ``x = 2.5, y = 5.9, z = 3.1``) will be
+        converted into coordinates ``(2,5,3)``.
+
+        The same functionality applied to the ``ret_type`` parameters. By default a list of integers containing the
+        *unique identifiers* of the neighbouring cells are returned. If ``tuple`` is supplied, the function will return
+        the 3d coordinates of the neighbouring will be returned.
+
+        Parameters
+        ----------
+        cell_pos : int, tuple, PositionComponent
+            The cell whose neighbours you want to get.
+        radius : int, Optional
+            The size of the Moore neighbourhood. Defaults to ``1``.
+        incl_center : bool, Optional
+            Flags whether you want the supplied ``cell_pos`` to be included in the returned ``list``
+        ret_type : type, Optional
+            The representation of the neighbouring cells, Defaults to ``int`` but may also be ``tuple``.
+        mode : str
+            The type of neighbourhood to return. Can either be ``'moore'`` or ``'neumann'``. Defaults to ``'moore'`.
+
+        Returns
+        -------
+        list
+            A list of neighbouring cells in the representation specified by ``ret_type``. Defaults to a list of ``int``.
+
+        Raises
+        ------
+        TypeError
+            If the type of cell_pos is not ``int``, ``tuple`` or ``PositionComponent`` or if the type of ``ret_type`` is
+            not ``int`` or ``tuple``.
+        KeyError
+            If the ``mode`` supplied is not ``'moore'`` or ``'neumann'``.
+        """
+        if mode == 'moore':
+            return self.get_moore_neighbours(cell_pos, radius, incl_center, ret_type)
+        elif mode == 'neumann':
+            return self.get_neumann_neighbours(cell_pos, radius, incl_center, ret_type)
+        else:
+            raise KeyError(f'Mode {mode} unrecognized. Use either "moore" or "neumann".')
 
 
 class LineWorld(DiscreteWorld):

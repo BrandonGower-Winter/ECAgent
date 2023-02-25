@@ -314,9 +314,23 @@ class SystemManager:
 
 
 class Environment(Agent):
-    """Base environment class.
+    """Base environment class. It is a void environment which means that is has no spacial properties.
 
-    It is a void environment which means that is has no spacial properties.
+    In ECAgent, all environments are treated as agents. This means that they can have components added and removed from
+    them.
+
+    Attributes
+    ----------
+    agents : dict
+        A ``dict`` of agents occupying the environment. The key is the agent's id.
+    components : dict
+        The components associated with the environment. The key is the Class of the component.
+    id : str
+        The agent id of the environment.
+    model : Model
+        The ``Model`` the ``Environment`` belongs to.
+    tag : int
+        The value of the Tag associated with the environment. Defaults to 0 (which is the value ``NONE``).
     """
 
     __slots__ = ['agents']
@@ -325,7 +339,7 @@ class Environment(Agent):
         super().__init__(id, model)
         self.agents = {}
 
-    def setModel(self, model: Model):
+    def set_model(self, model: Model):
         self.model = model
 
     def add_agent(self, agent: Agent):
@@ -509,7 +523,7 @@ class Environment(Agent):
         return len(self.agents)
 
     def __iter__(self):
-        """Returns a list all of all agents in the environment."""
+        """Returns a tuple of all agents in the environment."""
         return (self.agents[a] for a in self.agents)
 
     def shuffle(self, *args, tag: int = None):

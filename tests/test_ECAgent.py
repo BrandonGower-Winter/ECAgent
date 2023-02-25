@@ -118,14 +118,13 @@ class TestEnvironment:
         agent1.tag = 1
         assert model.environment.get_agents(tag=1) == [agent1]
 
-    def test_setModel(self):
+    def test_set_model(self):
         model = Model()
+
         env = Environment(None)
+        assert env.model is None
 
-        assert env.model is not model
-
-        env.setModel(model)
-
+        env.set_model(model)
         assert env.model is model
 
     def test__len__(self):

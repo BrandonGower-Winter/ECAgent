@@ -192,6 +192,13 @@ class TestModel:
         assert model.logger is logger
         assert model.logger.level == logging.DEBUG
 
+    def test_set_environment(self):
+        model = Model()
+        new_env = Environment(model)
+
+        model.set_environment(new_env)
+        assert model.environment is new_env
+
 
 class TestComponent:
 

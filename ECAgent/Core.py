@@ -8,12 +8,18 @@ from deprecated import deprecated
 
 
 class Model:
-    """ This is the base class for the ABM model.
-    You inherit this class to again access to all of the ECS functionality """
+    """This is the base class for your Agent-based Models.
+    You inherit this class to again access to all of the ECS functionality
+
+    Attributes
+    ----------
+    environment : Environment
+        The model's environment.
+    """
 
     __slots__ = ['environment', 'systemManager', 'random', 'logger']
 
-    def __init__(self, seed: int = None, logger=None):
+    def __init__(self, seed: int = None, logger: logging.Logger = None):
 
         self.environment = Environment(self)
         self.systemManager = SystemManager(self)
@@ -30,6 +36,17 @@ class Model:
             self.logger.setLevel(logging.INFO)
         else:
             self.logger = logger
+
+    def set_environment(self, env):
+        """Sets the models environment.
+        `model.set_environment(new_environment)`  is equivalent to ``model.environment = new_environment``.
+
+        Parameters
+        ----------
+        env :  Environment
+            The model's new environment.
+        """
+        self.environment = env
 
 
 class Component:
@@ -74,8 +91,7 @@ class Agent:
             self.model.systemManager.registerComponent(component)
 
     def removeComponent(self, component_type: type):
-        """
-        Removes component of type ```component_type`` from the agent.
+        """Removes component of type ```component_type`` from the agent.
 
         Parameters:
         component_type : type

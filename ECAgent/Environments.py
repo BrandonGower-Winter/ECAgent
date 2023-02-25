@@ -10,7 +10,7 @@ def discrete_grid_pos_to_id(x: int, y: int = 0, width: int = 0, z: int = 0, heig
     """Returns a unique number of based on the x, y and z coordinates entered.
 
     Uniqueness is dimension dependent. The equation for calculating uniqueness is defined as:
-     ```(z * width * height) + (y * width) + x`
+     ``(z * width * height) + (y * width) + x``
 
     Parameters
     ----------
@@ -133,13 +133,13 @@ class ConstantGenerator:
     will create a cell component called ``'constant'`` which will have values stored in a
     contiguous array: ``[1,1,1,1,1,1,1,1,1]`` which when viewed in 2D looks like:
 
-    +---------+---------+-----------+
-    | 1       |  1      |  1        |
-    +---------+---------+-----------+
-    | 1       |  1      |  1        |
-    +---------+---------+-----------+
-    | 1       |  1      |  1        |
-    +---------+---------+-----------+
+    +---------+---------+---------+
+    | 1       |  1      |  1      |
+    +---------+---------+---------+
+    | 1       |  1      |  1      |
+    +---------+---------+---------+
+    | 1       |  1      |  1      |
+    +---------+---------+---------+
 
     Attributes
     ----------

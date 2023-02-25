@@ -307,23 +307,32 @@ class System:
 
 
 class SystemManager:
-    """This class is responsible for managing the adding,
-    removing and executing of Systems.
+    """This class is responsible for managing the adding, removing and executing of Systems.
 
     Every ``Model`` will get a ``SystemManager`` which they can access using ``model.systems``.
 
     Attributes
     ----------
-
+    model : Model
+        The model the ``SystemManager`` belongs to.
+    timestep : int
+        The amount of time that has elapsed in the model.
+    systems : dict
+        A dictionary containing all of the model's systems. The key is the system's id.
+    execution_queue : list
+        A list of containing the order at which the systems execute when ``execute_systems()`` is called.
+    component_pools : dict
+        A dictionary containing lists of all components registered with the ``SystemManager``. The key is type of the
+        ``Component``.
     """
 
-    __slots__ = ['timestep', 'systems', 'executionQueue', 'componentPools', 'model']
+    __slots__ = ['timestep', 'systems', 'execution_queue', 'component_pools', 'model']
 
     def __init__(self, model: Model):
         self.timestep = 0
         self.systems = {}
-        self.executionQueue = []
-        self.componentPools = {}
+        self.execution_queue = []
+        self.component_pools = {}
         self.model = model
 
     def add_system(self, s: System):
@@ -344,13 +353,13 @@ class SystemManager:
         else:
             self.systems[s.id] = s  # Add to systems dict
             # Add to event queue
-            for i in range(0, len(self.executionQueue)):
-                if s.priority > self.executionQueue[i].priority:
-                    self.executionQueue.insert(i, s)
+            for i in range(0, len(self.execution_queue)):
+                if s.priority > self.execution_queue[i].priority:
+                    self.execution_queue.insert(i, s)
                     break
             # Add to the end of queue if s has the lowest priority
-            if s not in self.executionQueue:
-                self.executionQueue.append(s)
+            if s not in self.execution_queue:
+                self.execution_queue.append(s)
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "add_system" instead.')
     def addSystem(self, s: System):  # pragma: no cover
@@ -373,7 +382,7 @@ class SystemManager:
         if s_id not in self.systems.keys():
             raise SystemNotFoundError(s_id)
         else:
-            self.executionQueue.remove(self.systems[s_id])
+            self.execution_queue.remove(self.systems[s_id])
             del self.systems[s_id]
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "remove_system" instead.')
@@ -391,7 +400,7 @@ class SystemManager:
         if sys.start <= self.timestep <= sys.end and (sys.start - self.timestep) % sys.frequency == 0:
                 sys.execute()
         """
-        for sys in self.executionQueue:  # Simple execute cycle
+        for sys in self.execution_queue:  # Simple execute cycle
             if sys.start <= self.timestep <= sys.end and (sys.start - self.timestep) % sys.frequency == 0:
                 sys.execute()
         self.timestep += 1
@@ -401,24 +410,50 @@ class SystemManager:
         self.execute_systems()
 
     def register_component(self, component: Component):
-        if type(component) not in self.componentPools.keys():
-            self.componentPools[type(component)] = [component]
-        elif component in self.componentPools[type(component)]:
+        """Registers a component with the ``SystemManager``.
+
+        Registered components can be accessed using ``SystemManager.component_pools[type(component)]``.
+
+        Parameters
+        ----------
+        component : Component
+            The ``Component`` to register.
+
+        Raises
+        ------
+        KeyError
+            When ``component`` has already been registered with the ``SystemManager``.
+        """
+        if type(component) not in self.component_pools.keys():
+            self.component_pools[type(component)] = [component]
+        elif component in self.component_pools[type(component)]:
             raise KeyError(f"Agent {component.agent.id}'s {str(type(component))} Component already registered with the"
                            f"System Manager.")
         else:
-            self.componentPools[type(component)].append(component)
+            self.component_pools[type(component)].append(component)
 
     def deregister_component(self, component: Component):
-        if type(component) not in self.componentPools.keys():
+        """Deregisters (removes) a component from the ``SystemManager`` component pool.
+
+        Parameters
+        ----------
+        component : Component
+            The ``Component`` to deregister.
+
+        Raises
+        ------
+        KeyError
+            When ``component`` is not registered with the ``SystemManager``.
+        """
+        if type(component) not in self.component_pools.keys():
             raise KeyError(f"No components with type {str(type(component))} registered with the SystemManager.")
-        elif component not in self.componentPools[type(component)]:
+        elif component not in self.component_pools[type(component)]:
             raise KeyError(f"Cannot deregister Agent {component.agent.id}'s {str(type(component))} Component because "
                            f"it was never registered with the SystemManager to begin with.")
         else:
-            self.componentPools[type(component)].remove(component)
-            if len(self.componentPools[type(component)]) == 0:
-                del self.componentPools[type(component)]
+            self.component_pools[type(component)].remove(component)
+            if len(self.component_pools[type(component)]) == 0:
+                del self.component_pools[type(component)]
 
     def get_components(self, component_type: type):
         """Returns the list of components registered to the ``SystemManager`` with a type of ``component_type``.
@@ -436,8 +471,8 @@ class SystemManager:
         None
             If no components of type ``component_type`` can be found.
         """
-        if component_type in self.componentPools.keys():
-            return self.componentPools[component_type]
+        if component_type in self.component_pools.keys():
+            return self.component_pools[component_type]
         else:
             return None
 

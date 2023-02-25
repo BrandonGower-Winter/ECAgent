@@ -21,7 +21,7 @@ class TestEnvironment:
 
         assert len(model.environment.agents) == 1
         assert model.environment.get_agent(agent.id) == agent
-        assert len(model.systems.componentPools[Component]) == 1
+        assert len(model.systems.component_pools[Component]) == 1
 
         with pytest.raises(DuplicateAgentError):
             model.environment.add_agent(agent)
@@ -34,7 +34,7 @@ class TestEnvironment:
         model.environment.remove_agent(agent.id)
 
         assert len(model.environment.agents) == 0
-        assert Component not in model.systems.componentPools
+        assert Component not in model.systems.component_pools
 
         with pytest.raises(AgentNotFoundError):
             model.environment.remove_agent(agent.id)
@@ -279,8 +279,8 @@ class TestSystemManager:
         assert sys_man.model == model
         assert sys_man.timestep == 0
         assert len(sys_man.systems) == 0
-        assert len(sys_man.executionQueue) == 0
-        assert len(sys_man.componentPools) == 0
+        assert len(sys_man.execution_queue) == 0
+        assert len(sys_man.component_pools) == 0
 
     def test_add_system(self):
         model = Model()
@@ -288,7 +288,7 @@ class TestSystemManager:
 
         # Test adding to the end of the queue.
         model.systems.add_system(s1)
-        assert len(model.systems.executionQueue) == 1
+        assert len(model.systems.execution_queue) == 1
 
         # Test adding duplicate system.
         with pytest.raises(KeyError):
@@ -297,8 +297,8 @@ class TestSystemManager:
         # Test adding to the beginning of the queue
         s2 = System("s2", model, priority=10)
         model.systems.add_system(s2)
-        assert len(model.systems.executionQueue) == 2
-        assert model.systems.executionQueue[0].id == s2.id
+        assert len(model.systems.execution_queue) == 2
+        assert model.systems.execution_queue[0].id == s2.id
 
     def test_remove_system(self):
         model = Model()
@@ -341,7 +341,7 @@ class TestSystemManager:
         s1 = System("s1", model)
         model.systems.add_system(s1)
 
-        assert Component not in model.systems.componentPools.keys()
+        assert Component not in model.systems.component_pools.keys()
 
         agent1 = Agent("a1", model)
         component1 = Component(agent1, model)
@@ -349,8 +349,8 @@ class TestSystemManager:
 
         model.environment.add_agent(agent1)
 
-        assert len(model.systems.componentPools[Component]) == 1
-        assert model.systems.componentPools[Component][0] == component1
+        assert len(model.systems.component_pools[Component]) == 1
+        assert model.systems.component_pools[Component][0] == component1
 
         agent2 = Agent("a2", model)
         component2 = Component(agent2, model)
@@ -358,9 +358,9 @@ class TestSystemManager:
 
         model.environment.add_agent(agent2)
 
-        assert len(model.systems.componentPools[Component]) == 2
-        assert model.systems.componentPools[Component][0] == component1
-        assert model.systems.componentPools[Component][1] == component2
+        assert len(model.systems.component_pools[Component]) == 2
+        assert model.systems.component_pools[Component][0] == component1
+        assert model.systems.component_pools[Component][1] == component2
 
         with pytest.raises(KeyError):
             model.systems.register_component(component1)
@@ -370,7 +370,7 @@ class TestSystemManager:
         s1 = System("s1", model)
         model.systems.add_system(s1)
 
-        assert Component not in model.systems.componentPools.keys()
+        assert Component not in model.systems.component_pools.keys()
 
         agent1 = Agent("a1", model)
         component1 = Component(agent1, model)
@@ -385,14 +385,14 @@ class TestSystemManager:
         # deregister component 2 for basic remove check
         model.systems.deregister_component(component2)
 
-        assert len(model.systems.componentPools[Component]) == 1
-        assert component2 not in model.systems.componentPools[Component]
+        assert len(model.systems.component_pools[Component]) == 1
+        assert component2 not in model.systems.component_pools[Component]
         # deregister a component that doesn't exist in the pool
         with pytest.raises(KeyError):
             model.systems.deregister_component(component2)
         # Empty the component pool. This deletes the pool
         model.systems.deregister_component(component1)
-        assert Component not in model.systems.componentPools.keys()
+        assert Component not in model.systems.component_pools.keys()
         # Try delete from a pool that doesn't exist
         with pytest.raises(KeyError):
             model.systems.deregister_component(component1)

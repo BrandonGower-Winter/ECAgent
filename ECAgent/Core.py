@@ -170,7 +170,6 @@ class Agent:
             raise ValueError(f"Agent {self.id} already has a component of type {type(component)}.")
         else:
             self.components[type(component)] = component
-            self.model.systems.registerComponent(component)
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "add_component" instead.')
     def addComponent(self, component: Component):  # pragma no cover
@@ -192,7 +191,6 @@ class Agent:
         if component_type not in self.components.keys():
             raise ComponentNotFoundError(self, component_type)
         else:
-            self.model.systems.deregisterComponent(self.components[component_type])
             del self.components[component_type]
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "remove_component" instead.')
@@ -402,11 +400,12 @@ class SystemManager:
     def executeSystems(self):
         self.execute_systems()
 
-    def registerComponent(self, component: Component):
+    def register_component(self, component: Component):
         if type(component) not in self.componentPools.keys():
             self.componentPools[type(component)] = [component]
         elif component in self.componentPools[type(component)]:
-            raise Exception("Component already registered.")
+            raise KeyError(f"Agent {component.agent.id}'s {type(component)} Component already registered with the"
+                           f"System Manager.")
         else:
             self.componentPools[type(component)].append(component)
 
@@ -477,6 +476,8 @@ class Environment(Agent):
             raise DuplicateAgentError(agent.id, self.model.environment)
         else:
             self.agents[agent.id] = agent
+            for ckey in agent.components:
+                self.model.systems.register_component(agent[ckey])
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "add_agent" instead.')
     def addAgent(self, agent: Agent):  # pragma: no cover
@@ -499,6 +500,8 @@ class Environment(Agent):
         if a_id not in self.agents.keys():
             raise AgentNotFoundError(a_id, self)
         else:
+            for ckey in self.agents[a_id].components:
+                self.model.systems.register_component(self.agents[a_id][ckey])
             del self.agents[a_id]
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "remove_agent" instead.')

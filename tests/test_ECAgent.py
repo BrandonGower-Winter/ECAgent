@@ -334,7 +334,7 @@ class TestSystemManager:
         assert s1.counter == 11
         assert s2.counter == 3
 
-    def test_registerComponent(self):
+    def test_register_component(self):
         model = Model()
         s1 = System("s1", model)
         model.systems.add_system(s1)
@@ -345,6 +345,8 @@ class TestSystemManager:
         component1 = Component(agent1, model)
         agent1.add_component(component1)
 
+        model.environment.add_agent(agent1)
+
         assert len(model.systems.componentPools[Component]) == 1
         assert model.systems.componentPools[Component][0] == component1
 
@@ -352,12 +354,14 @@ class TestSystemManager:
         component2 = Component(agent2, model)
         agent2.add_component(component2)
 
+        model.environment.add_agent(agent2)
+
         assert len(model.systems.componentPools[Component]) == 2
         assert model.systems.componentPools[Component][0] == component1
         assert model.systems.componentPools[Component][1] == component2
 
-        with pytest.raises(Exception):
-            model.systems.registerComponent(component1)
+        with pytest.raises(KeyError):
+            model.systems.register_component(component1)
 
     def test_deregisterComponent(self):
         model = Model()
@@ -370,9 +374,13 @@ class TestSystemManager:
         component1 = Component(agent1, model)
         agent1.add_component(component1)
 
+        model.environment.add_agent(agent1)
+
         agent2 = Agent("a2", model)
         component2 = Component(agent2, model)
         agent2.add_component(component2)
+
+        model.environment.add_agent(agent2)
 
         # deregister component 2 for basic remove check
         model.systems.deregisterComponent(component2)
@@ -389,7 +397,7 @@ class TestSystemManager:
         with pytest.raises(Exception):
             model.systems.deregisterComponent(component1)
 
-    def test_getComponents(self):
+    def test_get_components(self):
         model = Model()
         s1 = System("s1", model)
         model.systems.add_system(s1)
@@ -403,6 +411,9 @@ class TestSystemManager:
         agent2 = Agent("a2", model)
         component2 = Component(agent2, model)
         agent2.add_component(component2)
+
+        model.environment.add_agent(agent1)
+        model.environment.add_agent(agent2)
 
         components = model.systems.getComponents(Component)
 

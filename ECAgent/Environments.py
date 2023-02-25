@@ -272,7 +272,7 @@ class SpaceWorld(Environment):
             If no agent with an ``agent.id == a_id`` can be found.
         """
         if a_id in self.agents:
-            self.agents[a_id].removeComponent(PositionComponent)
+            self.agents[a_id].remove_component(PositionComponent)
 
         super().remove_agent(a_id)
 

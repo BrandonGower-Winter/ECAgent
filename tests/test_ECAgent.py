@@ -385,10 +385,10 @@ class TestAgent:
         agent.add_component(component)
         assert len(agent.components) == 1
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             agent.add_component(component)
 
-    def test_removeComponent(self):
+    def test_remove_component(self):
         model = Model()
         agent = Agent("a1", model)
         s1 = System("s1", model)
@@ -397,11 +397,11 @@ class TestAgent:
         component = Component(agent, model)
         agent.add_component(component)
 
-        agent.removeComponent(Component)
+        agent.remove_component(Component)
         assert len(agent.components) == 0
 
         with pytest.raises(ComponentNotFoundError):
-            agent.removeComponent(Component)
+            agent.remove_component(Component)
 
     def test_getComponent(self):
         model = Model()

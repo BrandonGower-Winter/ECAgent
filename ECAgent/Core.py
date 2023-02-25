@@ -167,7 +167,7 @@ class Agent:
             If the agent already has a component of that type.
         """
         if type(component) in self.components.keys():
-            raise ValueError("Agents cannot have multiple of the components")
+            raise ValueError(f"Agent {self.id} already has a component of type {type(component)}.")
         else:
             self.components[type(component)] = component
             self.model.systems.registerComponent(component)
@@ -177,7 +177,7 @@ class Agent:
         """Deprecated. Use ``add_component`` instead."""
         self.add_component(component)
 
-    def removeComponent(self, component_type: type):
+    def remove_component(self, component_type: type):
         """Removes component of type ```component_type`` from the agent.
 
         Parameters:
@@ -194,6 +194,10 @@ class Agent:
         else:
             self.model.systems.deregisterComponent(self.components[component_type])
             del self.components[component_type]
+
+    @deprecated(reason='For not meeting standard python naming conventions. Use "remove_component" instead.')
+    def removeComponent(self, component_type: type):  # pragma: no cover
+        self.remove_component(component_type)
 
     def getComponent(self, component_type: type, throw_error: bool = False):
         """Gets a component that is the same type as ``component_type``.

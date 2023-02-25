@@ -255,7 +255,7 @@ class SpaceWorld(Environment):
             raise Exception("Cannot add the Agent to position not on the map.")
 
         super().add_agent(agent)
-        agent.addComponent(PositionComponent(agent, agent.model, x=x_pos, y=y_pos, z=z_pos))
+        agent.add_component(PositionComponent(agent, agent.model, x=x_pos, y=y_pos, z=z_pos))
 
     def remove_agent(self, a_id: str):
         """Removes the agent from the environment. Overrides the base ``Environment.remove_agent`` method.

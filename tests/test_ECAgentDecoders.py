@@ -81,7 +81,7 @@ class DummyAgent(Agent, IDecodable):
 
     def __init__(self, id: str, model: Model, wealth):
         super().__init__(id, model)
-        self.addComponent(DummyComponent(self, model, wealth))
+        self.add_component(DummyComponent(self, model, wealth))
 
     @staticmethod
     def decode(params: dict):

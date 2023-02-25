@@ -84,7 +84,7 @@ class TestEnvironment:
         assert model.environment.get_random_agent(CustomComponent) is None
 
         # Test case where agent does meet requirement
-        agent1.addComponent(CustomComponent(agent1, model))
+        agent1.add_component(CustomComponent(agent1, model))
         assert model.environment.get_random_agent(CustomComponent) is agent1
 
         # Test case with Tag
@@ -111,7 +111,7 @@ class TestEnvironment:
         assert model.environment.get_agents(Component) == []
 
         # Test component filter when some agents meet the filter
-        agent1.addComponent(Component(agent1, model))
+        agent1.add_component(Component(agent1, model))
         assert model.environment.get_agents(Component) == [agent1]
 
         # Test tag filter
@@ -160,7 +160,7 @@ class TestEnvironment:
         model = Model()
 
         a1 = Agent("a1", model)
-        a1.addComponent(Component(self, model))
+        a1.add_component(Component(self, model))
         model.environment.add_agent(a1)
         model.environment.add_agent(Agent("a2", model))
 
@@ -285,14 +285,14 @@ class TestSystemManager:
 
         agent1 = Agent("a1", model)
         component1 = Component(agent1, model)
-        agent1.addComponent(component1)
+        agent1.add_component(component1)
 
         assert len(model.systems.componentPools[Component]) == 1
         assert model.systems.componentPools[Component][0] == component1
 
         agent2 = Agent("a2", model)
         component2 = Component(agent2, model)
-        agent2.addComponent(component2)
+        agent2.add_component(component2)
 
         assert len(model.systems.componentPools[Component]) == 2
         assert model.systems.componentPools[Component][0] == component1
@@ -310,11 +310,11 @@ class TestSystemManager:
 
         agent1 = Agent("a1", model)
         component1 = Component(agent1, model)
-        agent1.addComponent(component1)
+        agent1.add_component(component1)
 
         agent2 = Agent("a2", model)
         component2 = Component(agent2, model)
-        agent2.addComponent(component2)
+        agent2.add_component(component2)
 
         # deregister component 2 for basic remove check
         model.systems.deregisterComponent(component2)
@@ -340,11 +340,11 @@ class TestSystemManager:
 
         agent1 = Agent("a1", model)
         component1 = Component(agent1, model)
-        agent1.addComponent(component1)
+        agent1.add_component(component1)
 
         agent2 = Agent("a2", model)
         component2 = Component(agent2, model)
-        agent2.addComponent(component2)
+        agent2.add_component(component2)
 
         components = model.systems.getComponents(Component)
 
@@ -374,7 +374,7 @@ class TestAgent:
         assert len(agent.components) == 0
         assert agent.tag == 1
 
-    def test_addComponent(self):
+    def test_add_component(self):
         model = Model()
         agent = Agent("a1", model)
         s1 = System("s1", model)
@@ -382,11 +382,11 @@ class TestAgent:
 
         component = Component(agent, model)
 
-        agent.addComponent(component)
+        agent.add_component(component)
         assert len(agent.components) == 1
 
         with pytest.raises(Exception):
-            agent.addComponent(component)
+            agent.add_component(component)
 
     def test_removeComponent(self):
         model = Model()
@@ -395,7 +395,7 @@ class TestAgent:
         model.systems.addSystem(s1)
 
         component = Component(agent, model)
-        agent.addComponent(component)
+        agent.add_component(component)
 
         agent.removeComponent(Component)
         assert len(agent.components) == 0
@@ -415,7 +415,7 @@ class TestAgent:
             agent.getComponent(Component, True)
 
         component = Component(agent, model)
-        agent.addComponent(component)
+        agent.add_component(component)
         # Check to see if getting a component that does exist returns the component
         assert agent.getComponent(Component) is component
 
@@ -427,7 +427,7 @@ class TestAgent:
         assert agent[Component] is None
 
         component = Component(agent, model)
-        agent.addComponent(component)
+        agent.add_component(component)
         # Check to see if getting a component that does exist returns the component
         assert agent[Component] is component
 
@@ -439,7 +439,7 @@ class TestAgent:
         assert len(agent) == 0
 
         # Test case when component is added
-        agent.addComponent(Component(agent, model))
+        agent.add_component(Component(agent, model))
         assert len(agent) == 1
 
     def test_hasComponent(self):
@@ -450,7 +450,7 @@ class TestAgent:
         assert not agent.hasComponent(Component)
 
         component = Component(agent, model)
-        agent.addComponent(component)
+        agent.add_component(component)
         # True check
         assert agent.hasComponent(Component)
 
@@ -467,7 +467,7 @@ class TestAgent:
 
         # Test should pass on multiple components
 
-        agent.addComponent(CustomComponent(agent,model))
+        agent.add_component(CustomComponent(agent,model))
 
         assert agent.hasComponent(Component, CustomComponent)
 
@@ -479,7 +479,7 @@ class TestAgent:
         assert Component not in agent
 
         component = Component(agent, model)
-        agent.addComponent(component)
+        agent.add_component(component)
         # True check
         assert Component in agent
 

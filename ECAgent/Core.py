@@ -117,8 +117,21 @@ class Component:
 
 
 class Agent:
-    """This is the base class for Agent objects.
-    Agents can be thought of as Entities"""
+    """This is the base class for Agent objects. Inherit from the class when creating custom agent types.
+
+    In ECAgent, An ``Agent`` is the ``Entity`` in the Entity-Component-System (ECS) architecture.
+
+    Attributes
+    ----------
+    components : dict
+        The components associated with the environment. The key is the Class of the component.
+    id : str
+        The agent id of the environment.
+    model : Model
+        The ``Model`` the ``Agent`` belongs to.
+    tag : int
+        The value of the Tag associated with the environment. Defaults to 0 (which is the value ``NONE``).
+    """
 
     __slots__ = ['id', 'model', 'components', 'tag']
 
@@ -129,23 +142,40 @@ class Agent:
         self.tag = tag
 
     def __getitem__(self, item: type):
-        """ [] Override that called the getComponent() function. """
+        """Wrapper for the ``Agent.get_component()`` function."""
         return self.getComponent(item)
 
     def __len__(self) -> int:
-        """Returns the number of components attached to a given agent"""
+        """Returns the number of components attached to a given agent."""
         return len(self.components)
 
     def __contains__(self, item: type):
-        """ Returns whether an agent has a particular component of not """
+        """Wrapper method for ``Agent.has_component(item)``."""
         return self.hasComponent(item)
 
-    def addComponent(self, component: Component):
+    def add_component(self, component: Component):
+        """Adds a ``Component`` to the ``Agent``.
+
+        Parameters
+        ----------
+        component : Component
+            The component to add.
+
+        Raises
+        ------
+        ValueError
+            If the agent already has a component of that type.
+        """
         if type(component) in self.components.keys():
-            raise Exception("Agents cannot have multiple of the components")
+            raise ValueError("Agents cannot have multiple of the components")
         else:
             self.components[type(component)] = component
             self.model.systems.registerComponent(component)
+
+    @deprecated(reason='For not meeting standard python naming conventions. Use "add_component" instead.')
+    def addComponent(self, component: Component):  # pragma no cover
+        """Deprecated. Use ``add_component`` instead."""
+        self.add_component(component)
 
     def removeComponent(self, component_type: type):
         """Removes component of type ```component_type`` from the agent.
@@ -317,7 +347,7 @@ class Environment(Agent):
     """Base environment class. It is a void environment which means that is has no spacial properties.
 
     In ECAgent, all environments are treated as agents. This means that they can have components added and removed from
-    them.
+    them. From a design perspective, An ``Environment`` is an ``Agent`` that contains other agents.
 
     Attributes
     ----------

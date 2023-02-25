@@ -100,8 +100,15 @@ class Model:
 
 
 class Component:
-    """This is the base class for Components"""
+    """This is the base class for Components. Inherit from this class to make your own components.
 
+    Attributes
+    ----------
+    agent : Agent
+        The agent the component belongs to.
+    model : Model
+        The model the component's agent belongs to.
+    """
     __slots__ = ['agent', 'model']
 
     def __init__(self, agent, model: Model):

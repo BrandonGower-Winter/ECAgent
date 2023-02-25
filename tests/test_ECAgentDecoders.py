@@ -118,7 +118,7 @@ class TestJsonDecoder:
         # Test Agents
         assert len(model.environment.agents) == 10
         for agent in model.environment.agents:
-            assert model.environment.agents[agent].hasComponent(DummyComponent)
+            assert model.environment.agents[agent].has_component(DummyComponent)
             assert model.environment.agents[agent].id.startswith('ta')
             assert model.environment.agents[agent].model is model
         assert 'pre_agent' in testDict

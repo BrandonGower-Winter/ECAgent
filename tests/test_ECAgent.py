@@ -253,6 +253,20 @@ class TestSystem:
         assert system.frequency == 1
         assert system.priority == 0
 
+    def test_clean_up(self):
+        model = Model()
+        s1 = System("s1", model)
+        model.systems.addSystem(s1)
+
+        s1.clean_up()
+        assert s1.id not in model.systems.systems
+
+    def test_execute(self):
+        s1 = System("s1",None)
+
+        with pytest.raises(NotImplementedError):
+            s1.execute()
+
 
 class TestSystemManager:
 
@@ -267,10 +281,15 @@ class TestSystemManager:
         assert len(sys_man.componentPools) == 0
 
     def test_executeSystems(self):
+
+        class TestSystem(System):
+            def execute(self):
+                pass
+
         model = Model()
-        s1 = System("s1", model)
+        s1 = TestSystem("s1", model)
         model.systems.addSystem(s1)
-        s1 = System("s2", model)
+        s1 = TestSystem("s2", model)
         model.systems.addSystem(s1)
 
         model.systems.executeSystems()
@@ -442,17 +461,17 @@ class TestAgent:
         agent.add_component(Component(agent, model))
         assert len(agent) == 1
 
-    def test_hasComponent(self):
+    def test_has_component(self):
         model = Model()
         agent = Agent("a1", model)
 
         # False check
-        assert not agent.hasComponent(Component)
+        assert not agent.has_component(Component)
 
         component = Component(agent, model)
         agent.add_component(component)
         # True check
-        assert agent.hasComponent(Component)
+        assert agent.has_component(Component)
 
         # Check for multiple components
 
@@ -461,15 +480,13 @@ class TestAgent:
             def __init__(self, a, m):
                 super().__init__(a, m)
 
-        # Test should fail on multiple components
-
-        assert not agent.hasComponent(Component, TestComponent)
+        # Test on multiple components (with one or missing)
+        assert not agent.has_component(Component, TestComponent)
 
         # Test should pass on multiple components
-
         agent.add_component(CustomComponent(agent,model))
 
-        assert agent.hasComponent(Component, CustomComponent)
+        assert agent.has_component(Component, CustomComponent)
 
     def test__contains__(self):
         model = Model()

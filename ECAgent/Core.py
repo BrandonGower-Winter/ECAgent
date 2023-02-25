@@ -151,7 +151,7 @@ class Agent:
 
     def __contains__(self, item: type):
         """Wrapper method for ``Agent.has_component(item)``."""
-        return self.hasComponent(item)
+        return self.has_component(item)
 
     def add_component(self, component: Component):
         """Adds a ``Component`` to the ``Agent``.
@@ -233,17 +233,56 @@ class Agent:
         """Deprecated. Use ``get_component`` instead."""
         return self.get_component(component_type, throw_error)
 
-    def hasComponent(self, *args) -> bool:
-        """ Returns a (True/False) bool if the agent (does/does not)
-        have a component of type component_type """
+    def has_component(self, *args) -> bool:
+        """Returns a (True/False) bool if the agent (does/does not) have the list of specified components.
+
+        The functions uses the ``*args`` so you can check for multiple components at once::
+
+            # Will return true if agent has a PositionComponent
+            agent.has_component(PositionComponent)
+
+            # Will return true if agent has both a PositionComponent and a RotationComponent
+            agent.has_component(PositionComponent, RotationComponent)
+
+        Parameters
+        ----------
+        args
+            The list of ``Component`` classes that will checked.
+
+        Returns
+        -------
+        bool
+            ``True`` if ``Agent`` has all of the components listed, else ``False``
+        """
         for component in args:
             if component not in self.components.keys():
                 return False
         return True
 
+    @deprecated(reason='For not meeting standard python naming conventions. Use "has_component" instead.')
+    def hasComponent(self, *args) -> bool:  # pragma: no cover
+        """Deprecated. Use ``has_component`` instead."""
+        return self.has_component(*args)
+
 
 class System:
-    """This is the base class for the systems in the ECS architecture"""
+    """This is the base class for the systems in ECAgent's Entity-Component-System (ECS) architecture.
+
+    Attributes
+    ----------
+    id : str
+        The id of the system.
+    model : Model
+        The ``Model`` the ``System`` belongs to.
+    priority : int
+        The priority of the system. Higher priority systems execute first. Defaults to ``0``.
+    frequency : int
+        How often the system should execute. Defaults to ``1`` which means the system will execute every timestep.
+    start : int
+        The timestep at which the system should start executing. Defaults to ``0``.
+    end : int
+        The last timestep at which the system should start executing. Defaults to ``sys.maxsize``.
+    """
 
     __slots__ = ['id', 'model', 'priority', 'frequency', 'start', 'end']
 
@@ -256,11 +295,17 @@ class System:
         self.start = start
         self.end = end
 
-    def cleanUp(self):
+    def clean_up(self):
         self.model.systems.removeSystem(self.id)
 
     def execute(self):
-        pass
+        """Abstract method which, when overridden by a child class, defines the the system's logic.
+
+        Raises
+        ------
+        NotImplementedError
+        """
+        raise NotImplementedError
 
 
 class SystemManager:
@@ -311,7 +356,7 @@ class SystemManager:
         SystemNotFoundError
             If the no System with ``System.id == s_id`` can be found.
         """
-        if id not in self.systems.keys():
+        if s_id not in self.systems.keys():
             raise SystemNotFoundError(s_id)
         else:
             self.executionQueue.remove(self.systems[s_id])
@@ -548,7 +593,7 @@ class Environment(Agent):
         else:
             # If a component filter is supplied, filter for agents that meet the condition
             for agentKey in self.agents:
-                if self.agents[agentKey].hasComponent(*args):
+                if self.agents[agentKey].has_component(*args):
                     matching_agents.append(self.agents[agentKey])
 
         # Filter by tag if tag was supplied

@@ -310,20 +310,29 @@ class TestSystemManager:
         model.systems.remove_system(s1.id)
         assert s1.id not in model.systems.systems
 
-    def test_executeSystems(self):
+    def test_execute_systems(self):
 
         class TestSystem(System):
+
+            def __init__(self, id: str, model: Model, priority, freq, start, end):
+                super().__init__(id, model, priority, freq, start, end)
+                self.counter = 0
+
             def execute(self):
-                pass
+                self.counter += 1
 
         model = Model()
-        s1 = TestSystem("s1", model)
+        s1 = TestSystem("s1", model, 0, 1, 0, 10)
         model.systems.add_system(s1)
-        s1 = TestSystem("s2", model)
-        model.systems.add_system(s1)
+        s2 = TestSystem("s2", model, 0, 3, 4, 10000)
+        model.systems.add_system(s2)
 
-        model.systems.executeSystems()
-        assert model.systems.timestep == 1
+        for _ in range(12):
+            model.systems.execute_systems()
+
+        assert model.systems.timestep == 12
+        assert s1.counter == 11
+        assert s2.counter == 3
 
     def test_registerComponent(self):
         model = Model()

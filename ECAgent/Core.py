@@ -94,7 +94,7 @@ class Model:
 
         if n > 0:
             for _ in range(n):
-                self.systems.executeSystems()
+                self.systems.execute_systems()
         else:
             raise ValueError("Value of 'n' must be greater than or equal 1.")
 
@@ -287,7 +287,7 @@ class System:
     __slots__ = ['id', 'model', 'priority', 'frequency', 'start', 'end']
 
     def __init__(self, id: str, model: Model, priority: int = 0,
-                 frequency: int = 1, start=0, end=maxsize):
+                 frequency: int = 1, start: int = 0, end: int = maxsize):
         self.id = id
         self.model = model
         self.priority = priority
@@ -355,7 +355,7 @@ class SystemManager:
                 self.executionQueue.append(s)
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "add_system" instead.')
-    def addSystem(self, s: System):
+    def addSystem(self, s: System):  # pragma: no cover
         """Deprecated. Use ``add_system`` instead."""
         self.add_system(s)
 
@@ -379,16 +379,28 @@ class SystemManager:
             del self.systems[s_id]
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "remove_system" instead.')
-    def removeSystem(self, s_id: str):
+    def removeSystem(self, s_id: str):  # pragma: no cover
         """Deprecated. Use ``remove_system`` instead."""
         self.remove_system(s_id)
 
-    def executeSystems(self):  # Simple execute cycle
-        for sys in self.executionQueue:
-            if sys.start <= self.timestep <= sys.end and \
-                    sys.start - self.timestep % sys.frequency == 0:
+    def execute_systems(self):
+        """Function that loops through all systems in the ``execution_queue`` and calls the ``execute()`` method.
+        The value of ``SystemManager.timestep`` is increased by ``1`` each time this method is called.
+
+        The function uses the System's ``start``, ``end`` and ``frequency`` to determine if its ``execute()`` should be
+        called::
+
+        if sys.start <= self.timestep <= sys.end and (sys.start - self.timestep) % sys.frequency == 0:
+                sys.execute()
+        """
+        for sys in self.executionQueue:  # Simple execute cycle
+            if sys.start <= self.timestep <= sys.end and (sys.start - self.timestep) % sys.frequency == 0:
                 sys.execute()
         self.timestep += 1
+
+    @deprecated(reason='For not meeting standard python naming conventions. Use "execute_systems" instead.')
+    def executeSystems(self):
+        self.execute_systems()
 
     def registerComponent(self, component: Component):
         if type(component) not in self.componentPools.keys():

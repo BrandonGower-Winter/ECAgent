@@ -296,7 +296,7 @@ class System:
         self.end = end
 
     def clean_up(self):
-        self.model.systems.removeSystem(self.id)
+        self.model.systems.remove_system(self.id)
 
     def execute(self):
         """Abstract method which, when overridden by a child class, defines the the system's logic.
@@ -309,8 +309,15 @@ class System:
 
 
 class SystemManager:
-    """ This class is responsible for managing the adding,
-    removing and executing Systems """
+    """This class is responsible for managing the adding,
+    removing and executing of Systems.
+
+    Every ``Model`` will get a ``SystemManager`` which they can access using ``model.systems``.
+
+    Attributes
+    ----------
+
+    """
 
     __slots__ = ['timestep', 'systems', 'executionQueue', 'componentPools', 'model']
 
@@ -321,17 +328,21 @@ class SystemManager:
         self.componentPools = {}
         self.model = model
 
-    def addSystem(self, s: System):
-        """Adds System s to the ``System`` manager and registers it with execution queue.
+    def add_system(self, s: System):
+        """Adds System s to the ``SystemManager`` and registers it with execution queue.
 
         Parameters
         ----------
         s : System
             The ``System`` being added to the ``SystemManager``
-        """
 
+        Raises
+        ------
+        KeyError
+            If system already exists in the execution queue.
+        """
         if s.id in self.systems.keys():
-            raise Exception("System already registered.")
+            raise KeyError(f"System {s.id} already registered with the execution queue.")
         else:
             self.systems[s.id] = s  # Add to systems dict
             # Add to event queue
@@ -343,7 +354,12 @@ class SystemManager:
             if s not in self.executionQueue:
                 self.executionQueue.append(s)
 
-    def removeSystem(self, s_id: str):
+    @deprecated(reason='For not meeting standard python naming conventions. Use "add_system" instead.')
+    def addSystem(self, s: System):
+        """Deprecated. Use ``add_system`` instead."""
+        self.add_system(s)
+
+    def remove_system(self, s_id: str):
         """Removes ``System`` with ``System.id == s_id`` from the ``SystemManager``.
 
         Parameters
@@ -361,6 +377,11 @@ class SystemManager:
         else:
             self.executionQueue.remove(self.systems[s_id])
             del self.systems[s_id]
+
+    @deprecated(reason='For not meeting standard python naming conventions. Use "remove_system" instead.')
+    def removeSystem(self, s_id: str):
+        """Deprecated. Use ``remove_system`` instead."""
+        self.remove_system(s_id)
 
     def executeSystems(self):  # Simple execute cycle
         for sys in self.executionQueue:

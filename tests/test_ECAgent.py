@@ -256,7 +256,7 @@ class TestSystem:
     def test_clean_up(self):
         model = Model()
         s1 = System("s1", model)
-        model.systems.addSystem(s1)
+        model.systems.add_system(s1)
 
         s1.clean_up()
         assert s1.id not in model.systems.systems
@@ -280,6 +280,36 @@ class TestSystemManager:
         assert len(sys_man.executionQueue) == 0
         assert len(sys_man.componentPools) == 0
 
+    def test_add_system(self):
+        model = Model()
+        s1 = System("s1", model)
+
+        # Test adding to the end of the queue.
+        model.systems.add_system(s1)
+        assert len(model.systems.executionQueue) == 1
+
+        # Test adding duplicate system.
+        with pytest.raises(KeyError):
+            model.systems.add_system(s1)
+
+        # Test adding to the beginning of the queue
+        s2 = System("s2", model, priority=10)
+        model.systems.add_system(s2)
+        assert len(model.systems.executionQueue) == 2
+        assert model.systems.executionQueue[0].id == s2.id
+
+    def test_remove_system(self):
+        model = Model()
+        s1 = System("s1", model)
+
+        # Test Error
+        with pytest.raises(SystemNotFoundError):
+            model.systems.remove_system(s1.id)
+
+        model.systems.add_system(s1)
+        model.systems.remove_system(s1.id)
+        assert s1.id not in model.systems.systems
+
     def test_executeSystems(self):
 
         class TestSystem(System):
@@ -288,9 +318,9 @@ class TestSystemManager:
 
         model = Model()
         s1 = TestSystem("s1", model)
-        model.systems.addSystem(s1)
+        model.systems.add_system(s1)
         s1 = TestSystem("s2", model)
-        model.systems.addSystem(s1)
+        model.systems.add_system(s1)
 
         model.systems.executeSystems()
         assert model.systems.timestep == 1
@@ -298,7 +328,7 @@ class TestSystemManager:
     def test_registerComponent(self):
         model = Model()
         s1 = System("s1", model)
-        model.systems.addSystem(s1)
+        model.systems.add_system(s1)
 
         assert Component not in model.systems.componentPools.keys()
 
@@ -323,7 +353,7 @@ class TestSystemManager:
     def test_deregisterComponent(self):
         model = Model()
         s1 = System("s1", model)
-        model.systems.addSystem(s1)
+        model.systems.add_system(s1)
 
         assert Component not in model.systems.componentPools.keys()
 
@@ -353,7 +383,7 @@ class TestSystemManager:
     def test_getComponents(self):
         model = Model()
         s1 = System("s1", model)
-        model.systems.addSystem(s1)
+        model.systems.add_system(s1)
 
         assert model.systems.getComponents(Component) is None
 
@@ -397,7 +427,7 @@ class TestAgent:
         model = Model()
         agent = Agent("a1", model)
         s1 = System("s1", model)
-        model.systems.addSystem(s1)
+        model.systems.add_system(s1)
 
         component = Component(agent, model)
 
@@ -411,7 +441,7 @@ class TestAgent:
         model = Model()
         agent = Agent("a1", model)
         s1 = System("s1", model)
-        model.systems.addSystem(s1)
+        model.systems.add_system(s1)
 
         component = Component(agent, model)
         agent.add_component(component)

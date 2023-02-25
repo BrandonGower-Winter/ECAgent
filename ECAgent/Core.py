@@ -17,12 +17,12 @@ class Model:
         The model's environment.
     """
 
-    __slots__ = ['environment', 'systemManager', 'random', 'logger']
+    __slots__ = ['environment', 'systems', 'random', 'logger']
 
     def __init__(self, seed: int = None, logger: logging.Logger = None):
 
         self.environment = Environment(self)
-        self.systemManager = SystemManager(self)
+        self.systems = SystemManager(self)
 
         # Initialize RNG. It is object based because we want to ensure
         # that object results are reproducable when batch execution
@@ -88,7 +88,7 @@ class Agent:
             raise Exception("Agents cannot have multiple of the components")
         else:
             self.components[type(component)] = component
-            self.model.systemManager.registerComponent(component)
+            self.model.systems.registerComponent(component)
 
     def removeComponent(self, component_type: type):
         """Removes component of type ```component_type`` from the agent.
@@ -105,7 +105,7 @@ class Agent:
         if component_type not in self.components.keys():
             raise ComponentNotFoundError(self, component_type)
         else:
-            self.model.systemManager.deregisterComponent(self.components[component_type])
+            self.model.systems.deregisterComponent(self.components[component_type])
             del self.components[component_type]
 
     def getComponent(self, component_type: type, throw_error: bool = False):
@@ -161,7 +161,7 @@ class System:
         self.end = end
 
     def cleanUp(self):
-        self.model.systemManager.removeSystem(self.id)
+        self.model.systems.removeSystem(self.id)
 
     def execute(self):
         pass

@@ -125,7 +125,7 @@ class Decoder:
             # Add generated model to the systemDict
             systemDict['params']['model'] = generatedModel
             # Create system
-            generatedModel.systemManager.addSystem(
+            generatedModel.systems.addSystem(
                 Decoder.str_to_class(systemDict['name'], Decoder.get_module_name(systemDict)).decode(
                     systemDict['params']
                 )

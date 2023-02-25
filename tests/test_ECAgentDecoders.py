@@ -62,7 +62,7 @@ class DummySystem(System, IDecodable):
         super(DummySystem, self).__init__(id, model, priority, frequency, start, end)
 
     def execute(self):
-        print(self.model.systemManager.timestep)
+        print(self.model.systems.timestep)
 
     @staticmethod
     def decode(params: dict):
@@ -108,10 +108,10 @@ class TestJsonDecoder:
         assert 'post_decode' in testDict
 
         # Test System
-        assert len(model.systemManager.systems) == 1
-        assert 'testsys' in model.systemManager.systems
-        assert model.systemManager.systems['testsys'].priority == 0
-        assert model.systemManager.systems['testsys'].model is model
+        assert len(model.systems.systems) == 1
+        assert 'testsys' in model.systems.systems
+        assert model.systems.systems['testsys'].priority == 0
+        assert model.systems.systems['testsys'].model is model
         assert 'pre_testsys' in testDict
         assert 'post_testsys' in testDict
 

@@ -70,7 +70,7 @@ class AgentCollector(Collector):
 
         # Include timestep value in record
         if self.includeTimestep:
-            tmpDict['timestep'] = self.model.systemManager.timestep
+            tmpDict['timestep'] = self.model.systems.timestep
 
         # Loop through all agents in the environment
         for agentKey in self.model.environment.agents:

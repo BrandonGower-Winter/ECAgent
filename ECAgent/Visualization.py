@@ -156,11 +156,11 @@ class VisualInterface:
         context = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
         if context == 'step-button':
             if not self.running:
-                self.model.systemManager.executeSystems()
+                self.model.systems.executeSystems()
         elif self.running:
-            self.model.systemManager.executeSystems()
+            self.model.systems.executeSystems()
 
-        return "Timestep: {}".format(self.model.systemManager.timestep)
+        return "Timestep: {}".format(self.model.systems.timestep)
 
 # ############################## Graph and Parameter Functionality ##############################
 

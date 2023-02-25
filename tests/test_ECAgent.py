@@ -363,7 +363,7 @@ class TestSystemManager:
         with pytest.raises(KeyError):
             model.systems.register_component(component1)
 
-    def test_deregisterComponent(self):
+    def test_deregister_component(self):
         model = Model()
         s1 = System("s1", model)
         model.systems.add_system(s1)
@@ -373,29 +373,27 @@ class TestSystemManager:
         agent1 = Agent("a1", model)
         component1 = Component(agent1, model)
         agent1.add_component(component1)
-
         model.environment.add_agent(agent1)
 
         agent2 = Agent("a2", model)
         component2 = Component(agent2, model)
         agent2.add_component(component2)
-
         model.environment.add_agent(agent2)
 
         # deregister component 2 for basic remove check
-        model.systems.deregisterComponent(component2)
+        model.systems.deregister_component(component2)
 
         assert len(model.systems.componentPools[Component]) == 1
         assert component2 not in model.systems.componentPools[Component]
         # deregister a component that doesn't exist in the pool
-        with pytest.raises(Exception):
-            model.systems.deregisterComponent(component2)
-        # Empty the component pool. This delete the pool
-        model.systems.deregisterComponent(component1)
+        with pytest.raises(KeyError):
+            model.systems.deregister_component(component2)
+        # Empty the component pool. This deletes the pool
+        model.systems.deregister_component(component1)
         assert Component not in model.systems.componentPools.keys()
         # Try delete from a pool that doesn't exist
-        with pytest.raises(Exception):
-            model.systems.deregisterComponent(component1)
+        with pytest.raises(KeyError):
+            model.systems.deregister_component(component1)
 
     def test_get_components(self):
         model = Model()

@@ -397,24 +397,24 @@ class SystemManager:
         self.timestep += 1
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "execute_systems" instead.')
-    def executeSystems(self):
+    def executeSystems(self):  # pragma: no cover
         self.execute_systems()
 
     def register_component(self, component: Component):
         if type(component) not in self.componentPools.keys():
             self.componentPools[type(component)] = [component]
         elif component in self.componentPools[type(component)]:
-            raise KeyError(f"Agent {component.agent.id}'s {type(component)} Component already registered with the"
+            raise KeyError(f"Agent {component.agent.id}'s {str(type(component))} Component already registered with the"
                            f"System Manager.")
         else:
             self.componentPools[type(component)].append(component)
 
-    def deregisterComponent(self, component: Component):
+    def deregister_component(self, component: Component):
         if type(component) not in self.componentPools.keys():
-            raise Exception("No components with type " + str(type(component)) + " registered")
+            raise KeyError(f"No components with type {str(type(component))} registered with the SystemManager.")
         elif component not in self.componentPools[type(component)]:
-            raise Exception("Cannot deregister component because "
-                            "it was never registered to begin with.")
+            raise KeyError(f"Cannot deregister Agent {component.agent.id}'s {str(type(component))} Component because "
+                           f"it was never registered with the SystemManager to begin with.")
         else:
             self.componentPools[type(component)].remove(component)
             if len(self.componentPools[type(component)]) == 0:
@@ -501,7 +501,7 @@ class Environment(Agent):
             raise AgentNotFoundError(a_id, self)
         else:
             for ckey in self.agents[a_id].components:
-                self.model.systems.register_component(self.agents[a_id][ckey])
+                self.model.systems.deregister_component(self.agents[a_id][ckey])
             del self.agents[a_id]
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "remove_agent" instead.')

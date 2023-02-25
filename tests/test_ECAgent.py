@@ -16,11 +16,12 @@ class TestEnvironment:
     def test_add_agent(self):
         model = Model()
         agent = Agent("a1", model)
-
+        agent.add_component(Component(agent, model))
         model.environment.add_agent(agent)
 
         assert len(model.environment.agents) == 1
         assert model.environment.get_agent(agent.id) == agent
+        assert len(model.systems.componentPools[Component]) == 1
 
         with pytest.raises(DuplicateAgentError):
             model.environment.add_agent(agent)
@@ -28,11 +29,12 @@ class TestEnvironment:
     def test_remove_agent(self):
         model = Model()
         agent = Agent("a1", model)
-
+        agent.add_component(Component(agent, model))
         model.environment.add_agent(agent)
         model.environment.remove_agent(agent.id)
 
         assert len(model.environment.agents) == 0
+        assert Component not in model.systems.componentPools
 
         with pytest.raises(AgentNotFoundError):
             model.environment.remove_agent(agent.id)
@@ -400,7 +402,7 @@ class TestSystemManager:
         s1 = System("s1", model)
         model.systems.add_system(s1)
 
-        assert model.systems.getComponents(Component) is None
+        assert model.systems.get_components(Component) is None
 
         agent1 = Agent("a1", model)
         component1 = Component(agent1, model)
@@ -413,7 +415,7 @@ class TestSystemManager:
         model.environment.add_agent(agent1)
         model.environment.add_agent(agent2)
 
-        components = model.systems.getComponents(Component)
+        components = model.systems.get_components(Component)
 
         assert len(components) == 2
         assert components[0] == component1

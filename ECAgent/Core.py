@@ -420,13 +420,31 @@ class SystemManager:
             if len(self.componentPools[type(component)]) == 0:
                 del self.componentPools[type(component)]
 
-    def getComponents(self, component: type):
-        """Returns the list of components registered to the system with id
-        = sysID. Returns None if there is no system with id = sysID"""
-        if component in self.componentPools.keys():
-            return self.componentPools[component]
+    def get_components(self, component_type: type):
+        """Returns the list of components registered to the ``SystemManager`` with a type of ``component_type``.
+        Returns ``None`` if there are no components of type ``component_type`` registered with the ``SystemManager``.
+
+        Parameters
+        ----------
+        component_type : type
+            The type of components you want to search for (e.g. ``PositionComponent``).
+
+        Returns
+        -------
+        list
+            Of components with type ``component_type``.
+        None
+            If no components of type ``component_type`` can be found.
+        """
+        if component_type in self.componentPools.keys():
+            return self.componentPools[component_type]
         else:
             return None
+
+    @deprecated(reason='For not meeting standard python naming conventions. Use "get_components" instead.')
+    def getComponents(self, component_type: type):  # pragma: no cover
+        """Deprecated. Use ``get_components`` instead."""
+        return self.get_components(component_type)
 
 
 class Environment(Agent):
@@ -540,7 +558,7 @@ class Environment(Agent):
             return None
 
     @deprecated(reason='For not meeting standard python naming conventions. Use "remove_agent" instead.')
-    def getAgent(self, id: str, throw_error: bool = False):  # pragma no cover
+    def getAgent(self, id: str, throw_error: bool = False):  # pragma: no cover
         """Deprecated. Use ``Environment.remove_agent`` instead."""
         self.get_agent(id, throw_error)
 

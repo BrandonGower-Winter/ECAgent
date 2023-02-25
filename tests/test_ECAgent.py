@@ -192,12 +192,42 @@ class TestModel:
         assert model.logger is logger
         assert model.logger.level == logging.DEBUG
 
+    def test__getattr__(self):
+        model = Model()
+
+        # Test Error Case
+        with pytest.raises(AttributeError):
+            model.not_an_attribute
+
+        # Test timestep
+        model.execute()
+        assert model.timestep == model.systems.timestep
+
     def test_set_environment(self):
         model = Model()
         new_env = Environment(model)
 
         model.set_environment(new_env)
         assert model.environment is new_env
+
+    def test_execute(self):
+        model = Model()
+
+        # Type Error
+        with pytest.raises(TypeError):
+            model.execute('2')
+
+        # Value Error
+        with pytest.raises(ValueError):
+            model.execute(-1)
+
+        # Valid single step
+        model.execute()
+        assert model.systems.timestep == 1
+
+        # Valid multistep
+        model.execute(2)
+        assert model.systems.timestep == 3
 
 
 class TestComponent:

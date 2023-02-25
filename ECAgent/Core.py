@@ -15,6 +15,12 @@ class Model:
     ----------
     environment : Environment
         The model's environment.
+    systems : SystemManager
+        The ``SystemManager`` assigned to the model.
+    random : random.Random
+        The model's pseudo-random number generator.
+    logger : logging.Logger
+        The model's logger.
     """
 
     __slots__ = ['environment', 'systems', 'random', 'logger']
@@ -37,6 +43,26 @@ class Model:
         else:
             self.logger = logger
 
+    def __getattr__(self, item: str):
+        """Wrapper method for accessing ``model.systems`` attributes.
+
+        Valid ``item`` values are: ``['timestep']``. More may be added in future versions of ECAgent.
+
+        Parameters
+        ----------
+        item : str
+            The name of the property to access.
+
+        Raises
+        ------
+        AttributeError
+            If invalid ``item`` specified.
+        """
+        if item == 'timestep':
+            return self.systems.timestep
+        else:
+            raise AttributeError(f'Attribute {item} is not recognized as an attribute of Model or SystemManager')
+
     def set_environment(self, env):
         """Sets the models environment.
         `model.set_environment(new_environment)`  is equivalent to ``model.environment = new_environment``.
@@ -47,6 +73,30 @@ class Model:
             The model's new environment.
         """
         self.environment = env
+
+    def execute(self, n: int = 1):
+        """A wrapper method for calling ``model.systems.execute_systems()``.
+
+        Parameters
+        ----------
+        n : int, Optional
+            The number of times to call ``systems.execute()``. Defaults to `1`.
+
+        Raises
+        ------
+        TypeError
+            If ``n`` is not an ``int``.
+        ValueError
+            If ``n < 1``.
+        """
+        if type(n) != int:
+            raise TypeError(f"Type {type(n)} not supported. 'n' must be an integer.")
+
+        if n > 0:
+            for _ in range(n):
+                self.systems.executeSystems()
+        else:
+            raise ValueError("Value of 'n' must be greater than or equal 1.")
 
 
 class Component:

@@ -403,21 +403,21 @@ class TestAgent:
         with pytest.raises(ComponentNotFoundError):
             agent.remove_component(Component)
 
-    def test_getComponent(self):
+    def test_get_component(self):
         model = Model()
         agent = Agent("a1", model)
 
         # Checks  to see if getting a component that doesn't exist returns None
-        assert agent.getComponent(Component) is None
+        assert agent.get_component(Component) is None
 
         # Checks the same argument but it should throw an error instead.
         with pytest.raises(ComponentNotFoundError):
-            agent.getComponent(Component, True)
+            agent.get_component(Component, True)
 
         component = Component(agent, model)
         agent.add_component(component)
         # Check to see if getting a component that does exist returns the component
-        assert agent.getComponent(Component) is component
+        assert agent.get_component(Component) is component
 
     def test__getitem__(self):
         model = Model()

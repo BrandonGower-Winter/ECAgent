@@ -143,7 +143,7 @@ class Agent:
 
     def __getitem__(self, item: type):
         """Wrapper for the ``Agent.get_component()`` function."""
-        return self.getComponent(item)
+        return self.get_component(item)
 
     def __len__(self) -> int:
         """Returns the number of components attached to a given agent."""
@@ -199,7 +199,7 @@ class Agent:
     def removeComponent(self, component_type: type):  # pragma: no cover
         self.remove_component(component_type)
 
-    def getComponent(self, component_type: type, throw_error: bool = False):
+    def get_component(self, component_type: type, throw_error: bool = False):
         """Gets a component that is the same type as ``component_type``.
 
         Parameters
@@ -227,6 +227,11 @@ class Agent:
             raise ComponentNotFoundError(self, component_type)
         else:
             return None
+
+    @deprecated(reason='For not meeting standard python naming conventions. Use "get_component" instead.')
+    def getComponent(self, component_type: type, throw_error: bool = False):  # pragma: no cover
+        """Deprecated. Use ``get_component`` instead."""
+        return self.get_component(component_type, throw_error)
 
     def hasComponent(self, *args) -> bool:
         """ Returns a (True/False) bool if the agent (does/does not)

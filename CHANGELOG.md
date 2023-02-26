@@ -1,4 +1,6 @@
-#Version: 0.5.2
+#Version 0.5.2
+
+- Fixed bug where having a SpaceWorld with width, height or depth equal to 0 would prevent you from adding agents tos to the evironment.
 
 #Version: 0.5.1
 

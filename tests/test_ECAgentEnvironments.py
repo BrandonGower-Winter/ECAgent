@@ -317,6 +317,31 @@ class TestSpaceWorld:
         with pytest.raises(ComponentNotFoundError):
             model.environment.move_to(agent2)
 
+        # Test with no x-dim
+        model = Model()
+        model.environment = SpaceWorld(model, 0, 5, 5)
+        agent = Agent("a1", model)
+        model.environment.add_agent(agent, 0, 0, 0)
+        model.environment.move_to(agent, y=2, z=2)
+        assert agent[PositionComponent].xyz() == (0, 2, 2)
+
+        # Test with no y-dim
+        model = Model()
+        model.environment = SpaceWorld(model, 5, 0, 5)
+        agent = Agent("a1", model)
+        model.environment.add_agent(agent, 0, 0, 0)
+        model.environment.move_to(agent, x=2, z=2)
+        assert agent[PositionComponent].xyz() == (2, 0, 2)
+
+        # Test with no z-dim
+        model = Model()
+        model.environment = SpaceWorld(model, 5, 5, 0)
+        agent = Agent("a1", model)
+        model.environment.add_agent(agent, 0, 0, 0)
+        model.environment.move_to(agent, x=2, y=2)
+        assert agent[PositionComponent].xyz() == (2, 2, 0)
+
+
 class TestDiscreteWorld:
 
     def test__init__(self):

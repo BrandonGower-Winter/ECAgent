@@ -384,7 +384,8 @@ class SpaceWorld(Environment):
         """
         if PositionComponent not in agent:
             raise ComponentNotFoundError(agent, PositionComponent)
-        elif 0 <= x < self.width and 0 <= y < self.height and 0 <= z < self.depth:
+        elif (0 <= x < self.width or self.width < 1) and (0 <= y < self.height or self.height < 1) and (
+                0 <= z < self.depth or self.depth < 1):
             component = agent[PositionComponent]
             component.x = x
             component.y = y

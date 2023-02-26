@@ -103,9 +103,14 @@ if __name__ == '__main__':
     with open('package.json', 'w+') as json_file:
         json_file.write(json.dumps(package_data, indent=4))
 
-    # Write new changelog to CHANGELOG.md
+    # Read in original data
+    with open('CHANGELOG.md', 'r') as changelog_file:
+        change_orig = changelog_file.read()
+
+    # Prepend new changelog to CHANGELOG.md
     with open('CHANGELOG.md', 'w+') as changelog_file:
         changelog_file.write(changelog)
+        changelog_file.write(change_orig)
 
     # Stage CHANGELOG and package.json
     subprocess.Popen(git_stage_command).communicate()

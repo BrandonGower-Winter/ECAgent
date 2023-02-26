@@ -169,6 +169,36 @@ class TestSpaceWorld:
         assert model.environment.get_agent(agent.id) == agent
         assert agent[PositionComponent].x == 1 and agent[PositionComponent].y == 2 and agent[PositionComponent].z == 3
 
+        # Test when width is 0
+        model = Model()
+        model.environment = SpaceWorld(model, 0, 5, 5)
+        agent = Agent("a1", model)
+        model.environment.add_agent(agent, y_pos=2, z_pos=2)
+
+        assert len(model.environment.agents) == 1
+        assert model.environment.get_agent(agent.id) == agent
+        assert agent[PositionComponent].x == 0 and agent[PositionComponent].y == 2 and agent[PositionComponent].z == 2
+
+        # Test when height is 0
+        model = Model()
+        model.environment = SpaceWorld(model, 5, 0, 5)
+        agent = Agent("a1", model)
+        model.environment.add_agent(agent, x_pos=2, z_pos=2)
+
+        assert len(model.environment.agents) == 1
+        assert model.environment.get_agent(agent.id) == agent
+        assert agent[PositionComponent].x == 2 and agent[PositionComponent].y == 0 and agent[PositionComponent].z == 2
+
+        # Test when depth is 0
+        model = Model()
+        model.environment = SpaceWorld(model, 5, 5, 0)
+        agent = Agent("a1", model)
+        model.environment.add_agent(agent, x_pos=2, y_pos=2)
+
+        assert len(model.environment.agents) == 1
+        assert model.environment.get_agent(agent.id) == agent
+        assert agent[PositionComponent].x == 2 and agent[PositionComponent].y == 2 and agent[PositionComponent].z == 0
+
     def test_remove_agent(self):
         model = Model()
         model.environment = DiscreteWorld(model, 5, 5, 5)

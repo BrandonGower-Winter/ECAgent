@@ -250,8 +250,11 @@ class SpaceWorld(Environment):
         Exception
             If the agent's initial position is outside the environment's spacial extents.
         """
-        # TODO create logic for being outside spacial extents.
-        if x_pos >= self.width or x_pos < 0 or y_pos >= self.height or y_pos < 0 or z_pos >= self.depth or z_pos < 0:
+        # TODO create Error for being outside spacial extents.
+        x_bool = x_pos >= self.width or x_pos < 0 if self.width > 0 else False
+        y_bool = y_pos >= self.height or y_pos < 0 if self.height > 0 else False
+        z_bool = z_pos >= self.depth or z_pos < 0 if self.depth > 0 else False
+        if x_bool or y_bool or z_bool:
             raise Exception("Cannot add the Agent to position not on the map.")
 
         super().add_agent(agent)

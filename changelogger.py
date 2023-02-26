@@ -110,6 +110,7 @@ if __name__ == '__main__':
     # Prepend new changelog to CHANGELOG.md
     with open('CHANGELOG.md', 'w+') as changelog_file:
         changelog_file.write(changelog)
+        changelog_file.write('\n')
         changelog_file.write(change_orig)
 
     # Stage CHANGELOG and package.json

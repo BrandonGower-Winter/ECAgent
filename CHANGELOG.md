@@ -1,3 +1,9 @@
+#Version: 0.5.3
+
+##Fixes:
+
+- Fixed error where an error would be thrown if the width, height and depth of a SpaceWorld was 0 and the move_to method was called for a valid location. ([910d0b](https://github.com/BrandonGower-Winter/ECAgent/commit/910d0be48cbed8253d72023eafdedcf278497313))
+- Fixed bug where having a SpaceWorld with width, height or depth equal to 0 would prevent you from adding agents tos to the evironment. ([4d1141](https://github.com/BrandonGower-Winter/ECAgent/commit/4d1141e074efd8df40d5fe60f9cbbf40f23f5ce5))
 #Version 0.5.2
 
 - Fixed bug where having a SpaceWorld with width, height or depth equal to 0 would prevent you from adding agents tos to the evironment.

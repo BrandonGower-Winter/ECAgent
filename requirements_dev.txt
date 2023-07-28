@@ -1,10 +1,11 @@
 -r requirements.txt
 flake8
+nbsphinx
+pandoc
 pytest
 pytest-cov
 setuptools
 sphinx
 sphinx_rtd_theme
-nbsphinx
-pandoc
 twine
+versioneer

@@ -6,6 +6,7 @@ ECAgent.Core module
 
 .. automodule:: ECAgent.Core
    :members:
+   :private-members:
    :show-inheritance:
 
 ECAgent.Environments module

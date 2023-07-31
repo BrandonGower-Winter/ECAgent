@@ -116,7 +116,177 @@ class Component:
         self.model = model
 
 
-class Agent:
+class _MetaAgent(type):
+    """This is the base metaclass for ``Agent`` classes. The class is responsible for supporting class components (
+    components attached to classes as opposed to agents).
+
+    Class components can be used as follows::
+
+        class CustomComponent(Component):
+            def __init__(self, agent, model):
+                super().__init__(agent, model)
+                self.x = 1
+                self.y = 'Some Text'
+
+        class CustomAgent(Agent):
+            pass
+
+        # Add CustomComponent to CustomAgent class
+        model = Model()
+        CustomAgent.add__class_component(CustomComponent(CustomAgent, model)
+
+        # Get properties of component
+        print(CustomAgent[CustomComponent].x)  # Prints '1'
+        print(CustomAgent.get_class_component(CustomComponent).y)  # Prints 'Some Text'
+
+    You can also set the default tag value of instantiated agents::
+
+        import ECAgent.Tags as Tags
+        Tags.add_tag('SHEEP')  # Add new sheep tag
+
+        CustomAgent.tag = Tags.SHEEP  # All future CustomAgents will have a tag of 'SHEEP'
+
+    Attributes
+    ----------
+    components : dict
+        The components associated with the environment. The key is the Class of the component.
+    id : str
+        The agent id of the environment.
+    tag : int
+        The value of the Tag associated with the ``Agent``. Defaults to 0 (which is the value ``NONE``) or the
+        default tag value of the Agent's metaclass.
+    """
+
+    def __init__(cls, name: str, bases: tuple, properties: dict):
+        super(_MetaAgent, cls).__init__(name, bases, properties)
+        cls._id = name
+        cls._components = {}
+        cls._tag = Tags.NONE
+
+    @property
+    def id(cls):
+        return cls._id
+
+    @id.setter
+    def id(cls, val):
+        cls._id = val
+
+    @property
+    def components(cls):
+        return cls._components
+
+    @property
+    def tag(cls):
+        return cls._tag
+
+    @tag.setter
+    def tag(cls, val):
+        cls._tag = val
+
+    def __getitem__(self, item: type):
+        """Wrapper for the ``_MetaAgent.get_class_component()`` function."""
+        return self.get_class_component(item)
+
+    def __len__(self) -> int:
+        """Returns the number of class components attached to a given Agent."""
+        return len(self._components)
+
+    def __contains__(self, item: type):
+        """Wrapper method for ``_MetaAgent.has_class_component(item)``."""
+        return self.has_class_component(item)
+
+    def add_class_component(self, component: Component):
+        """Adds a ``Component`` to the ``_MetaAgent``.
+
+        Parameters
+        ----------
+        component : Component
+            The component to add.
+
+        Raises
+        ------
+        ValueError
+            If the agent already has a component of that type.
+        """
+        if type(component) in self.components.keys():
+            raise ValueError(f"Agent {self.id} already has a component of type {type(component)}.")
+        else:
+            self._components[type(component)] = component
+
+    def remove_class_component(self, component_type: type):
+        """Removes component of type ```component_type`` from the agent class.
+
+        Parameters:
+        component_type : type
+            Class of component to be removed from agent.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If agent does not have a component of class ``component_type``.
+        """
+        if component_type not in self.components.keys():
+            raise ComponentNotFoundError(self, component_type)
+        else:
+            del self._components[component_type]
+
+    def get_class_component(self, component_type: type, throw_error: bool = False):
+        """Gets a component that is the same type as ``component_type``.
+
+        Parameters
+        ----------
+        component_type : type
+            The type of component to search for.
+        throw_error : bool, Optional
+            Boolean that specifies whether a ``ComponentNotFoundError`` should be raised upon failing to find a
+            component of type ``component_type``. Defaults to ``False``.
+        Returns
+        -------
+        Component
+            A component object matching the class specified by ``component_type``.
+        None
+            Returns None if agent does not have a component of class ``component_type``.
+
+        Raises
+        ------
+        ComponentNotFoundError
+            If ``throw_error`` is ``True`` and no component matching ``component_type`` is found.
+        """
+        if component_type in self.components.keys():
+            return self._components[component_type]
+        elif throw_error:
+            raise ComponentNotFoundError(self, component_type)
+        else:
+            return None
+
+    def has_class_component(self, *args) -> bool:
+        """Returns a (True/False) bool if the agent class (does/does not) have the list of specified components.
+
+        The functions uses the ``*args`` so you can check for multiple components at once::
+
+            # Will return true if agent has a PositionComponent
+            agent.has_component(PositionComponent)
+
+            # Will return true if agent has both a PositionComponent and a RotationComponent
+            agent.has_component(PositionComponent, RotationComponent)
+
+        Parameters
+        ----------
+        args
+            The list of ``Component`` classes that will checked.
+
+        Returns
+        -------
+        bool
+            ``True`` if ``Agent`` has all of the components listed, else ``False``
+        """
+        for component in args:
+            if component not in self._components.keys():
+                return False
+        return True
+
+
+class Agent(object, metaclass=_MetaAgent):
     """This is the base class for Agent objects. Inherit from the class when creating custom agent types.
 
     In ECAgent, An ``Agent`` is the ``Entity`` in the Entity-Component-System (ECS) architecture.
@@ -130,16 +300,17 @@ class Agent:
     model : Model
         The ``Model`` the ``Agent`` belongs to.
     tag : int
-        The value of the Tag associated with the environment. Defaults to 0 (which is the value ``NONE``).
+        The value of the Tag associated with the ``Agent``. Defaults to 0 (which is the value ``NONE``) or the
+        default tag value of the Agent's metaclass.
     """
 
     __slots__ = ['id', 'model', 'components', 'tag']
 
-    def __init__(self, id: str, model: Model, tag: int = Tags.NONE):
+    def __init__(self, id: str, model: Model, tag: int = None):
         self.id = id
         self.model = model
         self.components = {}
-        self.tag = tag
+        self.tag = Agent.tag if tag is None else tag
 
     def __getitem__(self, item: type):
         """Wrapper for the ``Agent.get_component()`` function."""

@@ -4,6 +4,11 @@ import pytest
 from ECAgent.Core import *
 # Unit testing for src framework
 
+
+class CustomComponent(Component):
+    pass
+
+
 class TestEnvironment:
 
     def test__init__(self):
@@ -422,6 +427,144 @@ class TestSystemManager:
         assert components[1] == component2
 
 
+class TestMetaAgent:
+
+    def test__init__(self):
+
+        # Getters
+        assert Agent.id == 'Agent'
+        assert len(Agent.components) == 0
+        assert Agent.tag == 0
+
+        # Setters
+        Agent.id = 'NewName'
+        Agent.tag = 1
+        assert Agent.id == 'NewName'
+        assert Agent.tag == 1
+
+        # Reset for other tests
+        Agent.id = 'Agent'
+        Agent.tag = 0
+
+    def test_add_component(self):
+        model = Model()
+        component = Component(Agent, model)
+
+        Agent.add_class_component(component)
+        assert len(Agent.components) == 1
+
+        # Second component
+        Agent.add_class_component(CustomComponent(Agent, model))
+        assert len(Agent.components) == 2
+
+        with pytest.raises(ValueError):
+            Agent.add_class_component(component)
+
+        # Cleanup
+        Agent.remove_class_component(Component)
+        Agent.remove_class_component(CustomComponent)
+        assert len(Agent.components) == 0
+
+    def test_remove_component(self):
+        model = Model()
+
+        component = Component(Agent, model)
+        Agent.add_class_component(component)
+
+        Agent.remove_class_component(Component)
+        assert len(Agent.components) == 0
+
+        with pytest.raises(ComponentNotFoundError):
+            Agent.remove_class_component(Component)
+
+    def test_get_component(self):
+        model = Model()
+
+        # Checks  to see if getting a component that doesn't exist returns None
+        assert Agent.get_class_component(Component) is None
+
+        # Checks the same argument but it should throw an error instead.
+        with pytest.raises(ComponentNotFoundError):
+            Agent.get_class_component(Component, True)
+
+        component = Component(Agent, model)
+        Agent.add_class_component(component)
+        # Check to see if getting a component that does exist returns the component
+        assert Agent.get_class_component(Component) is component
+
+        # Cleanup
+        Agent.remove_class_component(Component)
+        assert len(Agent.components) == 0
+
+    def test__getitem__(self):
+        model = Model()
+
+        # Checks  to see if getting a component that doesn't exist returns None
+        assert Agent[Component] is None
+
+        component = Component(Agent, model)
+        Agent.add_class_component(component)
+        # Check to see if getting a component that does exist returns the component
+        assert Agent[Component] is component
+
+        # Cleanup
+        Agent.remove_class_component(Component)
+        assert len(Agent.components) == 0
+
+    def test__len__(self):
+        model = Model()
+
+        # Test empty case
+        assert len(Agent) == 0
+
+        # Test case when component is added
+        Agent.add_class_component(Component(Agent, model))
+        assert len(Agent) == 1
+
+        # Cleanup
+        Agent.remove_class_component(Component)
+        assert len(Agent.components) == 0
+
+    def test_has_component(self):
+        model = Model()
+
+        # False check
+        assert not Agent.has_class_component(Component)
+
+        component = Component(Agent, model)
+        Agent.add_class_component(component)
+        # True check
+        assert Agent.has_class_component(Component)
+
+        # Check for multiple components
+        # Test on multiple components (with one or missing)
+        assert not Agent.has_class_component(Component, TestComponent)
+
+        # Test should pass on multiple components
+        Agent.add_class_component(CustomComponent(Agent, model))
+
+        assert Agent.has_class_component(Component, CustomComponent)
+        # Cleanup
+        Agent.remove_class_component(Component)
+        Agent.remove_class_component(CustomComponent)
+        assert len(Agent.components) == 0
+
+    def test__contains__(self):
+        model = Model()
+
+        # False check
+        assert Component not in Agent
+
+        component = Component(Agent, model)
+        Agent.add_class_component(component)
+        # True check
+        assert Component in Agent
+
+        # Cleanup
+        Agent.remove_class_component(Component)
+        assert len(Agent.components) == 0
+
+
 class TestAgent:
 
     def test__init__(self):
@@ -442,6 +585,14 @@ class TestAgent:
         assert agent.id == "a2"
         assert len(agent.components) == 0
         assert agent.tag == 1
+
+        # With Custom Meta tag
+        Agent.tag = 2
+        agent = Agent('a3', model)
+        assert agent.model == model
+        assert agent.id == 'a3'
+        assert len(agent.components) == 0
+        assert agent.tag == 2
 
     def test_add_component(self):
         model = Model()

@@ -2,6 +2,7 @@ import pytest
 
 import ECAgent.Tags as Tags
 
+
 class TestTagLibrary:
 
     def test__init__(self):
@@ -43,6 +44,21 @@ class TestTagLibrary:
         with pytest.raises(Tags.TagNotFoundError):
             tl.get_tag_name(1)
 
+    def test_itemize(self):
+        tl = Tags.TagLibrary()
+
+        # Default Case
+        items = tl.itemize()
+        assert len(items) == 1
+        assert items[0] == ('NONE', 0)
+
+        # Once Tag is added
+        tl.add_tag('TEST')
+        items = tl.itemize()
+        assert len(items) == 2
+        assert items[0] == ('NONE', 0)
+        assert items[1] == ('TEST', 1)
+
 
 def test_get_tag_name():
     # This test comes first because test_add_tag adds a tag to the global TagLibrary
@@ -69,3 +85,9 @@ def test_add_tag():
     with pytest.raises(Tags.DuplicateTagError):
         Tags.add_tag('TEST1')
 
+
+def test_itemize():
+    items = Tags.itemize()
+    assert len(items) == 2
+    assert items[0] == ('NONE', 0)
+    assert items[1] == ('TEST1', 1)

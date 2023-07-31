@@ -146,6 +146,17 @@ class TagLibrary:
         else:
             return self._tag_names[tag_id]
 
+    def itemize(self) -> list:
+        """Returns a ``list`` of tags in the ``TagLibrary`` and their values.
+
+        Returns
+        -------
+        list
+            In the following form: ``[('NONE', 0), ('TAG1', 1),..., ('TAGN', N)]``
+
+        """
+        return [(key, val) for val, key in enumerate(self._tag_names)]
+
 
 class DuplicateTagError(Exception):
     """Exception raised when a duplicate Tag is created.
@@ -236,7 +247,7 @@ def get_tag_name(tag_id: int) -> str:
 
 
 def __getattr__(tag_name: str) -> int:
-    """Returns
+    """Returns the value of a tag with a matching ``tag_name`` in the global ``TagLibrary``
     ----------
     int
         The unique id for a tag with a ``name == tag_name``.
@@ -250,3 +261,15 @@ def __getattr__(tag_name: str) -> int:
         raise TagNotFoundError(tag_name)
     else:
         return _module_library.__dict__[tag_name]
+
+
+def itemize() -> list:
+    """Returns a ``list`` of tags in the global ``TagLibrary`` and their values.
+
+    Returns
+    -------
+    list
+        In the following form: ``[('NONE', 0), ('TAG1', 1),..., ('TAGN', N)]``
+
+    """
+    return _module_library.itemize()

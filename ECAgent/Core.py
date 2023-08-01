@@ -151,7 +151,7 @@ class _MetaAgent(type):
     components : dict
         The components associated with the environment. The key is the Class of the component.
     id : str
-        The agent id of the environment.
+        The unique identifier of the class (defaults to the class' name).
     tag : int
         The value of the Tag associated with the ``Agent``. Defaults to 0 (which is the value ``NONE``) or the
         default tag value of the Agent's metaclass.
@@ -296,7 +296,7 @@ class Agent(object, metaclass=_MetaAgent):
     components : dict
         The components associated with the environment. The key is the Class of the component.
     id : str
-        The agent id of the environment.
+        The agent's unique identifier.
     model : Model
         The ``Model`` the ``Agent`` belongs to.
     tag : int

@@ -24,9 +24,9 @@ class TestPositionComponent:
         assert pos.model is model
         assert pos.agent is agent
 
-    def test_getPosition(self):
+    def test_get_position(self):
         pos = PositionComponent(None, None, 1, 2, 3)
-        assert pos.getPosition() == (1, 2, 3)
+        assert pos.get_position() == (1, 2, 3)
 
     def test_shorthands(self):
         pos = PositionComponent(None, None, 1, 2, 3)

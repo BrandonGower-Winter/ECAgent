@@ -53,9 +53,14 @@ class PositionComponent(Component):
         self.y = y
         self.z = z
 
-    def getPosition(self) -> (float, float, float):
+    def get_position(self) -> (float, float, float):
         """Returns the x,y and z values of the component as a tuple"""
         return self.x, self.y, self.z
+
+    @deprecated(reason='For not meeting standard python naming conventions. Use "get_position()" instead.')
+    def getPosition(self) -> (float, float, float):  # pragma: no cover
+        """Deprecated. Use ``get_position()`` instead."""
+        return self.get_position()
 
     def xy(self):
         """Returns the x and y values of the component as a 2-tuple.
@@ -75,9 +80,9 @@ class PositionComponent(Component):
     def xyz(self):
         """Returns the x, y and z values of the component as a 3-tuple.
 
-        Equivalent to ``PositionComponent.getPosition()``
+        Equivalent to ``PositionComponent.get_position()``
         """
-        return self.getPosition()
+        return self.get_position()
 
 
 def distance(a: PositionComponent, b: PositionComponent) -> float:

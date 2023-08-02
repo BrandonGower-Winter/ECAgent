@@ -1,3 +1,16 @@
+#Version: 0.5.5
+
+##Features:
+
+-  Renamed PositionComponent.getPosition() to Position.get_component() ([1c0e68](https://github.com/BrandonGower-Winter/ECAgent/commit/1c0e68bc7bce60f3395e9211366699a2492d330d))
+-  Implemented SystemManager 'getitem' which allows users to access systems or component pools more cleanly. ([f64c89](https://github.com/BrandonGower-Winter/ECAgent/commit/f64c89b633521b3d5a0d47e9f7ab88c9d122609a))
+- Added TagLibrary.itemize() which will return a list of tags in the library and their values. ([48bb86](https://github.com/BrandonGower-Winter/ECAgent/commit/48bb86f6be4cd30e749ad1cf2707a0fd1ebb9754))
+- Added Class Components to ECAgent. These work exactly like regular components except that are bound to an Agent ent's class as opposed to an Agent object. ([d0a1e0](https://github.com/BrandonGower-Winter/ECAgent/commit/d0a1e0cfe3a28ebcc80497e9eacb600c42c0eb0b))
+##Fixes:
+
+-  Fixed a few errors in the Agent and _MetaAgent docs. ([f2cb44](https://github.com/BrandonGower-Winter/ECAgent/commit/f2cb4445147ddb5c7c5141961c255f0fd61985ba))
+- Fixed error where an error would be thrown if the width, height and depth of a SpaceWorld was 0 and the move_to method was called for a valid location. ([910d0b](https://github.com/BrandonGower-Winter/ECAgent/commit/910d0be48cbed8253d72023eafdedcf278497313))
+
 #Version: 0.5.4
 
 

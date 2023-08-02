@@ -507,7 +507,7 @@ class SystemManager:
         self.component_pools = {}
         self.model = model
 
-    def __getitem__(self, item: Union[str, type]) -> Union[System, list[Component], None]:
+    def __getitem__(self, item: Union[str, type]) -> Union[System, list, None]:
         """Gets ``System`` with ``id == item`` or ``list`` of components whose ``type == item``.
 
         This function returns a different result based on the type of ``item``::

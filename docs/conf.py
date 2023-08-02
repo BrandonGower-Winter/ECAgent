@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'ECAgent'
 copyright = '2023, Brandon Gower-Winter'
 author = 'Brandon Gower-Winter'
-release = 'v0.5.4'
+release = 'v0.5.5'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

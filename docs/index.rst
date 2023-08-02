@@ -22,6 +22,7 @@ The easiest way to get started with ECAgent is to check out the `Introductory Tu
    :caption: Contents:
 
    tutorials/introductory_tutorial.ipynb
+   tutorials/advanced_tutorial.ipynb
    ECAgent
 
 

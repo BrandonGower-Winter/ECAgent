@@ -5,6 +5,7 @@ import ECAgent.Tags as Tags
 
 from sys import maxsize
 from deprecated import deprecated
+from typing import Union
 
 
 class Model:
@@ -506,6 +507,59 @@ class SystemManager:
         self.component_pools = {}
         self.model = model
 
+    def __getitem__(self, item: Union[str, type]) -> Union[System, list[Component], None]:
+        """Gets ``System`` with ``id == item`` or ``list`` of components whose ``type == item``.
+
+        This function returns a different result based on the type of ``item``::
+            # When arguments is of type str
+            sid = 'some_system_id'
+            model.systems[sid]  # Returns a System with id == sid
+            model.systems[sid, True] # will throw an error if no system id == sid
+
+            # When argument is of type type
+            # Returns a list of all CustomComponent objects in the model
+            model.systems[CustomComponent]
+            # Will throw an error if no CustomComponent objects exist
+            model.systems[CustomComponent, True]
+
+        Parameters
+        ----------
+        item : Union[str, type]
+            The ``id`` of the ``System`` being accessed or the type of ``Component`` you want to access.
+        throw_error : bool, Optional
+            Determines if the function should raise a ``KeyError`` when it cannot find a System with ``id == item``
+            or components of ``type == item``. Defaults to ``False``
+
+        Returns
+        -------
+        System
+            with ``id == item`` if ``item`` is of type ``str``.
+        list[Component]
+            with ``type == item`` if ``item`` is of type ``type``.
+        None
+            if no components of ``type == item`` exist.
+
+        Raises
+        ------
+        KeyError
+            If no ``System`` with ``id == item`` exists in the execution queue or no components of ``type == item``
+            exist in the component pool.
+        """
+        throw_error = False
+        if type(item) == tuple:
+            item, throw_error = item
+
+        # First check for system access:
+        if type(item) == str:
+            if item in self.systems:
+                return self.systems[item]
+            elif throw_error:
+                raise KeyError(f'Model does not have a System with id == {item}.')
+            else:
+                return None
+        else:
+            return self.get_components(item, throw_error=throw_error)
+
     def add_system(self, s: System):
         """Adds System s to the ``SystemManager`` and registers it with execution queue.
 
@@ -626,7 +680,7 @@ class SystemManager:
             if len(self.component_pools[type(component)]) == 0:
                 del self.component_pools[type(component)]
 
-    def get_components(self, component_type: type):
+    def get_components(self, component_type: type, throw_error: bool = False):
         """Returns the list of components registered to the ``SystemManager`` with a type of ``component_type``.
         Returns ``None`` if there are no components of type ``component_type`` registered with the ``SystemManager``.
 
@@ -634,6 +688,9 @@ class SystemManager:
         ----------
         component_type : type
             The type of components you want to search for (e.g. ``PositionComponent``).
+        throw_error : bool, Optional
+            Determines if the function should raise a ``KeyError`` when it cannot find components of
+            ``type == component_type``. Defaults to ``False``
 
         Returns
         -------
@@ -641,9 +698,16 @@ class SystemManager:
             Of components with type ``component_type``.
         None
             If no components of type ``component_type`` can be found.
+
+        Raises
+        ------
+        KeyError
+            If ``throw_error = True`` and no components of ``type == component_type`` are found.
         """
         if component_type in self.component_pools.keys():
             return self.component_pools[component_type]
+        elif throw_error:
+            raise KeyError(f'No Components of type {component_type} could be found.')
         else:
             return None
 

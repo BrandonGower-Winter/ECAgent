@@ -409,6 +409,10 @@ class TestSystemManager:
 
         assert model.systems.get_components(Component) is None
 
+        # Error case
+        with pytest.raises(KeyError):
+            model.systems.get_components(Component, True)
+
         agent1 = Agent("a1", model)
         component1 = Component(agent1, model)
         agent1.add_component(component1)
@@ -421,6 +425,47 @@ class TestSystemManager:
         model.environment.add_agent(agent2)
 
         components = model.systems.get_components(Component)
+
+        assert len(components) == 2
+        assert components[0] == component1
+        assert components[1] == component2
+
+    def test__getitem__(self):
+        model = Model()
+
+        # System return None
+        assert model.systems['s1'] is None
+
+        # System throws error
+        with pytest.raises(KeyError):
+             system = model.systems['s1', True]
+
+        # System returns s1
+        s1 = System("s1", model)
+        model.systems.add_system(s1)
+
+        assert model.systems['s1'].id == 's1'
+
+        # Test components return None
+        assert model.systems[Component] is None
+
+        # Test components Error case
+        with pytest.raises(KeyError):
+            component = model.systems[Component, True]
+
+        # Test get components
+        agent1 = Agent("a1", model)
+        component1 = Component(agent1, model)
+        agent1.add_component(component1)
+
+        agent2 = Agent("a2", model)
+        component2 = Component(agent2, model)
+        agent2.add_component(component2)
+
+        model.environment.add_agent(agent1)
+        model.environment.add_agent(agent2)
+
+        components = model.systems[Component]
 
         assert len(components) == 2
         assert components[0] == component1

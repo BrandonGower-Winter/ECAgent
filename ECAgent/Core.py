@@ -81,6 +81,18 @@ class Model:
         else:
             raise AttributeError(f'Attribute {item} is not recognized as an attribute of Model or SystemManager')
 
+    def __bool__(self) -> bool:
+        """Returns ``True`` if model is still running and ``False`` if model is complete.
+
+        Equivalent to ``model.is_running()``.
+
+        Returns
+        -------
+        bool
+            That is ``True`` if model is still running and ``False`` if not.
+        """
+        return self.is_running()
+
     def is_running(self) -> bool:
         """Returns ``True`` if model is still running and ``False`` if model is complete.
 

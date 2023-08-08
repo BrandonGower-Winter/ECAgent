@@ -210,6 +210,14 @@ class TestModel:
         model.execute()
         assert model.timestep == model.systems.timestep
 
+    def test_is_running(self):
+        model = Model()
+        assert model.is_running()
+        model._status = ModelStatus.RUNNING
+        assert model.is_running()
+        model._status = ModelStatus.COMPLETE
+        assert not model.is_running()
+
     def test_set_environment(self):
         model = Model()
         new_env = Environment(model)

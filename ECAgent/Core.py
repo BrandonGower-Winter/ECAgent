@@ -3,13 +3,13 @@ import random
 
 import ECAgent.Tags as Tags
 
-from enum import Enum
+from enum import IntEnum
 from sys import maxsize
 from deprecated import deprecated
 from typing import Union
 
 
-class ModelStatus(Enum):
+class ModelStatus(IntEnum):
     """Enum that describes the status of a ``Model``.
 
     Values are::
@@ -80,6 +80,16 @@ class Model:
             return self.systems.timestep
         else:
             raise AttributeError(f'Attribute {item} is not recognized as an attribute of Model or SystemManager')
+
+    def is_running(self) -> bool:
+        """Returns ``True`` if model is still running and ``False`` if model is complete.
+
+        Returns
+        -------
+        bool
+            That is ``True`` if model is still running and ``False`` if not.
+        """
+        return self._status < ModelStatus.COMPLETE
 
     def set_environment(self, env):
         """Sets the models environment.

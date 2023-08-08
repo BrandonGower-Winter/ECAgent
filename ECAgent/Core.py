@@ -13,13 +13,11 @@ class ModelStatus(IntEnum):
     """Enum that describes the status of a ``Model``.
 
     Values are::
-    INIT = 0
-    RUNNING = 1
-    COMPLETE = 2
+    RUNNING = 0
+    COMPLETE = 1
     """
-    INIT = 0
-    RUNNING = 1
-    COMPLETE = 2
+    RUNNING = 0
+    COMPLETE = 1
 
 
 class Model:
@@ -59,7 +57,7 @@ class Model:
             self.logger = logger
 
         # Set model's status
-        self._status = ModelStatus.INIT
+        self._status = ModelStatus.RUNNING
 
     def __getattr__(self, item: str):
         """Wrapper method for accessing ``model.systems`` attributes.
@@ -102,6 +100,14 @@ class Model:
             That is ``True`` if model is still running and ``False`` if not.
         """
         return self._status < ModelStatus.COMPLETE
+
+    def complete(self) -> None:
+        """Marks the model as ``ModelStatus.COMPLETE``. This means it will no longer execute even if
+        ``self.systems.execute_systems()`` is called manually.
+
+        You should only use this command if your model no longer needs to run.
+        """
+        self._status = ModelStatus.COMPLETE
 
     def set_environment(self, env):
         """Sets the models environment.

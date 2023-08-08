@@ -187,7 +187,7 @@ class TestModel:
         assert model.random is not None
         assert model.logger is not None
         assert model.logger.level == logging.INFO
-        assert model._status == ModelStatus.INIT
+        assert model._status == ModelStatus.RUNNING
 
         logger = logging.getLogger('TEST')
         logger.setLevel(logging.DEBUG)
@@ -221,10 +221,13 @@ class TestModel:
     def test_is_running(self):
         model = Model()
         assert model.is_running()
-        model._status = ModelStatus.RUNNING
-        assert model.is_running()
         model._status = ModelStatus.COMPLETE
         assert not model.is_running()
+
+    def test_complete(self):
+        model = Model()
+        model.complete()
+        assert model._status == ModelStatus.COMPLETE
 
     def test_set_environment(self):
         model = Model()

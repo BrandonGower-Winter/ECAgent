@@ -187,6 +187,7 @@ class TestModel:
         assert model.random is not None
         assert model.logger is not None
         assert model.logger.level == logging.INFO
+        assert model._status == ModelStatus.INIT
 
         logger = logging.getLogger('TEST')
         logger.setLevel(logging.DEBUG)

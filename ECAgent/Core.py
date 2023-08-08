@@ -3,9 +3,23 @@ import random
 
 import ECAgent.Tags as Tags
 
+from enum import Enum
 from sys import maxsize
 from deprecated import deprecated
 from typing import Union
+
+
+class ModelStatus(Enum):
+    """Enum that describes the status of a ``Model``.
+
+    Values are::
+    INIT = 0
+    RUNNING = 1
+    COMPLETE = 2
+    """
+    INIT = 0
+    RUNNING = 1
+    COMPLETE = 2
 
 
 class Model:
@@ -24,7 +38,7 @@ class Model:
         The model's logger.
     """
 
-    __slots__ = ['environment', 'systems', 'random', 'logger']
+    __slots__ = ['environment', 'systems', 'random', 'logger', '_status']
 
     def __init__(self, seed: int = None, logger: logging.Logger = None):
 
@@ -43,6 +57,9 @@ class Model:
             self.logger.setLevel(logging.INFO)
         else:
             self.logger = logger
+
+        # Set model's status
+        self._status = ModelStatus.INIT
 
     def __getattr__(self, item: str):
         """Wrapper method for accessing ``model.systems`` attributes.

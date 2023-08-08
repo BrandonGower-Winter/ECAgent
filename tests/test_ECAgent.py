@@ -210,6 +210,14 @@ class TestModel:
         model.execute()
         assert model.timestep == model.systems.timestep
 
+    def test__bool__(self):
+        model = Model()
+        assert model
+        model._status = ModelStatus.RUNNING
+        assert model
+        model._status = ModelStatus.COMPLETE
+        assert not model
+
     def test_is_running(self):
         model = Model()
         assert model.is_running()
@@ -349,6 +357,18 @@ class TestSystemManager:
         assert model.systems.timestep == 12
         assert s1.counter == 11
         assert s2.counter == 3
+
+        # When model is marked as complete
+        model._status = ModelStatus.COMPLETE
+
+        model.systems.execute_systems()  # Should do nothing
+        assert model.systems.timestep == 12
+        assert s1.counter == 11
+        assert s2.counter == 3
+
+        # Error case
+        with pytest.raises(ModelCompleteError):
+            model.systems.execute_systems(throw_error=True)
 
     def test_register_component(self):
         model = Model()
@@ -801,3 +821,11 @@ class TestSystemNotFoundError:
 
         assert error.s_id == 's1'
         assert error.message == 'System with id "s1" does not exist.'
+
+
+class TestModelCompleteError:
+
+    def test__init__(self):
+
+        error = ModelCompleteError()
+        assert error.message == 'execute_systems() was called on a model with status "ModelStatus.COMPLETE".'

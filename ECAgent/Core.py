@@ -654,16 +654,38 @@ class SystemManager:
         """Deprecated. Use ``remove_system`` instead."""
         self.remove_system(s_id)
 
-    def execute_systems(self):
+    def execute_systems(self, throw_error: bool = False):
         """Function that loops through all systems in the ``execution_queue`` and calls the ``execute()`` method.
         The value of ``SystemManager.timestep`` is increased by ``1`` each time this method is called.
+
+        If a ``Model`` is marked as complete, ``execute_systems()`` will do nothing or throw a ``ModelCompleteError`` if
+        ``throw_error == True``.
 
         The function uses the System's ``start``, ``end`` and ``frequency`` to determine if its ``execute()`` should be
         called::
 
         if sys.start <= self.timestep <= sys.end and (sys.start - self.timestep) % sys.frequency == 0:
                 sys.execute()
+
+        Parameters
+        ----------
+        throw_error : Optional, bool
+            Determines if a ``ModelComplete`` error should be thrown if a user tries to call ``execute_systems`` on a
+            model marked as complete.
+
+        Raises
+        ------
+        ModelCompleteError
+            If ``throw_error == True`` and this function is called on a model marked as complete.
         """
+        # If model is not executing
+        if not self.model.is_running():
+            self.model.logger.info("execute_systems() was called on a model marked as 'ModelStatus.COMPLETE'.")
+            if throw_error:
+                raise ModelCompleteError()
+            else:
+                return
+
         for sys in self.execution_queue:  # Simple execute cycle
             if sys.start <= self.timestep <= sys.end and (sys.start - self.timestep) % sys.frequency == 0:
                 sys.execute()
@@ -1109,3 +1131,17 @@ class SystemNotFoundError(Exception):
         self.s_id = s_id
         self.message = f'System with id "{s_id}" does not exist.'
         super(SystemNotFoundError, self).__init__(self.message)
+
+
+class ModelCompleteError(Exception):
+    """Exception raised for errors when systems are executed and Model is marked as finished.
+
+        Attributes:
+        -----------
+        message : str
+            Explanation of error.
+        """
+
+    def __init__(self):
+        self.message = 'execute_systems() was called on a model with status "ModelStatus.COMPLETE".'
+        super(ModelCompleteError, self).__init__(self.message)

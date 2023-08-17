@@ -693,6 +693,8 @@ class SystemManager:
                 return
 
         for sys in self.execution_queue:  # Simple execute cycle
+            if not self.model.is_running():
+                break
             if sys.start <= self.timestep <= sys.end and (sys.start - self.timestep) % sys.frequency == 0:
                 sys.execute()
         self.timestep += 1

@@ -348,6 +348,10 @@ class TestSystemManager:
             def execute(self):
                 self.counter += 1
 
+        class CompleteSystem(System):
+            def execute(self):
+                self.model.complete()
+
         model = Model()
         s1 = TestSystem("s1", model, 0, 1, 0, 10)
         model.systems.add_system(s1)
@@ -361,11 +365,17 @@ class TestSystemManager:
         assert s1.counter == 11
         assert s2.counter == 3
 
-        # When model is marked as complete
-        model._status = ModelStatus.COMPLETE
+        # When model is marked as complete while executing a system
+        model.systems.add_system(CompleteSystem('c1', model, priority=10))
 
         model.systems.execute_systems()  # Should do nothing
-        assert model.systems.timestep == 12
+        assert model.systems.timestep == 13
+        assert s1.counter == 11
+        assert s2.counter == 3
+
+        # While model is marked as complete before a simulation run
+        model.systems.execute_systems()  # Should do nothing
+        assert model.systems.timestep == 13
         assert s1.counter == 11
         assert s2.counter == 3
 

@@ -1,7 +1,8 @@
 import pytest
 
+import ECAgent.Core as core
 import ECAgent.Batching as batching
-
+import ECAgent.Collectors as collectors
 
 class TestParameterList:
 
@@ -71,3 +72,87 @@ class TestParameterList:
             assert p_set[i]["value"] == 44
             assert p_set[i]["string"] == "xyz"
             assert p_set[i]["list"] == i
+
+
+class CustomSystem(core.System):
+    def execute(self):
+        if self.model.systems.timestep == self.model.timesteps:  # Hacky solution which assumes CustomModel is used.
+            self.model.complete()
+
+
+class CustomCollector(collectors.Collector):
+    def collect(self):
+        self.records.append(1)
+
+
+class CustomModel(core.Model):
+    def __init__(self, num_agents: int = 0, timesteps: int = 10, collect: int = 0):
+        super().__init__()
+        self.num_agents = num_agents
+        self.timesteps = timesteps
+        self.systems.add_system(CustomSystem("custom_system", self))
+        for i in range(collect):
+            self.systems.add_system(CustomCollector(f'c{i}', self))
+
+
+def test_build_model_from_kwargs():
+    model = batching._build_model_from_kwargs(CustomModel, {'num_agents': 5, 'timesteps': 5})
+    assert model.num_agents == 5
+    assert model.timesteps == 5
+
+
+def test_run_model():
+    params = {'num_agents': 5, 'timesteps': 20, 'collect': 0}
+    # Default Case with max timesteps
+    assert batching._run_model(CustomModel, params, max_timesteps=10) is None
+
+    # 1 Collector case
+    params = {'num_agents': 5, 'timesteps': 20, 'collect': 1}
+    assert len(batching._run_model(CustomModel, params, collectors='c0', max_timesteps=10)) == 10
+
+    # Collector with early stop
+    params = {'num_agents': 5, 'timesteps': 5, 'collect': 1}
+    assert len(batching._run_model(CustomModel, params, collectors='c0', max_timesteps=10)) == 5
+
+    # 2 Collectors case
+    params = {'num_agents': 5, 'timesteps': 20, 'collect': 2}
+    data = batching._run_model(CustomModel, params, collectors=['c0', 'c1'], max_timesteps=10)
+    assert len(data) == 2
+    assert len(data['c0']) == 10
+    assert len(data['c1']) == 10
+
+
+def test_batch_run():
+    params = {'num_agents': 5, 'timesteps': 20, 'collect': 0}
+
+    # Raise error
+    with pytest.raises(AttributeError):
+        batching.batch_run(CustomModel, params, collectors=34, max_timesteps=10)
+
+    # Dict with no collection and 1 process
+    assert len(batching.batch_run(CustomModel, params, None, max_timesteps=10)) == 0
+
+    # Dict with 1 collector and 1 process
+    params = {'num_agents': 5, 'timesteps': [10, 20], 'collect': 1}
+    data = batching.batch_run(CustomModel, params, 'c0', max_timesteps=10)
+    assert len(data) == 2
+    assert len(data[0]) == 10
+    assert len(data[1]) == 10
+
+    # Dict with 2 collectors and 2 processes
+    params = {'num_agents': [5, 10, 20], 'timesteps': [10, 20], 'collect': 2}
+    data = batching.batch_run(CustomModel, params, ['c0', 'c1'], processes=2, max_timesteps=10)
+    assert len(data) == 6
+    for i in range(6):
+        assert len(data[i]) == 2
+        assert len(data[i]['c0']) == 10
+        assert len(data[i]['c1']) == 10
+
+    # Dict with 2 collectors, 2 repetitions and 2 processes
+    params = {'num_agents': [5, 10, 20], 'timesteps': [10, 20], 'collect': 2}
+    data = batching.batch_run(CustomModel, params, ['c0', 'c1'], processes=2, max_timesteps=10, repetitions=2)
+    assert len(data) == 12
+    for i in range(12):
+        assert len(data[i]) == 2
+        assert len(data[i]['c0']) == 10
+        assert len(data[i]['c1']) == 10

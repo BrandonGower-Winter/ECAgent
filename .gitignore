@@ -134,3 +134,6 @@ dmypy.json
 # Generated Changelog
 CHANGELOG.md
 package.json
+
+# Mac generated files
+.DS_Store

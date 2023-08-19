@@ -37,9 +37,9 @@ ECAgent.Tags module
     :members:
     :show-inheritance:
 
-ECAgent.Visualization module
+ECAgent.Batching module
 ----------------------------
 
-.. automodule:: ECAgent.Visualization
+.. automodule:: ECAgent.Batching
    :members:
    :show-inheritance:

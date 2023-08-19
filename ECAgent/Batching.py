@@ -23,6 +23,7 @@ class ParameterList:
     built, the list will contain unique parameter sets for all values included in a parameter.
 
     For example::
+
         import ECAgent.Batching as batching
 
         p_list = batching.ParameterList()  # Create ParameterList
@@ -191,9 +192,11 @@ def batch_run(model_cls: Type[Model], parameters: Union[ParameterList, Dict[str,
     dictionary or ``ParameterList`` as input.
 
     For example::
+
         batch_run(ExampleModel, {'num_agents': [10, 20, 30], 'env_size': [10, 20]})
 
     Is equivalent to::
+
         p_list = ParameterList()
         p_list.add_parameter('num_agent', [10, 20, 30])
         p_list.add_parameter('env_size', [10, 20])
@@ -201,6 +204,7 @@ def batch_run(model_cls: Type[Model], parameters: Union[ParameterList, Dict[str,
         batch_run(ExampleModel, p_list)
 
     Both of which will create and run models of type ``ExampleModel`` for each of the following parameters::
+
         [
             {'num_agents': 10, 'env_size': 10},
             {'num_agents': 10, 'env_size': 20},
@@ -212,6 +216,7 @@ def batch_run(model_cls: Type[Model], parameters: Union[ParameterList, Dict[str,
 
     The function also allows users to specify the name(s) of any data ``Collector`` systems whose ``records`` property
     will be returned. This value can either be a ``str`` or ``Iterable``::
+
         # For a single collector
         data = batch_run(
             ExampleModel,

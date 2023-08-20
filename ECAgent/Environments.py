@@ -4,6 +4,7 @@ import pandas
 
 from deprecated import deprecated
 from ECAgent.Core import Agent, Environment, Component, Model, ComponentNotFoundError
+from typing import Optional, List
 
 
 def discrete_grid_pos_to_id(x: int, y: int = 0, width: int = 0, z: int = 0, height: int = 0):
@@ -216,20 +217,44 @@ class SpaceWorld(Environment):
 
     Attributes
     ----------
-    width : int
+    width : float
         The width of the environment. This attribute can be thought of as the spacial extent of the x-axis.
-    height : int
+    height : float
         The height of the environment. This attribute can be thought of as the spacial extent of the y-axis.
-    depth : int
+    depth : float
         The depth of the environment. This attribute can be thought of as the spacial extent of the z-axis.
+    wrap_env : bool
+        Determines if the environment is toroidal (i.e. agents wrap around the environment instead of moving out of
+        bounds).
     """
-    __slots__ = ['width', 'height', 'depth']
+    __slots__ = ['width', 'height', 'depth', 'wrap_env', '_index_offset']
 
-    def __init__(self, model, width: int, height: int = 0, depth: int = 0, id: str = 'ENVIRONMENT'):
+    def __init__(self, model: Model, width: float, height: Optional[float] = 0.0, depth: Optional[float] = 0.0,
+                 id: Optional[str] = 'ENVIRONMENT', wrap_env: Optional[bool] = False):
+        """Creates a SpaceWorld environment.
+
+        Parameters
+        ----------
+        model : Model
+            The ``Model`` the environment belongs to.
+        width : float
+            The width of the environment.
+        height : Optional[float]
+            The height of the environment. Defaults to ``0.0``
+        depth : Optional[float]
+            The depth of the environment. Defaults to ``0.0``
+        id : Optional[str]
+            The id of the environment. Defaults to ``'ENVIRONMENT'``.
+        wrap_env : Optional[bool]
+            Determines if the environment is toroidal (i.e. agents wrap around the environment instead of moving out of
+            bounds).
+        """
         super().__init__(model, id=id)
         self.width = width
         self.height = height
         self.depth = depth
+        self.wrap_env = wrap_env
+        self._index_offset = 0  # This property is used manage spatial extents in Discrete vs Continuous Environments
 
     def add_agent(self, agent: Agent, x_pos: int = 0, y_pos: int = 0, z_pos: int = 0):
         """Adds an agent to the environment. Overrides the base ``Environment.add_agent`` class function.
@@ -256,9 +281,9 @@ class SpaceWorld(Environment):
             If the agent's initial position is outside the environment's spacial extents.
         """
         # TODO create Error for being outside spacial extents.
-        x_bool = x_pos >= self.width or x_pos < 0 if self.width > 0 else False
-        y_bool = y_pos >= self.height or y_pos < 0 if self.height > 0 else False
-        z_bool = z_pos >= self.depth or z_pos < 0 if self.depth > 0 else False
+        x_bool = x_pos > self.width - self._index_offset or x_pos < 0 if self.width > 0 else False
+        y_bool = y_pos > self.height - self._index_offset or y_pos < 0 if self.height > 0 else False
+        z_bool = z_pos > self.depth - self._index_offset or z_pos < 0 if self.depth > 0 else False
         if x_bool or y_bool or z_bool:
             raise Exception("Cannot add the Agent to position not on the map.")
 
@@ -285,7 +310,7 @@ class SpaceWorld(Environment):
         super().remove_agent(a_id)
 
     def get_agents_at(self, x_pos: float = 0.0, y_pos: float = 0.0, z_pos: float = 0.0, leeway: float = 0.0,
-                      x_leeway: float = 0, y_leeway: float = 0, z_leeway: float = 0) -> [Agent]:
+                      x_leeway: float = 0, y_leeway: float = 0, z_leeway: float = 0) -> List[Agent]:
         """Returns a list of agents at position (x_pos, y_pos, z_pos) +/- any leeway.
 
         The function will return ``[]`` empty if no agents are within the specified region.
@@ -296,6 +321,8 @@ class SpaceWorld(Environment):
 
         The function will return a list of agents within ``3.0`` units of the coordinates ``(10.0, 10.0, 10.0)`` on the
         x and z axes and within ``5.0`` units of the coordinates ``(10.0, 10.0, 10.0)`` on the y-axis.
+
+        Note: This function respects if the environment is toroidal (i.e. ``wrap_mode == True``).
 
         Parameters
         ----------
@@ -316,7 +343,7 @@ class SpaceWorld(Environment):
 
         Returns
         -------
-        [Agent]
+        List[Agent]
             A list of agents within the specified coordinates. An empty list ``[]`` is returned if no agents are found.
         """
 
@@ -339,8 +366,11 @@ class SpaceWorld(Environment):
     def move(self, agent: Agent, x: float = 0, y: float = 0, z: float = 0):
         """Moves an agent (x,y,z) units in the environment.
 
-        The function automatically clamps agent movement to the range
-        ``(0,0,0) <= x < (self.width,self.height,self.depth)``.
+        The function automatically clamps agent movement to the range::
+
+            (0, 0, 0) <= x < (self.width, self.height, self.depth)
+
+        If environment is non-toroidal (i.e. ``wrap_env == False``).
 
         Parameters
         ----------
@@ -362,9 +392,18 @@ class SpaceWorld(Environment):
             raise ComponentNotFoundError(agent, PositionComponent)
 
         component = agent[PositionComponent]
-        component.x = max(min(component.x + x, self.width - 1), 0)
-        component.y = max(min(component.y + y, self.height - 1), 0)
-        component.z = max(min(component.z + z, self.depth - 1), 0)
+
+        if self.wrap_env:
+            if self.width != 0:
+                component.x = (component.x + x) % self.width
+            if self.height != 0:
+                component.y = (component.y + y) % self.height
+            if self.depth != 0:
+                component.z = (component.z + z) % self.depth
+        else:
+            component.x = max(min(component.x + x, self.width - self._index_offset), 0)
+            component.y = max(min(component.y + y, self.height - self._index_offset), 0)
+            component.z = max(min(component.z + z, self.depth - self._index_offset), 0)
 
     def move_to(self, agent: Agent, x: float = 0, y: float = 0, z: float = 0):
         """Moves an agent to position (x,y,z) in the environment.
@@ -389,8 +428,9 @@ class SpaceWorld(Environment):
         """
         if PositionComponent not in agent:
             raise ComponentNotFoundError(agent, PositionComponent)
-        elif (0 <= x < self.width or self.width < 1) and (0 <= y < self.height or self.height < 1) and (
-                0 <= z < self.depth or self.depth < 1):
+        elif (0 <= x <= self.width - self._index_offset or self.width < 1) and (
+                0 <= y <= self.height - self._index_offset or self.height < 1) and (
+                0 <= z <= self.depth - self._index_offset or self.depth < 1):
             component = agent[PositionComponent]
             component.x = x
             component.y = y
@@ -398,6 +438,8 @@ class SpaceWorld(Environment):
         else:
             raise IndexError(f'Position ({x},{y},{z}) is out of the environment\'s range')
 
+
+# TODO ADD WRAP ENV TO BELOW WORLDS
 
 class DiscreteWorld(SpaceWorld):
     """Base Class for all Discrete Spacial Environments. It inherits from ``SpaceWorld``class and contains properties
@@ -450,12 +492,31 @@ class DiscreteWorld(SpaceWorld):
 
     Attributes
     ----------
+    model : Model
+            The ``Model`` the environment belongs to.
+    width : int
+        The width of the environment.
+    height : int
+        The height of the environment. Defaults to ``0``
+    depth : int
+        The depth of the environment. Defaults to ``0``
     cells : Pandas.DataFrame
         A table containing all of the cell components in the environment.
+    id : str
+        The id of the environment. Defaults to ``'ENVIRONMENT'``.
+    wrap_env : bool
+        Determines if the environment is toroidal (i.e. agents wrap around the environment instead of moving out of
+        bounds).
     """
-    def __init__(self, model, width: int, height: int = 0, depth: int = 0, id: str = 'ENVIRONMENT'):
-        super().__init__(model, width, height, depth, id)
+    def __init__(self, model, width: int, height: Optional[int] = 0, depth: Optional[int] = 0,
+                 id: Optional[str] = 'ENVIRONMENT', wrap_env: Optional[bool] = False):
+        super().__init__(model, width, height, depth, id=id, wrap_env=wrap_env)
 
+        if type(width) != int or type(height) != int or type(depth) != int:
+            raise AttributeError(f"DiscreteWorld environment's dimensions must of type (int, int, int) not "
+                                 f"({type(width)}, {type(height)}, {type(depth)}).")
+
+        self._index_offset = 1  # DiscreteWorlds operate at discrete coordinates starting at 0, this accounts for that.
         # Create cells
         self.cells = pandas.DataFrame({
             'pos': [(x, y, z) for z in range(max(depth, 1)) for y in range(max(height, 1)) for x in range(max(width, 1))]
@@ -835,11 +896,20 @@ class LineWorld(DiscreteWorld):
 
     Attributes
     ----------
-    width : int
-        The width of the environment. This attribute can be thought of as the spacial extent of the x-axis.
+    model : Model
+            The ``Model`` the environment belongs to.
+    width : float
+        The width of the environment.
+    cells : Pandas.DataFrame
+        A table containing all of the cell components in the environment.
+    id : str
+        The id of the environment. Defaults to ``'ENVIRONMENT'``.
+    wrap_env : bool
+        Determines if the environment is toroidal (i.e. agents wrap around the environment instead of moving out of
+        bounds).
     """
 
-    def __init__(self, model: Model, width: int, id: str = 'ENVIRONMENT'):
+    def __init__(self, model: Model, width: int, id: str = 'ENVIRONMENT', wrap_env: Optional[bool] = False):
         """Initializes a ``LineWorld`` object.
 
         Parameters
@@ -850,6 +920,9 @@ class LineWorld(DiscreteWorld):
             The width of the ``LineWorld``.
         id : str, Optional
             id of the ``LineWorld``.
+        wrap_env : Optional[bool]
+            Determines if the environment is toroidal (i.e. agents wrap around the environment instead of moving out of
+            bounds). Defaults to ``False``.
 
         Raises
         ------
@@ -860,11 +933,13 @@ class LineWorld(DiscreteWorld):
         if width < 1:
             raise IndexError("Cannot create a LineWorld with a negative width.")
 
-        super().__init__(model, width, 0, 0, id)
+        super().__init__(model, width, 0, 0, id=id, wrap_env=wrap_env)
 
     def get_dimensions(self) -> int:
         """Gets the dimension of the ``LineWorld``.
-        Returns:
+
+        Returns
+        -------
         int
             The ``width`` of the ``LineWorld``.
         """
@@ -879,22 +954,34 @@ class GridWorld(DiscreteWorld):
 
     Attributes
     ----------
+    model : Model
+            The ``Model`` the environment belongs to.
     width : int
-        The width of the environment. This attribute can be thought of as the spacial extent of the x-axis.
+        The width of the environment.
     height : int
-        The height of the environment. This attribute can be thought of as the spacial extent of the y-axis.
+        The height of the environment. Defaults to ``0``
+    cells : Pandas.DataFrame
+        A table containing all of the cell components in the environment.
+    id : str
+        The id of the environment. Defaults to ``'ENVIRONMENT'``.
+    wrap_env : bool
+        Determines if the environment is toroidal (i.e. agents wrap around the environment instead of moving out of
+        bounds).
     """
 
-    def __init__(self, model: Model, width: int, height: int, id: str = 'ENVIRONMENT'):
+    def __init__(self, model: Model, width: int, height: int, id: str = 'ENVIRONMENT',
+                 wrap_env: Optional[bool] = False):
 
         if width < 1 or height < 1:
             raise IndexError("Cannot create a GridWorld with a negative width or height.")
 
-        super().__init__(model, width, height, 0, id=id)
+        super().__init__(model, width, height, 0, id=id, wrap_env=wrap_env)
 
     def get_dimensions(self) -> (int, int):
         """Gets the dimension of the ``GridWorld``.
-        Returns:
+
+        Returns
+        -------
         (int, int)
             The ``width`` and ``height`` of the ``GridWorld``.
         """

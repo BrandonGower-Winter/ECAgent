@@ -107,6 +107,8 @@ class TestSpaceWorld:
         assert env.id == 'ENVIRONMENT'
         assert env.model is model
         assert len(env.agents) == 0
+        assert env.wrap_env is False
+        assert env._index_offset == 0
 
         # Test default with width and height
         env = SpaceWorld(model, 5, 5)
@@ -118,13 +120,14 @@ class TestSpaceWorld:
         assert len(env.agents) == 0
 
         # Test default with width, height and depth
-        env = SpaceWorld(model, 5, 5, 5)
+        env = SpaceWorld(model, 5, 5, 5, wrap_env=True)
         assert env.width == 5
         assert env.height == 5
         assert env.depth == 5
         assert env.id == 'ENVIRONMENT'
         assert env.model is model
         assert len(env.agents) == 0
+        assert env.wrap_env is True
 
     def test_add_agent(self):
         model = Model()
@@ -143,13 +146,13 @@ class TestSpaceWorld:
 
         # Test case when agent is added outside of the environment's dimensions [>width]
         with pytest.raises(Exception):
-            model.environment.add_agent(agent, 5, 0, 0)
+            model.environment.add_agent(agent, 6, 0, 0)
 
         with pytest.raises(Exception):
-            model.environment.add_agent(agent, 0, 5, 0)
+            model.environment.add_agent(agent, 0, 6, 0)
 
         with pytest.raises(Exception):
-            model.environment.add_agent(agent, 0, 0, 5)
+            model.environment.add_agent(agent, 0, 0, 6)
 
         # Test default case
         model.environment.add_agent(agent)
@@ -198,6 +201,19 @@ class TestSpaceWorld:
         assert len(model.environment.agents) == 1
         assert model.environment.get_agent(agent.id) == agent
         assert agent[PositionComponent].x == 2 and agent[PositionComponent].y == 2 and agent[PositionComponent].z == 0
+
+        # Test with different index offset (Which DiscreteWorlds use)
+        model = Model()
+        model.environment = SpaceWorld(model, 5, 5, 5)
+        model.environment._index_offset = 1
+        with pytest.raises(Exception):
+            model.environment.add_agent(agent, 5, 0, 0)
+
+        with pytest.raises(Exception):
+            model.environment.add_agent(agent, 0, 5, 0)
+
+        with pytest.raises(Exception):
+            model.environment.add_agent(agent, 0, 0, 5)
 
     def test_remove_agent(self):
         model = Model()
@@ -249,7 +265,7 @@ class TestSpaceWorld:
         agent2 = Agent("a2", model)
 
         model.environment.add_agent(agent, 0, 0, 0)
-        model.environment.add_agent(agent2, 4, 4, 4)
+        model.environment.add_agent(agent2, 5, 5, 5)
 
         # Test Default case
         model.environment.move(agent)
@@ -271,23 +287,35 @@ class TestSpaceWorld:
 
         # Test outs of bounds on the right
         model.environment.move(agent2, 1, 1, 1)
-        assert agent2[PositionComponent].x == 4
-        assert agent2[PositionComponent].y == 4
-        assert agent2[PositionComponent].z == 4
+        assert agent2[PositionComponent].x == 5
+        assert agent2[PositionComponent].y == 5
+        assert agent2[PositionComponent].z == 5
 
         # Test valid move to the left
-        model.environment.move(agent2, -2, -2, -2)
+        model.environment.move(agent2, -3, -3, -3)
         assert agent2[PositionComponent].x == 2
         assert agent2[PositionComponent].y == 2
         assert agent2[PositionComponent].z == 2
 
         # Test if updates reflect in environment
-        assert len(model.environment.get_agents_at(2,2,2)) == 2
+        assert len(model.environment.get_agents_at(2, 2, 2)) == 2
 
         # Test without component
         agent3 = Agent('a3', model)
         with pytest.raises(ComponentNotFoundError):
             model.environment.move(agent3)
+
+        # Test with wrapping
+        model.environment.wrap_env = True
+        model.environment.move(agent, -3, -3, -3)  # Wrap Left
+        assert agent[PositionComponent].x == 4
+        assert agent[PositionComponent].y == 4
+        assert agent[PositionComponent].z == 4
+
+        model.environment.move(agent2, 3, 3, 3)  # Wrap Right
+        assert agent2[PositionComponent].x == 0
+        assert agent2[PositionComponent].y == 0
+        assert agent2[PositionComponent].z == 0
 
     def test_move_to(self):
         model = Model()
@@ -341,12 +369,36 @@ class TestSpaceWorld:
         model.environment.move_to(agent, x=2, y=2)
         assert agent[PositionComponent].xyz() == (2, 2, 0)
 
+        # With Index offsets
+        model = Model()
+        model.environment = SpaceWorld(model, 5, 5, 5)
+        agent = Agent("a1", model)
+        model.environment.add_agent(agent, 0, 0, 0)
+        model.environment.move_to(agent, x=5, y=5, z=5)
+        assert agent[PositionComponent].xyz() == (5, 5, 5)
+        model.environment.move_to(agent, x=0, y=0, z=0)
+        model.environment._index_offset = 1
+        # Now (5,5,5) should now be out of bounds
+        with pytest.raises(IndexError):
+            model.environment.move_to(agent, 5, 5, 5)
+
 
 class TestDiscreteWorld:
 
     def test__init__(self):
 
         model = Model()
+
+        # Invalid dimensions
+        # x
+        with pytest.raises(AttributeError):
+            DiscreteWorld(model, 5.5)
+        # y
+        with pytest.raises(AttributeError):
+            DiscreteWorld(model, 5, 5.5)
+        # z
+        with pytest.raises(AttributeError):
+            DiscreteWorld(model, 5, 5, 5.5)
 
         # Test default with width
         env = DiscreteWorld(model, 5)
@@ -357,6 +409,8 @@ class TestDiscreteWorld:
         assert env.id == 'ENVIRONMENT'
         assert env.model is model
         assert len(env.agents) == 0
+        assert env._index_offset == 1
+        assert env.wrap_env is False
 
         for i in range(len(env.cells['pos'])):
             pos = env.cells['pos'][i]
@@ -377,7 +431,7 @@ class TestDiscreteWorld:
             assert discrete_grid_pos_to_id(pos[0], pos[1], 5) == i
 
         # Test default with width, height and depth
-        env = DiscreteWorld(model, 5, 5, 5)
+        env = DiscreteWorld(model, 5, 5, 5, wrap_env=True)
         assert env.width == 5
         assert env.height == 5
         assert env.depth == 5
@@ -385,6 +439,7 @@ class TestDiscreteWorld:
         assert env.id == 'ENVIRONMENT'
         assert env.model is model
         assert len(env.agents) == 0
+        assert env.wrap_env is True
 
         for i in range(len(env.cells['pos'])):
             pos = env.cells['pos'][i]
@@ -737,12 +792,14 @@ class TestLineWorld:
         assert env.id == 'ENVIRONMENT'
         assert env.model is model
         assert len(env.agents) == 0
+        assert env.wrap_env is False
 
         for i in range(len(env.cells['pos'])):
             assert env.cells['pos'][i] == (i, 0, 0)
 
     def test_get_dimensions(self):
-        env = LineWorld(Model(), 5)
+        model = Model()
+        env = LineWorld(model, 5)
         assert env.get_dimensions() == 5
 
 

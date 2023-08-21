@@ -13,8 +13,9 @@ class ModelStatus(IntEnum):
     """Enum that describes the status of a ``Model``.
 
     Values are::
-    RUNNING = 0
-    COMPLETE = 1
+
+        RUNNING = 0
+        COMPLETE = 1
     """
     RUNNING = 0
     COMPLETE = 1

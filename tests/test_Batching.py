@@ -101,22 +101,22 @@ def test_build_model_from_kwargs():
     assert model.timesteps == 5
 
 
-def test_run_model():
+def test_run_model_for_batch():
     params = {'num_agents': 5, 'timesteps': 20, 'collect': 0}
     # Default Case with max timesteps
-    assert batching._run_model(CustomModel, params, max_timesteps=10) is None
+    assert batching._run_model_for_batch(CustomModel, params, max_timesteps=10) is None
 
     # 1 Collector case
     params = {'num_agents': 5, 'timesteps': 20, 'collect': 1}
-    assert len(batching._run_model(CustomModel, params, collectors='c0', max_timesteps=10)) == 10
+    assert len(batching._run_model_for_batch(CustomModel, params, collectors='c0', max_timesteps=10)) == 10
 
     # Collector with early stop
     params = {'num_agents': 5, 'timesteps': 5, 'collect': 1}
-    assert len(batching._run_model(CustomModel, params, collectors='c0', max_timesteps=10)) == 5
+    assert len(batching._run_model_for_batch(CustomModel, params, collectors='c0', max_timesteps=10)) == 5
 
     # 2 Collectors case
     params = {'num_agents': 5, 'timesteps': 20, 'collect': 2}
-    data = batching._run_model(CustomModel, params, collectors=['c0', 'c1'], max_timesteps=10)
+    data = batching._run_model_for_batch(CustomModel, params, collectors=['c0', 'c1'], max_timesteps=10)
     assert len(data) == 2
     assert len(data['c0']) == 10
     assert len(data['c1']) == 10
@@ -156,3 +156,70 @@ def test_batch_run():
         assert len(data[i]) == 2
         assert len(data[i]['c0']) == 10
         assert len(data[i]['c1']) == 10
+
+
+def score_func(model: core.Model):
+    return model.systems.timestep - 1
+
+
+def test_run_model_for_search():
+    params = {'num_agents': 5, 'timesteps': 20, 'collect': 0}
+    # Default Case with max timesteps
+    data = batching._run_model_for_search(CustomModel, score_func, 1, params)
+    assert data['num_agents'] == 5
+    assert data['timesteps'] == 20
+    assert data['collect'] == 0
+    assert len(data['records']) == 1
+    assert data['records'][0] == 20
+
+    params = {'num_agents': 5, 'timesteps': 20, 'collect': 0}
+    # Default Case with max timesteps
+    data = batching._run_model_for_search(CustomModel, score_func, 2, params)
+    assert data['num_agents'] == 5
+    assert data['timesteps'] == 20
+    assert data['collect'] == 0
+    assert len(data['records']) == 2
+    assert data['records'][0] == 20
+    assert data['records'][1] == 20
+
+
+def test_score_model_for_search():
+    data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+    # MIN
+    assert batching._score_model_for_search(data, batching.ScoreMode.MIN) == 1
+    # MAX
+    assert batching._score_model_for_search(data, batching.ScoreMode.MAX) == 10
+    # MIN_MEAN
+    assert batching._score_model_for_search(data, batching.ScoreMode.MIN_MEAN) == 5.5
+    # MAX_MEAN
+    assert batching._score_model_for_search(data, batching.ScoreMode.MAX_MEAN) == 5.5
+    # MIN_SUM
+    assert batching._score_model_for_search(data, batching.ScoreMode.MIN_SUM) == 55
+    # MAX_SUM
+    assert batching._score_model_for_search(data, batching.ScoreMode.MAX_SUM) == 55
+    # MIN_VARIANCE
+    assert batching._score_model_for_search(data, batching.ScoreMode.MIN_VARIANCE) == 9.166666666666666
+    # MAX_VARIANCE
+    assert batching._score_model_for_search(data, batching.ScoreMode.MAX_VARIANCE) == 9.166666666666666
+
+    with pytest.raises(ValueError):
+        batching._score_model_for_search(data, -1)
+
+
+def test_grid_search():
+    params = {'num_agents': 5, 'timesteps': [5, 10, 15, 20], 'collect': 0}
+
+    # Without repetitions
+    p_best, p_list = batching.grid_search(CustomModel, params, score_func)
+    assert p_best['score'] == 5
+    assert p_best['records'] == [5]
+    assert len(p_list) == 4
+
+    # With repetitions
+    p_best, p_list = batching.grid_search(CustomModel, params, score_func, mode=batching.ScoreMode.MAX_MEAN, processes=2,
+                                          repetitions=4)
+    assert p_best['score'] == 20.0
+    assert p_best['records'] == [20, 20, 20, 20]
+    assert len(p_list) == 4
+
